@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../common/custom_text_field.dart';
+import 'Home.dart';
 import 'SignUp.dart';
-import 'package:cseduapp/screens/welcome_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -117,16 +117,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   onPressed: () {
                     if (_formKey.currentState?.validate() ?? false) {
-                      // Perform login logic here (e.g., authentication)
-                      // After successful login:
-                      Navigator.pushReplacement(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => WelcomePage(
-                            fullName: "Mehedi",
-                            email: "mehedi@gmail.com",
-                            gender: "boy",
-                            dob: "12/2/4505",
+                          builder: (_) => HomeScreen(
+                            userName: _emailController.text,
                           ),
                         ),
                       );

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'welcome_page.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -11,9 +10,12 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final _nameController = TextEditingController();
+  final _fullNameController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  String? _countryCode;
   String? _gender;
   String? _dob; // Now a String
   bool _acceptedTerms = false;
@@ -23,6 +25,16 @@ class _SignUpPageState extends State<SignUpPage> {
     'test.user@flutter.dev': 'flutter456',
     'hello@world.com': 'mypassword',
   };
+
+  final List<Map<String, String>> _countryCodes = [
+    {'country': 'United States', 'code': '+1'},
+    {'country': 'Canada', 'code': '+1'},
+    {'country': 'United Kingdom', 'code': '+44'},
+    {'country': 'Australia', 'code': '+61'},
+    {'country': 'India', 'code': '+91'},
+    {'country': 'Germany', 'code': '+49'},
+    // Add more countries as needed
+  ];
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
@@ -34,17 +46,17 @@ class _SignUpPageState extends State<SignUpPage> {
         return;
       }
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => WelcomePage(
-            fullName: _nameController.text,
-            email: _emailController.text,
-            gender: _gender!,
-            dob: _dob!,
-          ),
-        ),
-      );
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => WelcomePage(
+      //       fullName: _fullNameController.text,
+      //       email: _emailController.text,
+      //       gender: _gender!,
+      //       dob: _dob!,
+      //     ),
+      //   ),
+      // );
     }
   }
 
@@ -75,8 +87,9 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 20),
 
+                    // Full Name Field
                     TextFormField(
-                      controller: _nameController,
+                      controller: _fullNameController,
                       decoration: const InputDecoration(
                         labelText: "Full Name",
                         border: OutlineInputBorder(),
@@ -88,6 +101,21 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
 
+                    // Username Field
+                    TextFormField(
+                      controller: _usernameController,
+                      decoration: const InputDecoration(
+                        labelText: "Username",
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) =>
+                      value == null || value.trim().isEmpty
+                          ? "Username is required"
+                          : null,
+                    ),
+                    const SizedBox(height: 15),
+
+                    // Email Field
                     TextFormField(
                       controller: _emailController,
                       decoration: const InputDecoration(
@@ -101,6 +129,55 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
 
+                    // Phone Number Field with Country Code Dropdown
+                    Row(
+                      children: [
+                        // Country Code Dropdown
+                        Expanded(
+                          flex: 1,
+                          child: DropdownButtonFormField<String>(
+                            value: _countryCode,
+                            decoration: const InputDecoration(
+                              labelText: "Country Code",
+                              border: OutlineInputBorder(),
+                            ),
+                            items: _countryCodes
+                                .map((country) => DropdownMenuItem<String>(
+                              value: country['code'],
+                              child: Text(country['country']!),
+                            ))
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _countryCode = value;
+                              });
+                            },
+                            validator: (value) =>
+                            value == null ? "Please select a country code" : null,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        // Phone Number Field
+                        Expanded(
+                          flex: 2,
+                          child: TextFormField(
+                            controller: _phoneController,
+                            decoration: const InputDecoration(
+                              labelText: "Phone Number",
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType: TextInputType.phone,
+                            validator: (value) =>
+                            value == null || value.trim().isEmpty
+                                ? "Phone number is required"
+                                : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+
+                    // Password Field
                     TextFormField(
                       controller: _passwordController,
                       obscureText: true,
@@ -115,6 +192,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
 
+                    // Gender Dropdown
                     DropdownButtonFormField<String>(
                       decoration: const InputDecoration(
                         labelText: "Gender",
@@ -123,12 +201,13 @@ class _SignUpPageState extends State<SignUpPage> {
                       items: ['Male', 'Female', 'Other']
                           .map((g) => DropdownMenuItem(value: g, child: Text(g)))
                           .toList(),
-                      onChanged: (value) => _gender = value,
+                      onChanged: (value) => setState(() => _gender = value),
                       validator: (value) =>
                       value == null ? "Please select a gender" : null,
                     ),
                     const SizedBox(height: 15),
 
+                    // Date of Birth Picker
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(_dob == null
@@ -158,6 +237,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                     const SizedBox(height: 10),
 
+                    // Terms & Conditions Checkbox
                     CheckboxListTile(
                       value: _acceptedTerms,
                       onChanged: (value) =>
@@ -172,6 +252,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                     const SizedBox(height: 20),
 
+                    // Submit Button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(

@@ -47,6 +47,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 40),
+            // Get Started Button
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -56,10 +57,44 @@ class WelcomeScreen extends StatelessWidget {
               },
               child: Text("Get Started"),
             ),
+            SizedBox(height: 20),
+            // About Us Button
+            ElevatedButton(
+              onPressed: () {
+                // Action for About Us Button
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text("About Us"),
+                      content: Text(
+                          "This is an app to help you learn new languages easily. Stay tuned for more features."),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text("Close"),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Text("About Us"),
+            ),
+            SizedBox(height: 20),
+            // Exit Button
+            ElevatedButton(
+              onPressed: () {
+                // Exit the app
+                Navigator.of(context).pop();
+              },
+              child: Text("Exit"),
+            ),
           ],
         ),
       ),
     );
   }
 }
-
