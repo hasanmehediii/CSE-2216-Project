@@ -15,7 +15,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   String? _gender;
-  DateTime? _dob;
+  String? _dob; // Now a String
   bool _acceptedTerms = false;
 
   final validUsers = {
@@ -133,7 +133,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       contentPadding: EdgeInsets.zero,
                       title: Text(_dob == null
                           ? "Select Date of Birth"
-                          : "Date of Birth: ${_dob!.toLocal()}".split(' ')[0]),
+                          : "Date of Birth: $_dob"), // Display as string
                       trailing: const Icon(Icons.calendar_today),
                       onTap: () async {
                         final picked = await showDatePicker(
@@ -143,7 +143,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           lastDate: DateTime.now(),
                         );
                         if (picked != null) {
-                          setState(() => _dob = picked);
+                          setState(() => _dob = "${picked.toLocal()}".split(' ')[0]); // Format as String
                         }
                       },
                     ),

@@ -4,15 +4,17 @@ class WelcomePage extends StatelessWidget {
   final String fullName;
   final String email;
   final String gender;
-  final DateTime dob;
+  final String dob;
 
-  const WelcomePage({
-    super.key,
-    required this.fullName,
-    required this.email,
-    required this.gender,
-    required this.dob,
-  });
+  const WelcomePage({super.key, required this.fullName, required this.email, required this.gender, required this.dob});
+
+  // const WelcomePage({
+  //   super.key,
+  //   required this.fullName,
+  //   required this.email,
+  //   required this.gender,
+  //   required this.dob,
+  // });
 
   @override
   Widget build(BuildContext context) {
@@ -75,4 +77,8 @@ class WelcomePage extends StatelessWidget {
       ],
     );
   }
+}
+
+extension on String {
+  toLocal() {}
 }
