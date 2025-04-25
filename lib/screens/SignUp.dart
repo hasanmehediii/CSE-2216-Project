@@ -17,31 +17,33 @@ class _SignUpPageState extends State<SignUpPage> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-  String? _countryCode;
+  String? _selectedCode; // Now only code selected
   String? _gender;
   DateTime? _dob;
   bool _acceptedTerms = false;
 
   final List<Map<String, String>> _countryCodes = [
     {'country': 'United States', 'code': '+1'},
-    {'country': 'Canada', 'code': '+1'},
+    {'country': 'Bangladesh', 'code': '+88'},
     {'country': 'United Kingdom', 'code': '+44'},
     {'country': 'Australia', 'code': '+61'},
     {'country': 'India', 'code': '+91'},
     {'country': 'Germany', 'code': '+49'},
   ];
 
-  String getFlagEmoji(String code) {
-    switch (code) {
-      case '+1':
+  String getFlagEmoji(String country) {
+    switch (country) {
+      case 'United States':
         return '🇺🇸';
-      case '+44':
+      case 'Bangladesh':
+        return '🇧🇩';
+      case 'United Kingdom':
         return '🇬🇧';
-      case '+61':
+      case 'Australia':
         return '🇦🇺';
-      case '+91':
+      case 'India':
         return '🇮🇳';
-      case '+49':
+      case 'Germany':
         return '🇩🇪';
       default:
         return '';
@@ -56,9 +58,9 @@ class _SignUpPageState extends State<SignUpPage> {
       await prefs.setString('username', _usernameController.text);
       await prefs.setString('email', _emailController.text);
       await prefs.setString('phoneNumber', _phoneController.text);
-      await prefs.setString('countryCode', _countryCode!);
-      await prefs.setString('gender', _gender!);
-      await prefs.setString('dob', _dob!.toIso8601String());
+      await prefs.setString('countryCode', _selectedCode ?? ''); // Save only code
+      await prefs.setString('gender', _gender ?? '');
+      await prefs.setString('dob', _dob?.toIso8601String() ?? '');
       await prefs.setString('password', _passwordController.text);
 
       Navigator.pushReplacement(
@@ -99,7 +101,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Full Name
                     TextFormField(
                       controller: _fullNameController,
                       decoration: const InputDecoration(
@@ -113,7 +114,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
 
-                    // Username
                     TextFormField(
                       controller: _usernameController,
                       decoration: const InputDecoration(
@@ -127,7 +127,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
 
-                    // Email
                     TextFormField(
                       controller: _emailController,
                       decoration: const InputDecoration(
@@ -141,27 +140,29 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
 
-                    // Country Code + Phone
+                    // Country Code and Phone Number
                     Row(
                       children: [
                         Expanded(
                           flex: 2,
                           child: DropdownButtonFormField<String>(
-                            value: _countryCode,
+                            value: _selectedCode,
                             decoration: const InputDecoration(
-                              labelText: "Code",
+                              labelText: "Code", // Default label: Code
                               border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                             ),
                             items: _countryCodes.map((country) {
                               final code = country['code']!;
+                              final flag = getFlagEmoji(country['country']!);
                               return DropdownMenuItem<String>(
                                 value: code,
-                                child: Text('$code ${getFlagEmoji(code)}'),
+                                child: Text('$flag $code'),
                               );
                             }).toList(),
                             onChanged: (value) {
                               setState(() {
-                                _countryCode = value;
+                                _selectedCode = value;
                               });
                             },
                             validator: (value) =>
@@ -188,7 +189,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
 
-                    // Password
                     TextFormField(
                       controller: _passwordController,
                       obscureText: true,
@@ -203,7 +203,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
 
-                    // Gender
                     DropdownButtonFormField<String>(
                       decoration: const InputDecoration(
                         labelText: "Gender",
@@ -218,7 +217,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
 
-                    // DOB
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(_dob == null
@@ -248,7 +246,6 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                     const SizedBox(height: 10),
 
-                    // T&C Checkbox
                     CheckboxListTile(
                       value: _acceptedTerms,
                       onChanged: (value) =>
@@ -263,7 +260,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
                     const SizedBox(height: 20),
 
-                    // Submit Button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
