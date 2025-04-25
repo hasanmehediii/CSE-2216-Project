@@ -105,7 +105,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign Up'),
+        title: const Text('LangBuddy'),
         backgroundColor: Colors.blueAccent,
         centerTitle: true,
       ),

@@ -57,7 +57,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Welcome to LangBuddy'),
+        title: const Text('LangBuddy'),
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
       ),

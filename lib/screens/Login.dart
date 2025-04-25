@@ -72,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Language Learning App'),
+        title: const Text('LangBuddy'),
         backgroundColor: Colors.blueAccent,
         centerTitle: true,
       ),
