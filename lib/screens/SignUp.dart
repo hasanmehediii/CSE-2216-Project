@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'WelcomePage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'Home.dart';
+
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -21,11 +23,12 @@ class _SignUpPageState extends State<SignUpPage> {
   DateTime? _dob;
   bool _acceptedTerms = false;
 
-  final validUsers = {
-    'user1@example.com': 'password123',
-    'test.user@flutter.dev': 'flutter456',
-    'hello@world.com': 'mypassword',
-  };
+  // final validUsers = {
+//   'user1@example.com': 'password123',
+//   'test.user@flutter.dev': 'flutter456',
+//   'hello@world.com': 'mypassword',
+// };
+
 
   final List<Map<String, String>> _countryCodes = [
     {'country': 'United States', 'code': '+1'},
@@ -37,32 +40,43 @@ class _SignUpPageState extends State<SignUpPage> {
     // Add more countries as needed
   ];
 
-  void _submit() {
+  void _submit() async {
     if (_formKey.currentState!.validate()) {
-      if (!validUsers.containsKey(_emailController.text) ||
-          validUsers[_emailController.text] != _passwordController.text) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid email/password combination')),
-        );
-        return;
-      }
+      final prefs = await SharedPreferences.getInstance();
 
-      Navigator.push(
+      //old hard coded email password check
+      // if (!validUsers.containsKey(_emailController.text) ||
+//     validUsers[_emailController.text] != _passwordController.text) {
+//   ScaffoldMessenger.of(context).showSnackBar(
+//     const SnackBar(content: Text('Invalid email/password combination')),
+//   );
+//   return;
+// }
+
+
+      // Save all user data using shared pref
+      await prefs.setString('fullName', _fullNameController.text);
+      await prefs.setString('username', _usernameController.text);
+      await prefs.setString('email', _emailController.text);
+      await prefs.setString('phoneNumber', _phoneController.text);
+      await prefs.setString('countryCode', _countryCode!);
+      await prefs.setString('gender', _gender!);
+      await prefs.setString('dob', _dob!.toIso8601String());
+      await prefs.setString('password', _passwordController.text);
+
+      // Navigate to HomePage
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => WelcomePage(
-            fullName: _fullNameController.text,
-            email: _emailController.text,
-            gender: _gender!,
-            dob: _dob!,
-            countryCode: _countryCode!,
-            phoneNumber: _phoneController.text,
+          builder: (context) => HomeScreen(
+            userName: _usernameController.text,
           ),
         ),
       );
 
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

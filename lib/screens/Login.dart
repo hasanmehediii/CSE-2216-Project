@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../common/custom_text_field.dart';
 import 'Home.dart';
 import 'SignUp.dart';
@@ -115,18 +116,28 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState?.validate() ?? false) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => HomeScreen(
-                            userName: _emailController.text,
+                      final prefs = await SharedPreferences.getInstance();
+                      String? savedEmail = prefs.getString('email');
+                      String? savedPassword = prefs.getString('password');
+
+                      if (_emailController.text == savedEmail &&
+                          _passwordController.text == savedPassword) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => HomeScreen(userName: _emailController.text),
                           ),
-                        ),
-                      );
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Invalid email or password')),
+                        );
+                      }
                     }
                   },
+
                   child: const Text(
                     'Login',
                     style: TextStyle(fontSize: 18, color: Colors.white),
