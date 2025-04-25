@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cseduapp/screens/About.dart';
 import 'package:cseduapp/screens/Login.dart';
 import 'package:flutter/material.dart';
 
@@ -130,23 +131,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text("About Us"),
-                                  content: const Text(
-                                      "This app helps you learn new languages easily.\nMore exciting features coming soon!"),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text("Close"),
-                                    ),
-                                  ],
-                                );
-                              },
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const AboutUsPage()),
                             );
                           },
                           icon: const Icon(Icons.info_outline),
