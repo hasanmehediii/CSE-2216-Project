@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'WelcomePage.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -17,7 +18,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final _passwordController = TextEditingController();
   String? _countryCode;
   String? _gender;
-  String? _dob; // Now a String
+  DateTime? _dob;
   bool _acceptedTerms = false;
 
   final validUsers = {
@@ -46,17 +47,20 @@ class _SignUpPageState extends State<SignUpPage> {
         return;
       }
 
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => WelcomePage(
-      //       fullName: _fullNameController.text,
-      //       email: _emailController.text,
-      //       gender: _gender!,
-      //       dob: _dob!,
-      //     ),
-      //   ),
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WelcomePage(
+            fullName: _fullNameController.text,
+            email: _emailController.text,
+            gender: _gender!,
+            dob: _dob!,
+            countryCode: _countryCode!,
+            phoneNumber: _phoneController.text,
+          ),
+        ),
+      );
+
     }
   }
 
@@ -212,7 +216,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       contentPadding: EdgeInsets.zero,
                       title: Text(_dob == null
                           ? "Select Date of Birth"
-                          : "Date of Birth: $_dob"), // Display as string
+                          : "Date of Birth: ${_dob!.toLocal().toString().split(' ')[0]}"),
                       trailing: const Icon(Icons.calendar_today),
                       onTap: () async {
                         final picked = await showDatePicker(
@@ -222,7 +226,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           lastDate: DateTime.now(),
                         );
                         if (picked != null) {
-                          setState(() => _dob = "${picked.toLocal()}".split(' ')[0]); // Format as String
+                          setState(() => _dob = picked);
                         }
                       },
                     ),
