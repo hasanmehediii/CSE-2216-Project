@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'Home.dart';
+
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -17,14 +20,15 @@ class _SignUpPageState extends State<SignUpPage> {
   final _passwordController = TextEditingController();
   String? _countryCode;
   String? _gender;
-  String? _dob; // Now a String
+  DateTime? _dob;
   bool _acceptedTerms = false;
 
-  final validUsers = {
-    'user1@example.com': 'password123',
-    'test.user@flutter.dev': 'flutter456',
-    'hello@world.com': 'mypassword',
-  };
+  // final validUsers = {
+//   'user1@example.com': 'password123',
+//   'test.user@flutter.dev': 'flutter456',
+//   'hello@world.com': 'mypassword',
+// };
+
 
   final List<Map<String, String>> _countryCodes = [
     {'country': 'United States', 'code': '+1'},
@@ -36,29 +40,43 @@ class _SignUpPageState extends State<SignUpPage> {
     // Add more countries as needed
   ];
 
-  void _submit() {
+  void _submit() async {
     if (_formKey.currentState!.validate()) {
-      if (!validUsers.containsKey(_emailController.text) ||
-          validUsers[_emailController.text] != _passwordController.text) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid email/password combination')),
-        );
-        return;
-      }
+      final prefs = await SharedPreferences.getInstance();
 
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => WelcomePage(
-      //       fullName: _fullNameController.text,
-      //       email: _emailController.text,
-      //       gender: _gender!,
-      //       dob: _dob!,
-      //     ),
-      //   ),
-      // );
+      //old hard coded email password check
+      // if (!validUsers.containsKey(_emailController.text) ||
+//     validUsers[_emailController.text] != _passwordController.text) {
+//   ScaffoldMessenger.of(context).showSnackBar(
+//     const SnackBar(content: Text('Invalid email/password combination')),
+//   );
+//   return;
+// }
+
+
+      // Save all user data using shared pref
+      await prefs.setString('fullName', _fullNameController.text);
+      await prefs.setString('username', _usernameController.text);
+      await prefs.setString('email', _emailController.text);
+      await prefs.setString('phoneNumber', _phoneController.text);
+      await prefs.setString('countryCode', _countryCode!);
+      await prefs.setString('gender', _gender!);
+      await prefs.setString('dob', _dob!.toIso8601String());
+      await prefs.setString('password', _passwordController.text);
+
+      // Navigate to HomePage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(
+            userName: _usernameController.text,
+          ),
+        ),
+      );
+
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -212,7 +230,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       contentPadding: EdgeInsets.zero,
                       title: Text(_dob == null
                           ? "Select Date of Birth"
-                          : "Date of Birth: $_dob"), // Display as string
+                          : "Date of Birth: ${_dob!.toLocal().toString().split(' ')[0]}"),
                       trailing: const Icon(Icons.calendar_today),
                       onTap: () async {
                         final picked = await showDatePicker(
@@ -222,7 +240,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           lastDate: DateTime.now(),
                         );
                         if (picked != null) {
-                          setState(() => _dob = "${picked.toLocal()}".split(' ')[0]); // Format as String
+                          setState(() => _dob = picked);
                         }
                       },
                     ),
