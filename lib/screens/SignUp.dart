@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Home.dart';
 
-
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
@@ -23,13 +22,6 @@ class _SignUpPageState extends State<SignUpPage> {
   DateTime? _dob;
   bool _acceptedTerms = false;
 
-  // final validUsers = {
-//   'user1@example.com': 'password123',
-//   'test.user@flutter.dev': 'flutter456',
-//   'hello@world.com': 'mypassword',
-// };
-
-
   final List<Map<String, String>> _countryCodes = [
     {'country': 'United States', 'code': '+1'},
     {'country': 'Canada', 'code': '+1'},
@@ -37,24 +29,29 @@ class _SignUpPageState extends State<SignUpPage> {
     {'country': 'Australia', 'code': '+61'},
     {'country': 'India', 'code': '+91'},
     {'country': 'Germany', 'code': '+49'},
-    // Add more countries as needed
   ];
+
+  String getFlagEmoji(String code) {
+    switch (code) {
+      case '+1':
+        return '🇺🇸';
+      case '+44':
+        return '🇬🇧';
+      case '+61':
+        return '🇦🇺';
+      case '+91':
+        return '🇮🇳';
+      case '+49':
+        return '🇩🇪';
+      default:
+        return '';
+    }
+  }
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       final prefs = await SharedPreferences.getInstance();
 
-      //old hard coded email password check
-      // if (!validUsers.containsKey(_emailController.text) ||
-//     validUsers[_emailController.text] != _passwordController.text) {
-//   ScaffoldMessenger.of(context).showSnackBar(
-//     const SnackBar(content: Text('Invalid email/password combination')),
-//   );
-//   return;
-// }
-
-
-      // Save all user data using shared pref
       await prefs.setString('fullName', _fullNameController.text);
       await prefs.setString('username', _usernameController.text);
       await prefs.setString('email', _emailController.text);
@@ -64,7 +61,6 @@ class _SignUpPageState extends State<SignUpPage> {
       await prefs.setString('dob', _dob!.toIso8601String());
       await prefs.setString('password', _passwordController.text);
 
-      // Navigate to HomePage
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -73,10 +69,8 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
         ),
       );
-
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +99,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Full Name Field
+                    // Full Name
                     TextFormField(
                       controller: _fullNameController,
                       decoration: const InputDecoration(
@@ -119,7 +113,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
 
-                    // Username Field
+                    // Username
                     TextFormField(
                       controller: _usernameController,
                       decoration: const InputDecoration(
@@ -133,7 +127,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
 
-                    // Email Field
+                    // Email
                     TextFormField(
                       controller: _emailController,
                       decoration: const InputDecoration(
@@ -147,37 +141,36 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
 
-                    // Phone Number Field with Country Code Dropdown
+                    // Country Code + Phone
                     Row(
                       children: [
-                        // Country Code Dropdown
                         Expanded(
-                          flex: 1,
+                          flex: 2,
                           child: DropdownButtonFormField<String>(
                             value: _countryCode,
                             decoration: const InputDecoration(
-                              labelText: "Country Code",
+                              labelText: "Code",
                               border: OutlineInputBorder(),
                             ),
-                            items: _countryCodes
-                                .map((country) => DropdownMenuItem<String>(
-                              value: country['code'],
-                              child: Text(country['country']!),
-                            ))
-                                .toList(),
+                            items: _countryCodes.map((country) {
+                              final code = country['code']!;
+                              return DropdownMenuItem<String>(
+                                value: code,
+                                child: Text('$code ${getFlagEmoji(code)}'),
+                              );
+                            }).toList(),
                             onChanged: (value) {
                               setState(() {
                                 _countryCode = value;
                               });
                             },
                             validator: (value) =>
-                            value == null ? "Please select a country code" : null,
+                            value == null ? "Select code" : null,
                           ),
                         ),
                         const SizedBox(width: 10),
-                        // Phone Number Field
                         Expanded(
-                          flex: 2,
+                          flex: 3,
                           child: TextFormField(
                             controller: _phoneController,
                             decoration: const InputDecoration(
@@ -195,7 +188,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
 
-                    // Password Field
+                    // Password
                     TextFormField(
                       controller: _passwordController,
                       obscureText: true,
@@ -210,7 +203,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
 
-                    // Gender Dropdown
+                    // Gender
                     DropdownButtonFormField<String>(
                       decoration: const InputDecoration(
                         labelText: "Gender",
@@ -221,11 +214,11 @@ class _SignUpPageState extends State<SignUpPage> {
                           .toList(),
                       onChanged: (value) => setState(() => _gender = value),
                       validator: (value) =>
-                      value == null ? "Please select a gender" : null,
+                      value == null ? "Select gender" : null,
                     ),
                     const SizedBox(height: 15),
 
-                    // Date of Birth Picker
+                    // DOB
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(_dob == null
@@ -255,7 +248,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                     const SizedBox(height: 10),
 
-                    // Terms & Conditions Checkbox
+                    // T&C Checkbox
                     CheckboxListTile(
                       value: _acceptedTerms,
                       onChanged: (value) =>
