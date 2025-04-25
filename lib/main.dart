@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cseduapp/screens/Login.dart';
 import 'package:flutter/material.dart';
 
@@ -34,14 +36,15 @@ class WelcomeScreen extends StatelessWidget {
             Icon(Icons.language, size: 100, color: Colors.blue),
             SizedBox(height: 20),
             Text(
-              "Welcome to Language Learning!",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              "Welcome to LangBuddy",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,
+                  color: Colors.blue),
             ),
             SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Text(
-                "Learn new languages with ease. Let's get started.",
+                "Your buddy for language learning",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16),
               ),
@@ -88,7 +91,7 @@ class WelcomeScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 // Exit the app
-                Navigator.of(context).pop();
+                exit(0);
               },
               child: Text("Exit"),
             ),
