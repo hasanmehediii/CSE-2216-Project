@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'Home.dart';
+import '../database/auth_service.dart'; // Make sure AuthService handles Firebase authentication
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -11,7 +10,6 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-
   final _fullNameController = TextEditingController();
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -79,25 +77,23 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
-      final prefs = await SharedPreferences.getInstance();
-
-      await prefs.setString('fullName', _fullNameController.text);
-      await prefs.setString('username', _usernameController.text);
-      await prefs.setString('email', _emailController.text);
-      await prefs.setString('phoneNumber', _phoneController.text);
-      await prefs.setString('countryCode', _selectedCode ?? '');
-      await prefs.setString('gender', _gender ?? '');
-      await prefs.setString('dob', _dob?.toIso8601String() ?? '');
-      await prefs.setString('password', _passwordController.text);
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomeScreen(
-            userName: _usernameController.text,
-          ),
-        ),
-      );
+      try {
+        await AuthService().signUp(
+          fullName: _fullNameController.text,
+          username: _usernameController.text,
+          email: _emailController.text,
+          phoneNumber: _phoneController.text,
+          countryCode: _selectedCode ?? '',
+          gender: _gender ?? '',
+          dob: _dob ?? DateTime.now(),
+          password: _passwordController.text,
+          context: context,
+        );
+        // Navigate to the next screen after successful sign-up, e.g. HomePage.
+      } catch (e) {
+        // Handle error here (e.g., show a message to the user).
+        print("Error: $e");
+      }
     }
   }
 
@@ -120,9 +116,9 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
               Positioned(bottom: 100 - _animation.value, left: 20 + _animation.value, child: _buildFadedLetter('ب')),
               Positioned(bottom: 50 + _animation.value, right: 50 - _animation.value, child: _buildFadedLetter('文')),
               Positioned(top: 30 + _animation.value, right: 100 - _animation.value, child: _buildFadedLetter('अ')),
-              Positioned(top: 200 - _animation.value, left: 80 + _animation.value, child: _buildFadedLetter('অ')),
-              Positioned(bottom: 200 + _animation.value, right: 70 - _animation.value, child: _buildFadedLetter('ñ')),
-              Positioned(top: 250 + _animation.value, left: 50 - _animation.value, child: _buildFadedLetter('é')),
+              Positioned(top: 200 - _animation.value, left: 80 + _animation.value, child: _buildFadedLetter('অ')), // Bangla
+              Positioned(bottom: 200 + _animation.value, right: 70 - _animation.value, child: _buildFadedLetter('ñ')), // Spanish
+              Positioned(top: 250 + _animation.value, left: 50 - _animation.value, child: _buildFadedLetter('é')), // French
 
               // Signup Form without Card
               SingleChildScrollView(
@@ -171,6 +167,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                       ),
                       const SizedBox(height: 15),
 
+                      // Country Code and Phone Number
                       Row(
                         children: [
                           Expanded(
@@ -216,6 +213,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                       ),
                       const SizedBox(height: 15),
 
+                      // Password Field
                       TextFormField(
                         controller: _passwordController,
                         obscureText: true,
@@ -228,6 +226,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                       ),
                       const SizedBox(height: 15),
 
+                      // Gender Selection
                       DropdownButtonFormField<String>(
                         decoration: const InputDecoration(
                           labelText: "Gender",
@@ -241,6 +240,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                       ),
                       const SizedBox(height: 15),
 
+                      // Date of Birth Picker
                       ListTile(
                         contentPadding: EdgeInsets.zero,
                         title: Text(_dob == null
@@ -270,6 +270,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                         ),
                       const SizedBox(height: 10),
 
+                      // Terms and Conditions Checkbox
                       CheckboxListTile(
                         value: _acceptedTerms,
                         onChanged: (value) => setState(() => _acceptedTerms = value ?? false),
@@ -281,6 +282,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                       ),
                       const SizedBox(height: 20),
 
+                      // Submit Button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(

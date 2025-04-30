@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth package
 import 'package:shared_preferences/shared_preferences.dart';
 import '../common/custom_text_field.dart';
 import 'Home.dart';
@@ -66,6 +67,35 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       return 'Password must be at least 6 characters';
     }
     return null;
+  }
+
+  // Firebase Authentication function
+  Future<void> _login() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        // Sign in with Firebase Auth
+        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+
+        // Navigate to HomeScreen after successful login
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => HomeScreen(userName: userCredential.user?.email ?? ''),
+          ),
+        );
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'user-not-found') {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No user found for that email')));
+        } else if (e.code == 'wrong-password') {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Wrong password provided for that user')));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
+        }
+      }
+    }
   }
 
   @override
@@ -152,27 +182,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            onPressed: () async {
-                              if (_formKey.currentState?.validate() ?? false) {
-                                final prefs = await SharedPreferences.getInstance();
-                                String? savedEmail = prefs.getString('email');
-                                String? savedPassword = prefs.getString('password');
-
-                                if (_emailController.text == savedEmail &&
-                                    _passwordController.text == savedPassword) {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => HomeScreen(userName: _emailController.text),
-                                    ),
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Invalid email or password')),
-                                  );
-                                }
-                              }
-                            },
+                            onPressed: _login,
                             child: const Text(
                               'Login',
                               style: TextStyle(fontSize: 20, color: Colors.white),

@@ -1,10 +1,20 @@
 import 'dart:io';
-
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:cseduapp/screens/About.dart';
 import 'package:cseduapp/screens/Login.dart';
-import 'package:flutter/material.dart';
+import 'firebase_options.dart';
+import 'dart:io' show Platform, exit;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const LanguageLearningApp());
 }
 
@@ -31,7 +41,8 @@ class WelcomeScreen extends StatefulWidget {
   State<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProviderStateMixin {
+class _WelcomeScreenState extends State<WelcomeScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -73,22 +84,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
               Positioned(bottom: 100 - _animation.value, left: 20 + _animation.value, child: _buildFadedLetter('ب')),
               Positioned(bottom: 50 + _animation.value, right: 50 - _animation.value, child: _buildFadedLetter('文')),
               Positioned(top: 30 + _animation.value, right: 100 - _animation.value, child: _buildFadedLetter('अ')),
-              Positioned(top: 200 - _animation.value, left: 80 + _animation.value, child: _buildFadedLetter('অ')), // Bangla
-              Positioned(bottom: 200 + _animation.value, right: 70 - _animation.value, child: _buildFadedLetter('ñ')), // Spanish
-              Positioned(top: 250 + _animation.value, left: 50 - _animation.value, child: _buildFadedLetter('é')), // French
+              Positioned(top: 200 - _animation.value, left: 80 + _animation.value, child: _buildFadedLetter('অ')),
+              Positioned(bottom: 200 + _animation.value, right: 70 - _animation.value, child: _buildFadedLetter('ñ')),
+              Positioned(top: 250 + _animation.value, left: 50 - _animation.value, child: _buildFadedLetter('é')),
 
-              // Main Welcome Content
+              // Main content
               Center(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.language,
-                        size: 100,
-                        color: Colors.blueAccent,
-                      ),
+                      const Icon(Icons.language, size: 100, color: Colors.blueAccent),
                       const SizedBox(height: 20),
                       const Text(
                         "Welcome to LangBuddy",
@@ -106,6 +113,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                         style: TextStyle(fontSize: 18, color: Colors.black54),
                       ),
                       const SizedBox(height: 40),
+
                       // Get Started Button
                       SizedBox(
                         width: double.infinity,
@@ -126,6 +134,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                         ),
                       ),
                       const SizedBox(height: 20),
+
                       // About Us Button
                       SizedBox(
                         width: double.infinity,
@@ -146,12 +155,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                         ),
                       ),
                       const SizedBox(height: 20),
-                      // Exit Button
+
+                      // Exit Button with confirmation dialog
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            exit(0);
+                            _showExitDialog(context);
                           },
                           icon: const Icon(Icons.exit_to_app),
                           label: const Text("Exit"),
@@ -183,6 +193,39 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
           fontWeight: FontWeight.bold,
           color: Colors.black,
         ),
+      ),
+    );
+  }
+
+  void _showExitDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Exit App"),
+        content: const Text("Are you sure you want to exit?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              if (kIsWeb) {
+                // Show a message or redirect
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Exit is not supported on Web')),
+                );
+              } else if (Platform.isAndroid || Platform.isIOS) {
+                // On mobile, pop the app
+                Navigator.of(context).maybePop();
+              } else {
+                // On desktop
+                exit(0);
+              }
+            },
+            child: const Text("Exit"),
+          ),
+        ],
       ),
     );
   }

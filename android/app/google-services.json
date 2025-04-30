@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "329288538059",
+    "project_id": "language-learning-app-89478",
+    "storage_bucket": "language-learning-app-89478.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:329288538059:android:46cdbdf8f04fd66546084e",
+        "android_client_info": {
+          "package_name": "com.example.cseduapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPtaB3BNFgJwHAnNeUby1IzW-6tldxQYg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
