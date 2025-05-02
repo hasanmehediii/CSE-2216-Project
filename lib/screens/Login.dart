@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth package
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../common/custom_text_field.dart';
+import '../database/models/user_model.dart';
 import 'Home.dart';
 import 'SignUp.dart';
 
@@ -27,7 +28,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
       duration: const Duration(seconds: 6),
       vsync: this,
@@ -48,52 +48,56 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     super.dispose();
   }
 
+  // Update the email validation regex
   String? _validateEmail(String? mail) {
-    if (mail == null || mail.isEmpty) {
-      return 'Please enter your email';
-    }
-    final emailRegex = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
-    if (!emailRegex.hasMatch(mail)) {
-      return 'Please enter a valid email';
-    }
+    if (mail == null || mail.isEmpty) return 'Please enter your email';
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[a-zA-Z]{2,7}$');
+    if (!emailRegex.hasMatch(mail)) return 'Please enter a valid email';
     return null;
   }
 
   String? _validatePassword(String? password) {
-    if (password == null || password.isEmpty) {
-      return 'Please enter your password';
-    }
-    if (password.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
+    if (password == null || password.isEmpty) return 'Please enter your password';
+    if (password.length < 6) return 'Password must be at least 6 characters';
     return null;
   }
 
-  // Firebase Authentication function
+  // Firebase authentication login function
   Future<void> _login() async {
     if (_formKey.currentState?.validate() ?? false) {
       try {
-        // Sign in with Firebase Auth
+        // Attempt to sign in with Firebase authentication
         UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
 
-        // Navigate to HomeScreen after successful login
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => HomeScreen(userName: userCredential.user?.email ?? ''),
-          ),
-        );
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'user-not-found') {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No user found for that email')));
-        } else if (e.code == 'wrong-password') {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Wrong password provided for that user')));
+        final uid = userCredential.user!.uid;
+        final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+        if (doc.exists) {
+          final userData = AppUser.fromMap(doc.data()!);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => HomeScreen(userName: userData.fullName),
+            ),
+          );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
+          throw Exception("User profile not found in Firestore.");
         }
+      } on FirebaseAuthException catch (e) {
+        String message;
+        if (e.code == 'user-not-found') {
+          message = 'No user found for that email';
+        } else if (e.code == 'wrong-password') {
+          message = 'Wrong password provided for that user';
+        } else {
+          message = e.message ?? 'Login failed';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
@@ -111,17 +115,15 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         builder: (context, child) {
           return Stack(
             children: [
-              // Background moving faded letters
               Positioned(top: _animation.value, left: _animation.value, child: _buildFadedLetter('A')),
               Positioned(top: 100 + _animation.value, right: 20 + _animation.value, child: _buildFadedLetter('あ')),
               Positioned(bottom: 100 - _animation.value, left: 20 + _animation.value, child: _buildFadedLetter('ب')),
               Positioned(bottom: 50 + _animation.value, right: 50 - _animation.value, child: _buildFadedLetter('文')),
               Positioned(top: 30 + _animation.value, right: 100 - _animation.value, child: _buildFadedLetter('अ')),
-              Positioned(top: 200 - _animation.value, left: 80 + _animation.value, child: _buildFadedLetter('অ')), // Bangla
-              Positioned(bottom: 200 + _animation.value, right: 70 - _animation.value, child: _buildFadedLetter('ñ')), // Spanish
-              Positioned(top: 250 + _animation.value, left: 50 - _animation.value, child: _buildFadedLetter('é')), // French
+              Positioned(top: 200 - _animation.value, left: 80 + _animation.value, child: _buildFadedLetter('অ')),
+              Positioned(bottom: 200 + _animation.value, right: 70 - _animation.value, child: _buildFadedLetter('ñ')),
+              Positioned(top: 250 + _animation.value, left: 50 - _animation.value, child: _buildFadedLetter('é')),
 
-              // Login Form directly on background
               Center(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
@@ -130,18 +132,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Icons.language,
-                          size: 80,
-                          color: Colors.blueAccent,
-                        ),
+                        const Icon(Icons.language, size: 80, color: Colors.blueAccent),
                         const SizedBox(height: 20),
                         Text(
                           'Login',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue[800],
-                          ),
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.blue[800]),
                         ),
                         const SizedBox(height: 30),
                         CustomTextField(
@@ -159,14 +154,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           obscureText: _obscureText,
                           prefixIcon: const Icon(Icons.lock),
                           suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureText ? Icons.visibility : Icons.visibility_off,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscureText = !_obscureText;
-                              });
-                            },
+                            icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
+                            onPressed: () => setState(() => _obscureText = !_obscureText),
                           ),
                           validator: _validatePassword,
                           focusNode: _passwordFocusNode,
@@ -178,32 +167,18 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blueAccent,
                               padding: const EdgeInsets.symmetric(vertical: 18),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                             ),
                             onPressed: _login,
-                            child: const Text(
-                              'Login',
-                              style: TextStyle(fontSize: 20, color: Colors.white),
-                            ),
+                            child: const Text('Login', style: TextStyle(fontSize: 20, color: Colors.white)),
                           ),
                         ),
                         const SizedBox(height: 15),
                         TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const SignUpPage()),
-                            );
-                          },
+                          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SignUpPage())),
                           child: const Text(
-                            'Don\'t have an account? Sign Up',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.blueAccent,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            "Don't have an account? Sign Up",
+                            style: TextStyle(fontSize: 16, color: Colors.blueAccent, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
@@ -221,14 +196,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   Widget _buildFadedLetter(String letter) {
     return Opacity(
       opacity: 0.05,
-      child: Text(
-        letter,
-        style: const TextStyle(
-          fontSize: 60, // Smaller faded letters
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ),
-      ),
+      child: Text(letter, style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.black)),
     );
   }
 }

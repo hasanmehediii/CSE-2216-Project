@@ -1,11 +1,8 @@
+// Home.dart
 import 'package:flutter/material.dart';
 import 'home_screens/dashboard.dart';
 import 'home_screens/live_quiz.dart';
 import 'home_screens/routine.dart';
-
-void main() {
-  runApp(const MaterialApp(home: HomeScreen(userName: 'Nafisha')));
-}
 
 class HomeScreen extends StatefulWidget {
   final String userName;
@@ -85,7 +82,25 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           builder: (BuildContext context) {
                             return AlertDialog(
                               title: const Text("Choose a Language"),
-                              content: const Text("You can select a language to start learning."),
+                              content: SingleChildScrollView(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    "English", "Bangla", "Spanish", "Chinese", "Japanese",
+                                    "French", "Hindi", "Arabic", "German", "Russian",
+                                    "Portuguese", "Italian", "Korean", "Turkish", "Urdu",
+                                    "Dutch", "Greek", "Thai", "Swahili", "Persian"
+                                  ].map((language) {
+                                    return ListTile(
+                                      title: Text(language),
+                                      onTap: () {
+                                        Navigator.of(context).pop();
+                                        print("Selected language: $language");
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
                               actions: <Widget>[
                                 TextButton(
                                   onPressed: () {
@@ -98,26 +113,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           },
                         );
                       },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        shadowColor: Colors.blueAccent,
-                        elevation: 5,
-                      ),
-                      icon: const Icon(Icons.language, size: 24),
-                      label: const Text('Select a Language', style: TextStyle(fontSize: 18)),
+                      icon: const Icon(Icons.language),
+                      label: const Text("Select Language"),
                     ),
                     const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20.0),
                       child: Column(
                         children: [
-                          const Text(
-                            "Your Learning Progress",
-                            style: TextStyle(fontSize: 18),
-                          ),
+                          const Text("Your Learning Progress", style: TextStyle(fontSize: 18)),
                           const SizedBox(height: 10),
                           AnimatedContainer(
                             duration: const Duration(seconds: 2),
@@ -135,79 +139,55 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                     ),
                     ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const StudentDashboard()),
-                        );
-                      },
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StudentDashboard())),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
                         backgroundColor: Colors.purple,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         shadowColor: Colors.purpleAccent,
                         elevation: 5,
                       ),
-                      icon: const Icon(Icons.dashboard, size: 24),
-                      label: const Text('Student Dashboard', style: TextStyle(fontSize: 18)),
+                      icon: const Icon(Icons.dashboard, size: 24, color: Colors.white),
+                      label: const Text('Student Dashboard', style: TextStyle(fontSize: 18, color: Colors.white)),
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const LiveQuizPage()),
-                        );
-                      },
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LiveQuizPage())),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
                         backgroundColor: Colors.orange,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         shadowColor: Colors.orangeAccent,
                         elevation: 5,
                       ),
-                      icon: const Icon(Icons.quiz, size: 24),
-                      label: const Text('Live Quiz', style: TextStyle(fontSize: 18)),
+                      icon: const Icon(Icons.quiz, size: 24, color: Colors.white),
+                      label: const Text('Live Quiz', style: TextStyle(fontSize: 18, color: Colors.white)),
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const RoutinePage()),
-                        );
-                      },
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RoutinePage())),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
                         backgroundColor: Colors.teal,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         shadowColor: Colors.tealAccent,
                         elevation: 5,
                       ),
-                      icon: const Icon(Icons.schedule, size: 24),
-                      label: const Text('Routine', style: TextStyle(fontSize: 18)),
+                      icon: const Icon(Icons.schedule, size: 24, color: Colors.white),
+                      label: const Text('Routine', style: TextStyle(fontSize: 18, color: Colors.white)),
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+                      onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         shadowColor: Colors.redAccent,
                         elevation: 5,
                       ),
-                      icon: const Icon(Icons.logout, size: 24),
-                      label: const Text('Log Out', style: TextStyle(fontSize: 18)),
+                      icon: const Icon(Icons.logout, size: 24, color: Colors.white),
+                      label: const Text('Log Out', style: TextStyle(fontSize: 18, color: Colors.white)),
                     ),
                   ],
                 ),
@@ -222,10 +202,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Widget _buildFadedLetter(String letter) {
     return Opacity(
       opacity: 0.04,
-      child: Text(
-        letter,
-        style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.black),
-      ),
+      child: Text(letter, style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.black)),
     );
   }
 }

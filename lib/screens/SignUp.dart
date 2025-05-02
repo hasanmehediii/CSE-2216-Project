@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../database/auth_service.dart'; // Make sure AuthService handles Firebase authentication
+import '../database/auth_service.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -15,6 +15,8 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _nidController = TextEditingController();
+
   String? _selectedCode;
   String? _gender;
   DateTime? _dob;
@@ -34,20 +36,13 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
 
   String getFlagEmoji(String country) {
     switch (country) {
-      case 'United States':
-        return '🇺🇸';
-      case 'Bangladesh':
-        return '🇧🇩';
-      case 'United Kingdom':
-        return '🇬🇧';
-      case 'Australia':
-        return '🇦🇺';
-      case 'India':
-        return '🇮🇳';
-      case 'Germany':
-        return '🇩🇪';
-      default:
-        return '';
+      case 'United States': return '🇺🇸';
+      case 'Bangladesh': return '🇧🇩';
+      case 'United Kingdom': return '🇬🇧';
+      case 'Australia': return '🇦🇺';
+      case 'India': return '🇮🇳';
+      case 'Germany': return '🇩🇪';
+      default: return '';
     }
   }
 
@@ -72,6 +67,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
     _emailController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
+    _nidController.dispose();
     super.dispose();
   }
 
@@ -85,13 +81,12 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
           phoneNumber: _phoneController.text,
           countryCode: _selectedCode ?? '',
           gender: _gender ?? '',
-          dob: _dob ?? DateTime.now(),
+          nid: _nidController.text,
+          dob: _dob?.toIso8601String() ?? '',
           password: _passwordController.text,
           context: context,
         );
-        // Navigate to the next screen after successful sign-up, e.g. HomePage.
       } catch (e) {
-        // Handle error here (e.g., show a message to the user).
         print("Error: $e");
       }
     }
@@ -110,17 +105,16 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
         builder: (context, child) {
           return Stack(
             children: [
-              // Floating faded background letters
+              // Background faded letters
               Positioned(top: _animation.value, left: _animation.value, child: _buildFadedLetter('A')),
               Positioned(top: 100 + _animation.value, right: 20 + _animation.value, child: _buildFadedLetter('あ')),
               Positioned(bottom: 100 - _animation.value, left: 20 + _animation.value, child: _buildFadedLetter('ب')),
               Positioned(bottom: 50 + _animation.value, right: 50 - _animation.value, child: _buildFadedLetter('文')),
               Positioned(top: 30 + _animation.value, right: 100 - _animation.value, child: _buildFadedLetter('अ')),
-              Positioned(top: 200 - _animation.value, left: 80 + _animation.value, child: _buildFadedLetter('অ')), // Bangla
-              Positioned(bottom: 200 + _animation.value, right: 70 - _animation.value, child: _buildFadedLetter('ñ')), // Spanish
-              Positioned(top: 250 + _animation.value, left: 50 - _animation.value, child: _buildFadedLetter('é')), // French
+              Positioned(top: 200 - _animation.value, left: 80 + _animation.value, child: _buildFadedLetter('অ')),
+              Positioned(bottom: 200 + _animation.value, right: 70 - _animation.value, child: _buildFadedLetter('ñ')),
+              Positioned(top: 250 + _animation.value, left: 50 - _animation.value, child: _buildFadedLetter('é')),
 
-              // Signup Form without Card
               SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
                 child: Form(
@@ -128,70 +122,43 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                   child: Column(
                     children: [
                       const SizedBox(height: 20),
-                      const Text(
-                        "Create Your Account",
-                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.blueAccent),
-                      ),
+                      const Text("Create Your Account", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
                       const SizedBox(height: 30),
 
                       TextFormField(
                         controller: _fullNameController,
-                        decoration: const InputDecoration(
-                          labelText: "Full Name",
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) =>
-                        value == null || value.trim().length < 3 ? "Enter at least 3 characters" : null,
+                        decoration: const InputDecoration(labelText: "Full Name", border: OutlineInputBorder()),
+                        validator: (value) => value == null || value.trim().length < 3 ? "Enter at least 3 characters" : null,
                       ),
                       const SizedBox(height: 15),
 
                       TextFormField(
                         controller: _usernameController,
-                        decoration: const InputDecoration(
-                          labelText: "Username",
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) =>
-                        value == null || value.trim().isEmpty ? "Username is required" : null,
+                        decoration: const InputDecoration(labelText: "Username", border: OutlineInputBorder()),
+                        validator: (value) => value == null || value.trim().isEmpty ? "Username is required" : null,
                       ),
                       const SizedBox(height: 15),
 
                       TextFormField(
                         controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: "Email",
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) =>
-                        value == null || !value.contains('@') || !value.contains('.') ? "Enter a valid email" : null,
+                        decoration: const InputDecoration(labelText: "Email", border: OutlineInputBorder()),
+                        validator: (value) => value == null || !value.contains('@') || !value.contains('.') ? "Enter a valid email" : null,
                       ),
                       const SizedBox(height: 15),
 
-                      // Country Code and Phone Number
                       Row(
                         children: [
                           Expanded(
                             flex: 2,
                             child: DropdownButtonFormField<String>(
                               value: _selectedCode,
-                              decoration: const InputDecoration(
-                                labelText: "Code",
-                                border: OutlineInputBorder(),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                              ),
+                              decoration: const InputDecoration(labelText: "Code", border: OutlineInputBorder()),
                               items: _countryCodes.map((country) {
                                 final code = country['code']!;
                                 final flag = getFlagEmoji(country['country']!);
-                                return DropdownMenuItem<String>(
-                                  value: code,
-                                  child: Text('$flag $code'),
-                                );
+                                return DropdownMenuItem<String>(value: code, child: Text('$flag $code'));
                               }).toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedCode = value;
-                                });
-                              },
+                              onChanged: (value) => setState(() => _selectedCode = value),
                               validator: (value) => value == null ? "Select code" : null,
                             ),
                           ),
@@ -200,52 +167,42 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                             flex: 3,
                             child: TextFormField(
                               controller: _phoneController,
-                              decoration: const InputDecoration(
-                                labelText: "Phone Number",
-                                border: OutlineInputBorder(),
-                              ),
+                              decoration: const InputDecoration(labelText: "Phone Number", border: OutlineInputBorder()),
                               keyboardType: TextInputType.phone,
-                              validator: (value) =>
-                              value == null || value.trim().isEmpty ? "Phone number is required" : null,
+                              validator: (value) => value == null || value.trim().isEmpty ? "Phone number is required" : null,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 15),
 
-                      // Password Field
                       TextFormField(
                         controller: _passwordController,
                         obscureText: true,
-                        decoration: const InputDecoration(
-                          labelText: "Password",
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) =>
-                        value == null || value.length < 6 ? "Password must be at least 6 characters" : null,
+                        decoration: const InputDecoration(labelText: "Password", border: OutlineInputBorder()),
+                        validator: (value) => value == null || value.length < 6 ? "Password must be at least 6 characters" : null,
                       ),
                       const SizedBox(height: 15),
 
-                      // Gender Selection
+                      TextFormField(
+                        controller: _nidController,
+                        decoration: const InputDecoration(labelText: "NID Number", border: OutlineInputBorder()),
+                        keyboardType: TextInputType.number,
+                        validator: (value) => value == null || value.trim().length < 10 ? "Enter a valid NID" : null,
+                      ),
+                      const SizedBox(height: 15),
+
                       DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          labelText: "Gender",
-                          border: OutlineInputBorder(),
-                        ),
-                        items: ['Male', 'Female', 'Other']
-                            .map((g) => DropdownMenuItem(value: g, child: Text(g)))
-                            .toList(),
+                        decoration: const InputDecoration(labelText: "Gender", border: OutlineInputBorder()),
+                        items: ['Male', 'Female', 'Other'].map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
                         onChanged: (value) => setState(() => _gender = value),
                         validator: (value) => value == null ? "Select gender" : null,
                       ),
                       const SizedBox(height: 15),
 
-                      // Date of Birth Picker
                       ListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: Text(_dob == null
-                            ? "Select Date of Birth"
-                            : "Date of Birth: ${_dob!.toLocal().toString().split(' ')[0]}"),
+                        title: Text(_dob == null ? "Select Date of Birth" : "Date of Birth: \${_dob!.toLocal().toString().split(' ')[0]}"),
                         trailing: const Icon(Icons.calendar_today),
                         onTap: () async {
                           final picked = await showDatePicker(
@@ -254,35 +211,25 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                             firstDate: DateTime(1900),
                             lastDate: DateTime.now(),
                           );
-                          if (picked != null) {
-                            setState(() => _dob = picked);
-                          }
+                          if (picked != null) setState(() => _dob = picked);
                         },
                       ),
                       if (_dob == null)
                         const Padding(
                           padding: EdgeInsets.only(left: 8, top: 4),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text("Date of Birth is required",
-                                style: TextStyle(color: Colors.red, fontSize: 12)),
-                          ),
+                          child: Align(alignment: Alignment.centerLeft, child: Text("Date of Birth is required", style: TextStyle(color: Colors.red, fontSize: 12))),
                         ),
                       const SizedBox(height: 10),
 
-                      // Terms and Conditions Checkbox
                       CheckboxListTile(
                         value: _acceptedTerms,
                         onChanged: (value) => setState(() => _acceptedTerms = value ?? false),
                         title: const Text("I accept Terms & Conditions"),
                         controlAffinity: ListTileControlAffinity.leading,
-                        subtitle: !_acceptedTerms
-                            ? const Text("Required to proceed", style: TextStyle(color: Colors.red, fontSize: 12))
-                            : null,
+                        subtitle: !_acceptedTerms ? const Text("Required to proceed", style: TextStyle(color: Colors.red, fontSize: 12)) : null,
                       ),
                       const SizedBox(height: 20),
 
-                      // Submit Button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -309,14 +256,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
   Widget _buildFadedLetter(String letter) {
     return Opacity(
       opacity: 0.04,
-      child: Text(
-        letter,
-        style: const TextStyle(
-          fontSize: 60,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ),
-      ),
+      child: Text(letter, style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.black)),
     );
   }
 }
