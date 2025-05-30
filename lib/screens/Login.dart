@@ -1,6 +1,6 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../common/custom_text_field.dart';
 import '../database/models/user_model.dart';
 import 'Home.dart';
@@ -62,45 +62,45 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     return null;
   }
 
-  // Firebase authentication login function
+  // fastapi login function
   Future<void> _login() async {
     if (_formKey.currentState?.validate() ?? false) {
+      final url = Uri.parse('http://127.0.0.1:8000/login');
+
+      final body = jsonEncode({
+        'email': _emailController.text.trim(),
+        'password': _passwordController.text,
+      });
+
       try {
-        // Attempt to sign in with Firebase authentication
-        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: body,
         );
 
-        final uid = userCredential.user!.uid;
-        final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final userName = data['username'] ?? 'User';
 
-        if (doc.exists) {
-          final userData = AppUser.fromMap(doc.data()!);
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => HomeScreen(userName: userData.fullName),
+              builder: (_) => HomeScreen(userName: userName),
             ),
           );
         } else {
-          throw Exception("User profile not found in Firestore.");
+          final errorData = jsonDecode(response.body);
+          final message = errorData['detail'] ?? 'Login failed';
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
         }
-      } on FirebaseAuthException catch (e) {
-        String message;
-        if (e.code == 'user-not-found') {
-          message = 'No user found for that email';
-        } else if (e.code == 'wrong-password') {
-          message = 'Wrong password provided for that user';
-        } else {
-          message = e.message ?? 'Login failed';
-        }
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
