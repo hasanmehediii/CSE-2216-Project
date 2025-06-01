@@ -3,18 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cseduapp/screens/About.dart';
 import 'package:cseduapp/screens/Login.dart';
+import 'package:cseduapp/screens/home_screens/main_menu.dart';
 import 'firebase_options.dart';
-import 'dart:io' show Platform, exit;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
   runApp(const LanguageLearningApp());
 }
 
@@ -26,10 +23,13 @@ class LanguageLearningApp extends StatelessWidget {
     return MaterialApp(
       title: 'Language Learning App',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: const WelcomeScreen(),
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/about': (context) => const AboutUsPage(),
+        '/mainMenu': (context) => const MainMenu(),
+      },
     );
   }
 }
@@ -79,14 +79,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           return Stack(
             children: [
               // Floating faded letters
-              Positioned(top: _animation.value, left: _animation.value, child: _buildFadedLetter('A')),
-              Positioned(top: 100 + _animation.value, right: 20 + _animation.value, child: _buildFadedLetter('あ')),
-              Positioned(bottom: 100 - _animation.value, left: 20 + _animation.value, child: _buildFadedLetter('ب')),
-              Positioned(bottom: 50 + _animation.value, right: 50 - _animation.value, child: _buildFadedLetter('文')),
-              Positioned(top: 30 + _animation.value, right: 100 - _animation.value, child: _buildFadedLetter('अ')),
-              Positioned(top: 200 - _animation.value, left: 80 + _animation.value, child: _buildFadedLetter('অ')),
-              Positioned(bottom: 200 + _animation.value, right: 70 - _animation.value, child: _buildFadedLetter('ñ')),
-              Positioned(top: 250 + _animation.value, left: 50 - _animation.value, child: _buildFadedLetter('é')),
+              _floatingLetter('A', top: _animation.value, left: _animation.value),
+              _floatingLetter('あ', top: 100 + _animation.value, right: 20 + _animation.value),
+              _floatingLetter('ب', bottom: 100 - _animation.value, left: 20 + _animation.value),
+              _floatingLetter('文', bottom: 50 + _animation.value, right: 50 - _animation.value),
+              _floatingLetter('अ', top: 30 + _animation.value, right: 100 - _animation.value),
+              _floatingLetter('অ', top: 200 - _animation.value, left: 80 + _animation.value),
+              _floatingLetter('ñ', bottom: 200 + _animation.value, right: 70 - _animation.value),
+              _floatingLetter('é', top: 250 + _animation.value, left: 50 - _animation.value),
 
               // Main content
               Center(
@@ -99,11 +99,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       const SizedBox(height: 20),
                       const Text(
                         "Welcome to LangBuddy",
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueAccent,
-                        ),
+                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.blueAccent),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 20),
@@ -114,55 +110,44 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       ),
                       const SizedBox(height: 40),
 
-                      // Get Started Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const LoginScreen()),
-                            );
-                          },
-                          icon: const Icon(Icons.arrow_forward),
-                          label: const Text("Get Started"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueAccent,
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            textStyle: const TextStyle(fontSize: 18),
-                          ),
-                        ),
+                      // Login Button
+                      _buildButton(
+                        context,
+                        label: "Get Started",
+                        icon: Icons.arrow_forward,
+                        color: Colors.blueAccent,
+                        route: '/login',
                       ),
+
                       const SizedBox(height: 20),
 
-                      // About Us Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const AboutUsPage()),
-                            );
-                          },
-                          icon: const Icon(Icons.info_outline),
-                          label: const Text("About Us"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.lightBlue,
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            textStyle: const TextStyle(fontSize: 18),
-                          ),
-                        ),
+                      // About Button
+                      _buildButton(
+                        context,
+                        label: "About Us",
+                        icon: Icons.info_outline,
+                        color: Colors.lightBlue,
+                        route: '/about',
                       ),
+
                       const SizedBox(height: 20),
 
-                      // Exit Button with confirmation dialog
+                      // Skip to Main Menu Button (for testing)
+                      _buildButton(
+                        context,
+                        label: "Skip to Menu",
+                        icon: Icons.menu,
+                        color: Colors.yellow,
+                        route: '/mainMenu',
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Exit Button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
-                          onPressed: () {
-                            _showExitDialog(context);
-                          },
+                          onPressed: () => _showExitDialog(context),
                           icon: const Icon(Icons.exit_to_app),
                           label: const Text("Exit"),
                           style: ElevatedButton.styleFrom(
@@ -183,20 +168,46 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
-  Widget _buildFadedLetter(String letter) {
-    return Opacity(
-      opacity: 0.04,
-      child: Text(
-        letter,
-        style: const TextStyle(
-          fontSize: 60,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
+  // Floating letter helper
+  Widget _floatingLetter(String letter, {double? top, double? left, double? right, double? bottom}) {
+    return Positioned(
+      top: top,
+      left: left,
+      right: right,
+      bottom: bottom,
+      child: Opacity(
+        opacity: 0.04,
+        child: Text(
+          letter,
+          style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.black),
         ),
       ),
     );
   }
 
+  // Button builder
+  Widget _buildButton(BuildContext context, {
+    required String label,
+    required IconData icon,
+    required Color color,
+    required String route,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () => Navigator.pushNamed(context, route),
+        icon: Icon(icon),
+        label: Text(label),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          textStyle: const TextStyle(fontSize: 18),
+        ),
+      ),
+    );
+  }
+
+  // Exit confirmation
   void _showExitDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -211,15 +222,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           TextButton(
             onPressed: () {
               if (kIsWeb) {
-                // Show a message or redirect
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Exit is not supported on Web')),
                 );
               } else if (Platform.isAndroid || Platform.isIOS) {
-                // On mobile, pop the app
                 Navigator.of(context).maybePop();
               } else {
-                // On desktop
                 exit(0);
               }
             },
