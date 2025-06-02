@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cseduapp/screens/About.dart';
 import 'package:cseduapp/screens/Login.dart';
-import 'package:cseduapp/screens/home_screens/main_menu.dart';
 import 'firebase_options.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -28,7 +27,6 @@ class LanguageLearningApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/about': (context) => const AboutUsPage(),
-        '/mainMenu': (context) => const MainMenu(),
       },
     );
   }
@@ -129,18 +127,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         color: Colors.lightBlue,
                         route: '/about',
                       ),
-
-                      const SizedBox(height: 20),
-
-                      // Skip to Main Menu Button (for testing)
-                      _buildButton(
-                        context,
-                        label: "Skip to Menu",
-                        icon: Icons.menu,
-                        color: Colors.yellow,
-                        route: '/mainMenu',
-                      ),
-
                       const SizedBox(height: 20),
 
                       // Exit Button
