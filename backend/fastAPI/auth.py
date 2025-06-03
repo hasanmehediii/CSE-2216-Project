@@ -82,8 +82,18 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 async def protected_route(current_user: dict = Depends(get_current_user)):
     return {"message": f"Hello, {current_user['email']}! You have accessed a protected route."}
 
-@auth_router.get("/me")
-async def read_users_me(current_user: dict = Depends(get_current_user)):
-    user_data = current_user.copy()
-    user_data.pop("password", None)
-    return user_data
+# New endpoint for fetching user profile
+@auth_router.get("/user/profile")
+async def get_user_profile(current_user: dict = Depends(get_current_user)):
+    # Exclude sensitive fields like password
+    user_profile = {
+        "fullName": current_user["fullName"],
+        "username": current_user["username"],
+        "email": current_user["email"],
+        "phoneNumber": current_user["phoneNumber"],
+        "countryCode": current_user["countryCode"],
+        "gender": current_user.get("gender"),  # Use .get() for optional field
+        "nid": current_user["nid"],
+        "dob": current_user["dob"].isoformat()  # Convert datetime to string for JSON
+    }
+    return user_profile

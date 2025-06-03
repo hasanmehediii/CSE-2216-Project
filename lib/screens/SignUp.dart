@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../database/auth_service.dart';
+import '../services/auth_service.dart';
+import 'Login.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -75,13 +76,13 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
     if (_formKey.currentState!.validate()) {
       try {
         await AuthService().signUp(
-          fullName: _fullNameController.text,
-          username: _usernameController.text,
-          email: _emailController.text,
-          phoneNumber: _phoneController.text,
+          fullName: _fullNameController.text.trim(),
+          username: _usernameController.text.trim(),
+          email: _emailController.text.trim(),
+          phoneNumber: _phoneController.text.trim(),
           countryCode: _selectedCode ?? '',
-          gender: _gender ?? '',
-          nid: _nidController.text,
+          gender: _gender,
+          nid: _nidController.text.trim(),
           dob: _dob?.toIso8601String() ?? '',
           password: _passwordController.text,
           context: context,
@@ -91,6 +92,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

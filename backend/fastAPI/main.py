@@ -22,7 +22,7 @@ app.include_router(auth_router)
 
 @app.get("/")
 async def root():
-    return {"message": "Hello, FastAPI with MongoDB, ho ho!"}
+    return {"message": "Hello, FastAPI with MongoDB!"}
 
 @app.on_event("startup")
 async def startup_event():

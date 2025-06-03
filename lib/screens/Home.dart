@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'home_screens/dashboard.dart';
 import 'home_screens/live_quiz.dart';
 import 'home_screens/routine.dart';
+import '../services/storage_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_profile_provider.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String userName;
-
-  const HomeScreen({super.key, required this.userName});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -35,8 +36,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 
+  // Logout function
+  Future<void> _logout(BuildContext context) async {
+    await StorageService.clearStorage();
+    Provider.of<UserProfileProvider>(context, listen: false).clearUserProfile();
+    Navigator.pushReplacementNamed(context, '/login');
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userProfile = Provider.of<UserProfileProvider>(context).userProfile;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Language Learning'),
@@ -65,7 +75,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     Container(
                       alignment: Alignment.center,
                       child: Text(
-                        "Welcome, ${widget.userName}!",
+                        userProfile != null
+                            ? "Welcome, ${userProfile.fullName}!"
+                            : "Welcome, Guest!",
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -74,6 +86,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         textAlign: TextAlign.center,
                       ),
                     ),
+                    if (userProfile != null) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        'Email: ${userProfile.email}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      Text(
+                        'Username: ${userProfile.username}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      // Add more profile fields as needed
+                    ],
                     const SizedBox(height: 40),
                     ElevatedButton.icon(
                       onPressed: () {
@@ -178,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton.icon(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => _logout(context),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
                         backgroundColor: Colors.red,

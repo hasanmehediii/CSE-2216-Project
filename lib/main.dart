@@ -6,16 +6,22 @@ import 'package:cseduapp/screens/Login.dart';
 import 'firebase_options.dart';
 import 'dart:io' show Platform, exit;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:provider/provider.dart';
+import 'providers/user_profile_provider.dart';
+import 'services/auth_service.dart';
+import 'services/storage_service.dart';
+import 'screens/Home.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProfileProvider()),
+      ],
+      child: const LanguageLearningApp(),
+    ),
   );
-
-  runApp(const LanguageLearningApp());
 }
 
 class LanguageLearningApp extends StatelessWidget {
@@ -29,8 +35,50 @@ class LanguageLearningApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const WelcomeScreen(),
+      home: const AuthWrapper(),
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => const HomeScreen(),
+        '/about': (context) => const AboutUsPage(),
+      },
     );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _checkLoginStatus(context),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return snapshot.data == true ? const HomeScreen() : const WelcomeScreen();
+      },
+    );
+  }
+
+  Future<bool> _checkLoginStatus(BuildContext context) async {
+    final token = await StorageService.getToken();
+    if (token != null) {
+      try {
+        final profile = await AuthService().fetchUserProfile(token);
+        Provider.of<UserProfileProvider>(context, listen: false)
+            .setUserProfile(profile);
+        await StorageService.saveUserProfile(profile);
+        return true;
+      } catch (e) {
+        print('Auto-login failed: $e');
+        await StorageService.clearStorage(); // Clear invalid token
+        return false;
+      }
+    }
+    return false;
   }
 }
 
@@ -119,10 +167,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const LoginScreen()),
-                            );
+                            Navigator.pushNamed(context, '/login');
                           },
                           icon: const Icon(Icons.arrow_forward),
                           label: const Text("Get Started"),
@@ -140,10 +185,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const AboutUsPage()),
-                            );
+                            Navigator.pushNamed(context, '/about');
                           },
                           icon: const Icon(Icons.info_outline),
                           label: const Text("About Us"),

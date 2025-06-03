@@ -3,8 +3,13 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import '../common/custom_text_field.dart';
 import '../database/models/user_model.dart';
+import '../models/user_profile.dart';
+import '../services/auth_service.dart';
+import '../services/storage_service.dart';
 import 'Home.dart';
 import 'SignUp.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_profile_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -65,41 +70,26 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   // fastapi login function
   Future<void> _login() async {
     if (_formKey.currentState?.validate() ?? false) {
-      final url = Uri.parse('http://127.0.0.1:8000/login');
-
-      final body = jsonEncode({
-        'email': _emailController.text.trim(),
-        'password': _passwordController.text,
-      });
-
       try {
-        final response = await http.post(
-          url,
-          headers: {'Content-Type': 'application/json'},
-          body: body,
+        final authService = AuthService();
+        final result = await authService.login(
+          _emailController.text.trim(),
+          _passwordController.text,
         );
-
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          final userName = data['username'] ?? 'User';
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => HomeScreen(userName: userName),
-            ),
-          );
-        } else {
-          final errorData = jsonDecode(response.body);
-          final message = errorData['detail'] ?? 'Login failed';
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-        }
+        // Save token and profile
+        await StorageService.saveToken(result['token']);
+        await StorageService.saveUserProfile(result['profile']);
+        Provider.of<UserProfileProvider>(context, listen: false)
+            .setUserProfile(result['profile']);
+        // Navigate to HomeScreen
+        Navigator.pushReplacementNamed(context, '/home');
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
       }
     }
   }
-
 
 
   @override

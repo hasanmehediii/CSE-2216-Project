@@ -43,7 +43,7 @@ class AuthService {
         // Signup success
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen(userName: username)),
+          MaterialPageRoute(builder: (context) => HomeScreen()),
         );
       } else {
         // Signup failed
