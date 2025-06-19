@@ -1,17 +1,23 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cseduapp/screens/About.dart';
 import 'package:cseduapp/screens/Login.dart';
-import 'firebase_options.dart';
+import 'package:cseduapp/screens/Home.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:provider/provider.dart';
+import 'providers/user_profile_provider.dart';
+import 'services/auth_service.dart';
+import 'services/storage_service.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProfileProvider()),
+      ],
+      child: const LanguageLearningApp(),
+    ),
   );
-  runApp(const LanguageLearningApp());
 }
 
 class LanguageLearningApp extends StatelessWidget {
@@ -23,12 +29,50 @@ class LanguageLearningApp extends StatelessWidget {
       title: 'Language Learning App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const WelcomeScreen(),
+      home: const AuthWrapper(),
       routes: {
         '/login': (context) => const LoginScreen(),
+        '/home': (context) => const HomeScreen(),
         '/about': (context) => const AboutUsPage(),
       },
     );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _checkLoginStatus(context),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return snapshot.data == true ? const HomeScreen() : const WelcomeScreen();
+      },
+    );
+  }
+
+  Future<bool> _checkLoginStatus(BuildContext context) async {
+    final token = await StorageService.getToken();
+    if (token != null) {
+      try {
+        final profile = await AuthService().fetchUserProfile(token);
+        Provider.of<UserProfileProvider>(context, listen: false)
+            .setUserProfile(profile);
+        await StorageService.saveUserProfile(profile);
+        return true;
+      } catch (e) {
+        print('Auto-login failed: $e');
+        await StorageService.clearStorage();
+        return false;
+      }
+    }
+    return false;
   }
 }
 
@@ -97,7 +141,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       const SizedBox(height: 20),
                       const Text(
                         "Welcome to LangBuddy",
-                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.blueAccent),
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueAccent,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 20),
@@ -108,7 +156,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       ),
                       const SizedBox(height: 40),
 
-                      // Login Button
+                      // Get Started Button
                       _buildButton(
                         context,
                         label: "Get Started",
@@ -116,10 +164,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         color: Colors.blueAccent,
                         route: '/login',
                       ),
-
                       const SizedBox(height: 20),
 
-                      // About Button
+                      // About Us Button
                       _buildButton(
                         context,
                         label: "About Us",
@@ -130,18 +177,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       const SizedBox(height: 20),
 
                       // Exit Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () => _showExitDialog(context),
-                          icon: const Icon(Icons.exit_to_app),
-                          label: const Text("Exit"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.redAccent,
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            textStyle: const TextStyle(fontSize: 18),
-                          ),
-                        ),
+                      _buildButton(
+                        context,
+                        label: "Exit",
+                        icon: Icons.exit_to_app,
+                        color: Colors.redAccent,
+                        onPressed: () => _showExitDialog(context),
                       ),
                     ],
                   ),
@@ -154,7 +195,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
-  // Floating letter helper
   Widget _floatingLetter(String letter, {double? top, double? left, double? right, double? bottom}) {
     return Positioned(
       top: top,
@@ -171,17 +211,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
-  // Button builder
   Widget _buildButton(BuildContext context, {
     required String label,
     required IconData icon,
     required Color color,
-    required String route,
+    String? route,
+    VoidCallback? onPressed,
   }) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed: () => Navigator.pushNamed(context, route),
+        onPressed: onPressed ?? () => Navigator.pushNamed(context, route!),
         icon: Icon(icon),
         label: Text(label),
         style: ElevatedButton.styleFrom(
@@ -193,7 +233,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
-  // Exit confirmation
   void _showExitDialog(BuildContext context) {
     showDialog(
       context: context,

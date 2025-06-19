@@ -1,10 +1,15 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../common/custom_text_field.dart';
 import '../database/models/user_model.dart';
+import '../models/user_profile.dart';
+import '../services/auth_service.dart';
+import '../services/storage_service.dart';
 import 'Home.dart';
 import 'SignUp.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_profile_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -62,45 +67,30 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     return null;
   }
 
-  // Firebase authentication login function
+  // fastapi login function
   Future<void> _login() async {
     if (_formKey.currentState?.validate() ?? false) {
       try {
-        // Attempt to sign in with Firebase authentication
-        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
+        final authService = AuthService();
+        final result = await authService.login(
+          _emailController.text.trim(),
+          _passwordController.text,
         );
-
-        final uid = userCredential.user!.uid;
-        final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-
-        if (doc.exists) {
-          final userData = AppUser.fromMap(doc.data()!);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => HomeScreen(userName: userData.fullName),
-            ),
-          );
-        } else {
-          throw Exception("User profile not found in Firestore.");
-        }
-      } on FirebaseAuthException catch (e) {
-        String message;
-        if (e.code == 'user-not-found') {
-          message = 'No user found for that email';
-        } else if (e.code == 'wrong-password') {
-          message = 'Wrong password provided for that user';
-        } else {
-          message = e.message ?? 'Login failed';
-        }
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        // Save token and profile
+        await StorageService.saveToken(result['token']);
+        await StorageService.saveUserProfile(result['profile']);
+        Provider.of<UserProfileProvider>(context, listen: false)
+            .setUserProfile(result['profile']);
+        // Navigate to HomeScreen
+        Navigator.pushReplacementNamed(context, '/home');
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -1,12 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import '../screens/Home.dart';
-import 'models/user_model.dart';
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String baseUrl = 'http://127.0.0.1:8000';
 
   Future<void> signUp({
     required String fullName,
@@ -20,33 +18,45 @@ class AuthService {
     required String password,
     required BuildContext context,
   }) async {
+    final url = Uri.parse('$baseUrl/signup');
+
+    final body = jsonEncode({
+      'fullName': fullName,
+      'username': username,
+      'email': email,
+      'phoneNumber': phoneNumber,
+      'countryCode': countryCode,
+      'gender': gender,
+      'nid': nid,
+      'dob': dob,
+      'password': password,
+    });
+
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
       );
 
-      AppUser user = AppUser(
-        uid: userCredential.user!.uid,
-        fullName: fullName,
-        username: username,
-        email: email,
-        phoneNumber: phoneNumber,
-        countryCode: countryCode,
-        gender: gender,
-        nid: nid,
-        dob: dob,
-      );
-
-      await _firestore.collection('users').doc(user.uid).set(user.toMap());
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen(userName: username)),
-      );
-    } on FirebaseAuthException catch (e) {
+      if (response.statusCode == 200) {
+        // Signup success
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      } else {
+        // Signup failed
+        final resBody = jsonDecode(response.body);
+        final errorMessage = resBody['detail'] ?? 'Sign Up Failed';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      }
+    } catch (e) {
+      // Network or other error
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? 'Sign Up Failed')),
+        SnackBar(content: Text('Error: $e')),
       );
     }
   }
