@@ -2,19 +2,26 @@
 import 'package:flutter/material.dart';
 import 'home_screens/dashboard.dart';
 import 'home_screens/live_quiz.dart';
+import 'home_screens/writing.dart';
+import 'home_screens/mcq.dart';
+import 'home_screens/settings.dart';
+import 'home_screens/pro.dart';
 import 'home_screens/routine.dart';
 import '../services/storage_service.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_profile_provider.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String userName;
+
+  const HomeScreen({super.key, required this.userName});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+  String? fullName;
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -48,8 +55,42 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     final userProfile = Provider.of<UserProfileProvider>(context).userProfile;
 
     return Scaffold(
+      drawer: Drawer(
+        child: SafeArea(
+          child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  'LangBuddy',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const Divider(),
+              _buildDrawerItem(Icons.workspace_premium, "Get Pro", const ProPage()),
+              _buildDrawerItem(Icons.bar_chart, "Progress", const RoutinePage()),
+              _buildDrawerItem(Icons.menu_book, "Vocabulary", const LiveQuizPage()),
+              _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const MCQTestPage()),
+              _buildDrawerItem(Icons.edit_note, "Written Test", const WritingTestPage()),
+              _buildDrawerItem(Icons.settings, "Settings", const SettingsPage()),
+              const Spacer(),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: Text(fullName ?? 'Not logged in'),
+                onTap: () => _navigateTo(const StudentDashboard()),
+              ),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text('Logout'),
+                onTap: _logout,
+              ),
+            ],
+          ),
+        ),
+      ),
       appBar: AppBar(
-        title: const Text('Language Learning'),
+        title: const Text('LangBuddy'),
         centerTitle: true,
         backgroundColor: Colors.blue,
       ),
@@ -72,146 +113,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      alignment: Alignment.center,
-                      child: Text(
-                        userProfile != null
-                            ? "Welcome, ${userProfile.fullName}!"
-                            : "Welcome, Guest!",
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue[800],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    if (userProfile != null) ...[
-                      const SizedBox(height: 10),
-                      Text(
-                        'Email: ${userProfile.email}',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      Text(
-                        'Username: ${userProfile.username}',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      // Add more profile fields as needed
-                    ],
-                    const SizedBox(height: 40),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text("Choose a Language"),
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    "English", "Bangla", "Spanish", "Chinese", "Japanese",
-                                    "French", "Hindi", "Arabic", "German", "Russian",
-                                    "Portuguese", "Italian", "Korean", "Turkish", "Urdu",
-                                    "Dutch", "Greek", "Thai", "Swahili", "Persian"
-                                  ].map((language) {
-                                    return ListTile(
-                                      title: Text(language),
-                                      onTap: () {
-                                        Navigator.of(context).pop();
-                                        print("Selected language: $language");
-                                      },
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text("Close"),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      icon: const Icon(Icons.language),
-                      label: const Text("Select Language"),
-                    ),
+                    const Icon(Icons.language, size: 80, color: Colors.blueAccent),
                     const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20.0),
-                      child: Column(
-                        children: [
-                          const Text("Your Learning Progress", style: TextStyle(fontSize: 18)),
-                          const SizedBox(height: 10),
-                          AnimatedContainer(
-                            duration: const Duration(seconds: 2),
-                            curve: Curves.easeInOut,
-                            child: LinearProgressIndicator(
-                              value: 0.6,
-                              backgroundColor: Colors.grey[300],
-                              color: Colors.green,
-                              minHeight: 8,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text("60% Completed", style: TextStyle(fontSize: 16, color: Colors.green)),
-                        ],
+                    Text(
+                      'Welcome to LangBuddy!',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue[800],
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                    ElevatedButton.icon(
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StudentDashboard())),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
-                        backgroundColor: Colors.purple,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        shadowColor: Colors.purpleAccent,
-                        elevation: 5,
-                      ),
-                      icon: const Icon(Icons.dashboard, size: 24, color: Colors.white),
-                      label: const Text('Student Dashboard', style: TextStyle(fontSize: 18, color: Colors.white)),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton.icon(
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LiveQuizPage())),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
-                        backgroundColor: Colors.orange,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        shadowColor: Colors.orangeAccent,
-                        elevation: 5,
-                      ),
-                      icon: const Icon(Icons.quiz, size: 24, color: Colors.white),
-                      label: const Text('Live Quiz', style: TextStyle(fontSize: 18, color: Colors.white)),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton.icon(
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RoutinePage())),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
-                        backgroundColor: Colors.teal,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        shadowColor: Colors.tealAccent,
-                        elevation: 5,
-                      ),
-                      icon: const Icon(Icons.schedule, size: 24, color: Colors.white),
-                      label: const Text('Routine', style: TextStyle(fontSize: 18, color: Colors.white)),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton.icon(
-                      onPressed: () => _logout(context),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
-                        backgroundColor: Colors.red,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        shadowColor: Colors.redAccent,
-                        elevation: 5,
-                      ),
-                      icon: const Icon(Icons.logout, size: 24, color: Colors.white),
-                      label: const Text('Log Out', style: TextStyle(fontSize: 18, color: Colors.white)),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Hello, ${widget.userName}',
+                      style: const TextStyle(fontSize: 18),
                     ),
                   ],
                 ),
@@ -223,10 +138,21 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
+  ListTile _buildDrawerItem(IconData icon, String label, Widget page) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(label),
+      onTap: () => _navigateTo(page),
+    );
+  }
+
   Widget _buildFadedLetter(String letter) {
     return Opacity(
-      opacity: 0.04,
-      child: Text(letter, style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.black)),
+      opacity: 0.05,
+      child: Text(
+        letter,
+        style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.black),
+      ),
     );
   }
 }
