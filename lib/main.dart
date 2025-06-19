@@ -8,6 +8,9 @@ import 'package:provider/provider.dart';
 import 'providers/user_profile_provider.dart';
 import 'services/auth_service.dart';
 import 'services/storage_service.dart';
+import 'screens/que_screen.dart';
+import 'screens/result_screen.dart';
+
 
 void main() {
   runApp(
@@ -34,6 +37,8 @@ class LanguageLearningApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
         '/about': (context) => const AboutUsPage(),
+        '/mcq': (context) => const QuestionScreen(),
+        '/result': (context) => const ResultScreen(score: 0, total: 0, day: 0), // placeholder
       },
     );
   }
@@ -48,9 +53,7 @@ class AuthWrapper extends StatelessWidget {
       future: _checkLoginStatus(context),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
         return snapshot.data == true ? const HomeScreen() : const WelcomeScreen();
       },
@@ -62,12 +65,10 @@ class AuthWrapper extends StatelessWidget {
     if (token != null) {
       try {
         final profile = await AuthService().fetchUserProfile(token);
-        Provider.of<UserProfileProvider>(context, listen: false)
-            .setUserProfile(profile);
+        Provider.of<UserProfileProvider>(context, listen: false).setUserProfile(profile);
         await StorageService.saveUserProfile(profile);
         return true;
       } catch (e) {
-        print('Auto-login failed: $e');
         await StorageService.clearStorage();
         return false;
       }

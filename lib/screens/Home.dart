@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/storage_service.dart';
 import '../providers/user_profile_provider.dart';
+import '../screens/que_screen.dart';
 import 'home_screens/dashboard.dart';
 import 'home_screens/live_quiz.dart';
 import 'home_screens/routine.dart';
 import 'home_screens/writing.dart';
-import 'home_screens/mcq.dart';
+//import 'home_screens/mcq.dart';
 import 'home_screens/settings.dart';
 import 'home_screens/pro.dart';
 
@@ -73,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               _buildDrawerItem(Icons.workspace_premium, "Get Pro", const ProPage()),
               _buildDrawerItem(Icons.bar_chart, "Progress", const RoutinePage()),
               _buildDrawerItem(Icons.menu_book, "Vocabulary", const LiveQuizPage()),
-              _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const MCQTestPage()),
+          _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const QuestionScreen()),
               _buildDrawerItem(Icons.edit_note, "Written Test", const WritingTestPage()),
               _buildDrawerItem(Icons.settings, "Settings", const SettingsPage()),
               const Spacer(),
