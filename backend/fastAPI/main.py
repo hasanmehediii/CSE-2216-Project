@@ -1,33 +1,48 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from auth import auth_router
-from db import client 
+from db import client, words_collection  # Ensure your MongoDB collection for words is correctly imported
+from pydantic import BaseModel
+from typing import Dict
 
 app = FastAPI()
 
 # Add CORS middleware
 origins = [
-    "*"  
+    "*"  # Allow all origins for now
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,          
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],            
-    allow_headers=["*"],            
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-app.include_router(auth_router)
+# Define the Word Pydantic model to match MongoDB document structure
+class Word(BaseModel):
+    english_word: str
+    image_link: str
+    translations: Dict[str, str]
+    englishMeaning: str
 
-@app.get("/")
-async def root():
-    return {"message": "Hello, FastAPI with MongoDB!"}
+    class Config:
+        orm_mode = True
+
+@app.get("/words", response_model=list[Word])
+async def get_words():
+    words_cursor = words_collection.find()
+    words = await words_cursor.to_list(length=100)
+
+    # Add englishMeaning dynamically from english_word if it's missing in the DB
+    for word in words:
+        word["englishMeaning"] = word.get("english_word", "")  # Use english_word as englishMeaning
+
+    return words
 
 @app.on_event("startup")
 async def startup_event():
     try:
-        
         await client.admin.command('ping')
         print("Connected to MongoDB!")
     except Exception as e:

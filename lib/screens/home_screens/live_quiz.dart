@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';  // For JSON decoding
 
 class LiveQuizPage extends StatefulWidget {
   const LiveQuizPage({super.key});
@@ -9,40 +11,33 @@ class LiveQuizPage extends StatefulWidget {
 
 class _LiveQuizPageState extends State<LiveQuizPage> {
   int _currentIndex = 0;
+  String _selectedLanguage = 'spanish';  // Default language
+  List<Map<String, dynamic>> _words = [];
 
-  // The list of words, each with a single image URL
-  final List<Map<String, dynamic>> _words = [
-    {
-      'wordText': 'Bicicleta', // Spanish for Cycle
-      'imageUrl': 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop', // Better bicycle image
-      'languageName': 'Spanish',
-      'englishMeaning': 'Cycle / Bicycle',
-    },
-    {
-      'wordText': 'Haus', // German for House
-      'imageUrl': 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=300&fit=crop', // Better house image
-      'languageName': 'German',
-      'englishMeaning': 'House',
-    },
-    {
-      'wordText': 'Livre', // French for Book
-      'imageUrl': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop', // Better book image
-      'languageName': 'French',
-      'englishMeaning': 'Book',
-    },
-    {
-      'wordText': 'Кот', // Kot (Russian for Cat)
-      'imageUrl': 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=300&fit=crop', // Better cat image
-      'languageName': 'Russian',
-      'englishMeaning': 'Cat',
-    },
-    {
-      'wordText': '水', // Shuǐ (Chinese for Water)
-      'imageUrl': 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&h=300&fit=crop', // Better water image
-      'languageName': 'Chinese',
-      'englishMeaning': 'Water',
-    },
-  ];
+  // List of available languages
+  List<String> _languages = ['spanish', 'german', 'arabic', 'chinese', 'french'];
+
+  // Fetch data from FastAPI
+  Future<void> _fetchWords() async {
+    final response = await http.get(Uri.parse('http://127.0.0.1:8000/words'));  // FastAPI endpoint
+
+    if (response.statusCode == 200) {
+      // If the server returns a 200 OK response, parse the JSON
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        _words = data.map((word) {
+          return {
+            'wordText': word['english_word'],
+            'imageUrl': word['image_link'],
+            'translations': word['translations'],
+            'englishMeaning': word['englishMeaning'],
+          };
+        }).toList();
+      });
+    } else {
+      throw Exception('Failed to load words');
+    }
+  }
 
   // Function to move to the next word
   void _nextWord() {
@@ -59,9 +54,27 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _fetchWords();  // Fetch words when the screen is initialized
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Get the data for the currently displayed word
+    if (_words.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Word Display'),
+          backgroundColor: Colors.teal,
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final currentWord = _words[_currentIndex];
+
+    // Get the translation for the selected language
+    final selectedWordTranslation = currentWord['translations'][_selectedLanguage] ?? "Translation not available";
 
     return Scaffold(
       appBar: AppBar(
@@ -72,14 +85,13 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
-          // FIX: Wrap the Column with SingleChildScrollView to prevent overflow
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Display a single image of the word with better loading and caching
-                if (currentWord['imageUrl'] != null)
+                // Display image
+                if (currentWord['imageUrl'] != null && currentWord['imageUrl'] is String)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 30.0),
                     child: Container(
@@ -98,56 +110,32 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(15),
                         child: Image.network(
-                          currentWord['imageUrl'] as String,
+                          currentWord['imageUrl'] ?? "",
                           height: 200,
                           width: double.infinity,
                           fit: BoxFit.cover,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              height: 200,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                      : null,
-                                  color: Colors.teal,
-                                ),
-                              ),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              height: 200,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(15),
-                                border: Border.all(color: Colors.grey[300]!),
-                              ),
-                              child: const Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.broken_image, size: 50, color: Colors.grey),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    'Image not available',
-                                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
                         ),
                       ),
                     ),
                   )
                 else
-                  Container(), // Empty container if no image URL
+                  Container(),
+
+                // Language selection dropdown
+                DropdownButton<String>(
+                  value: _selectedLanguage,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedLanguage = newValue!;
+                    });
+                  },
+                  items: _languages.map<DropdownMenuItem<String>>((String language) {
+                    return DropdownMenuItem<String>(
+                      value: language,
+                      child: Text(language.toUpperCase()),
+                    );
+                  }).toList(),
+                ),
 
                 // Card for the word in the selected language
                 Card(
@@ -157,15 +145,14 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
                     padding: const EdgeInsets.all(25.0),
                     child: Column(
                       children: [
-                        // Language name
                         Text(
-                          currentWord['languageName'] as String,
+                          _selectedLanguage.toUpperCase(), // Display selected language
                           style: const TextStyle(fontSize: 16, color: Colors.grey),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          currentWord['wordText'] as String,
+                          selectedWordTranslation, // Display translation of the selected language
                           style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.deepPurple),
                           textAlign: TextAlign.center,
                         ),
@@ -173,7 +160,7 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20), // Spacing between cards
+                const SizedBox(height: 20),
 
                 // Card for the word in English
                 Card(
@@ -183,7 +170,6 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
                     padding: const EdgeInsets.all(25.0),
                     child: Column(
                       children: [
-                        // "English Meaning" label
                         const Text(
                           'English Meaning',
                           style: TextStyle(fontSize: 16, color: Colors.grey),
@@ -191,7 +177,7 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          currentWord['englishMeaning'] as String,
+                          currentWord['englishMeaning'] ?? "Unknown",  // Fallback if null
                           style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.blueAccent),
                           textAlign: TextAlign.center,
                         ),
@@ -199,7 +185,7 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 40), // Spacing before navigation buttons
+                const SizedBox(height: 40),
 
                 // Navigation buttons (Previous and Next)
                 Row(
