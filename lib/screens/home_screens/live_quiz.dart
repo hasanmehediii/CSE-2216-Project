@@ -66,6 +66,7 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
         appBar: AppBar(
           title: const Text('Word Display'),
           backgroundColor: Colors.teal,
+          leading: BackButton(), // Add back button
         ),
         body: const Center(child: CircularProgressIndicator()),
       );
@@ -80,17 +81,15 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
       appBar: AppBar(
         title: const Text('Word Display'),
         backgroundColor: Colors.teal,
-        automaticallyImplyLeading: false, // Hide back button
+        leading: BackButton(), // Add back button
       ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: SingleChildScrollView(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Display image
+                // First row with the image
                 if (currentWord['imageUrl'] != null && currentWord['imageUrl'] is String)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 30.0),
@@ -137,55 +136,64 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
                   }).toList(),
                 ),
 
-                // Card for the word in the selected language
-                Card(
-                  elevation: 5,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(25.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          _selectedLanguage.toUpperCase(), // Display selected language
-                          style: const TextStyle(fontSize: 16, color: Colors.grey),
-                          textAlign: TextAlign.center,
+                // Second row with two cards horizontally
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Card(
+                          elevation: 5,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(25.0),
+                            child: Column(
+                              children: [
+                                Text(
+                                  _selectedLanguage.toUpperCase(), // Display selected language
+                                  style: const TextStyle(fontSize: 16, color: Colors.grey),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  selectedWordTranslation, // Display translation of the selected language
+                                  style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 10),
-                        Text(
-                          selectedWordTranslation, // Display translation of the selected language
-                          style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.deepPurple),
-                          textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(width: 10),  // Spacing between cards
+                      Expanded(
+                        child: Card(
+                          elevation: 5,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(25.0),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  'English Meaning',
+                                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  currentWord['englishMeaning'] ?? "Unknown",  // Fallback if null
+                                  style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.blueAccent),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 20),
-
-                // Card for the word in English
-                Card(
-                  elevation: 5,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(25.0),
-                    child: Column(
-                      children: [
-                        const Text(
-                          'English Meaning',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          currentWord['englishMeaning'] ?? "Unknown",  // Fallback if null
-                          style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.blueAccent),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40),
 
                 // Navigation buttons (Previous and Next)
                 Row(
