@@ -1,12 +1,7 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import '../common/custom_text_field.dart';
-import '../database/models/user_model.dart';
-import '../models/user_profile.dart';
 import '../services/auth_service.dart';
 import '../services/storage_service.dart';
-import 'Home.dart';
 import 'SignUp.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_profile_provider.dart';

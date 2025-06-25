@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_profile_provider.dart';
-import '../../models/user_profile.dart';
 import 'info_card.dart';
 
 class StudentDashboard extends StatelessWidget {
