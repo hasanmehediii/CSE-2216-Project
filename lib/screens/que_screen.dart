@@ -14,6 +14,13 @@ class QuestionScreen extends StatefulWidget {
 }
 
 class _QuestionScreenState extends State<QuestionScreen> {
+  bool hasStarted = false;
+  String selectedLanguage = "English";
+  final List<String> languages = [
+    "English", "French", "Spanish", "Chinese", "Japanese"
+
+  ];
+
   int currentIndex = 0;
   int score = 0;
   int currentDay = 0;
@@ -25,17 +32,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
   @override
   void initState() {
     super.initState();
-    initQuiz();
-    timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      setState(() {
-        if (remaining.inSeconds > 0) {
-          remaining -= const Duration(seconds: 1);
-        } else {
-          timer.cancel();
-          _submit();
-        }
-      });
-    });
+    // Quiz initialization will start only after "Start" is pressed
   }
 
   Future<void> initQuiz() async {
@@ -45,6 +42,17 @@ class _QuestionScreenState extends State<QuestionScreen> {
     final questions = await QuestionService.fetchQuestionsForDay(currentDay + 1);
     setState(() {
       todaysQuestions = questions;
+    });
+
+    timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      setState(() {
+        if (remaining.inSeconds > 0) {
+          remaining -= const Duration(seconds: 1);
+        } else {
+          timer.cancel();
+          _submit();
+        }
+      });
     });
   }
 
@@ -88,12 +96,73 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   @override
   void dispose() {
-    timer.cancel();
+    if (hasStarted) timer.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!hasStarted) {
+      // Show MCQ Intro UI
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text("MCQ Test"),
+          centerTitle: true,
+          backgroundColor: Colors.blue,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '1st MCQ Exam on $selectedLanguage',
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  setState(() {
+                    hasStarted = true;
+                  });
+                  await initQuiz();
+                },
+                icon: const Icon(Icons.play_arrow),
+                label: const Text("Start"),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
+                  textStyle: const TextStyle(fontSize: 18),
+                  backgroundColor: Colors.green,
+                ),
+              ),
+              const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                value: selectedLanguage,
+                items: languages.map((lang) {
+                  return DropdownMenuItem<String>(
+                    value: lang,
+                    child: Text(lang),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      selectedLanguage = value;
+                    });
+                  }
+                },
+                decoration: const InputDecoration(
+                  labelText: "Select Language",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (todaysQuestions.isEmpty) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -102,7 +171,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("MCQ Test"),
+        title: Text("MCQ Test - $selectedLanguage"),
         leading: const BackButton(),
         actions: [
           Center(

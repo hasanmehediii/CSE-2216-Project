@@ -25,6 +25,11 @@ class StudentDashboard extends StatelessWidget {
                 "Student Information",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
+              Icon(
+                Icons.person,
+                size: 100,
+                color: Colors.blue[800],
+              ),
               const SizedBox(height: 20),
               InfoCard(title: "Full Name", value: userProfile.fullName),
               InfoCard(title: "Username", value: userProfile.username),
