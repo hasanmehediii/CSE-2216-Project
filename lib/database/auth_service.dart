@@ -6,6 +6,7 @@ import '../screens/Home.dart';
 class AuthService {
   final String baseUrl = 'http://127.0.0.1:8000';
 
+
   Future<void> signUp({
     required String fullName,
     required String username,

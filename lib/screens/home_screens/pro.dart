@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/user_profile_provider.dart';
 
 class ProPage extends StatefulWidget {
   const ProPage({super.key});
@@ -311,9 +313,17 @@ class _ProPageState extends State<ProPage> with SingleTickerProviderStateMixin {
     );
   }
 
-  void _processPayment(String method) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Payment successful via $method!")),
-    );
+  void _processPayment(String method) async {
+    try {
+      await Provider.of<UserProfileProvider>(context, listen: false).updatePremiumStatus(true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Payment successful via $method! You are now a Pro user.")),
+      );
+      Navigator.pushReplacementNamed(context, '/home'); // Navigate back to HomeScreen
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Payment failed: $e")),
+      );
+    }
   }
 }

@@ -12,6 +12,7 @@ class User(BaseModel):
     nid: str
     dob: datetime
     password: str
+    is_premium: bool = False  # Add is_premium field with default value False
 
 class UserLogin(BaseModel):
     email: EmailStr

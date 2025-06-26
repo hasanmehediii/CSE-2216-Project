@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from models import User, UserLogin
 from db import collection
+from pydantic import BaseModel
+from typing import Optional
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
@@ -92,8 +94,23 @@ async def get_user_profile(current_user: dict = Depends(get_current_user)):
         "email": current_user["email"],
         "phoneNumber": current_user["phoneNumber"],
         "countryCode": current_user["countryCode"],
-        "gender": current_user.get("gender"),  # Use .get() for optional field
+        "gender": current_user.get("gender"),
         "nid": current_user["nid"],
-        "dob": current_user["dob"].isoformat()  # Convert datetime to string for JSON
+        "dob": current_user["dob"].isoformat(),
+        "is_premium": current_user.get("is_premium", False)
     }
     return user_profile
+
+# Define Pydantic model for premium update
+class PremiumUpdate(BaseModel):
+    is_premium: bool
+
+@auth_router.patch("/user/premium")
+async def update_premium_status(update: PremiumUpdate, current_user: dict = Depends(get_current_user)):
+    result = await collection.update_one(
+        {"email": current_user["email"]},
+        {"$set": {"is_premium": update.is_premium}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=400, detail="Failed to update premium status")
+    return {"message": f"Premium status updated to {update.is_premium}"}

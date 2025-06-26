@@ -11,6 +11,7 @@ import 'home_screens/writing.dart';
 //import 'home_screens/mcq.dart';
 import 'home_screens/settings.dart';
 import 'home_screens/pro.dart';
+import 'home_screens/video_lessons.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -57,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final userProfile = Provider.of<UserProfileProvider>(context).userProfile;
+    final isPremium = Provider.of<UserProfileProvider>(context).isPremium;
 
     return Scaffold(
       drawer: Drawer(
@@ -72,6 +74,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
               const Divider(),
               _buildDrawerItem(Icons.workspace_premium, "Get Pro", const ProPage()),
+              if (isPremium)
+                _buildDrawerItem(Icons.video_library, "Video Lessons", const VideoLessonsPage()),
               _buildDrawerItem(Icons.bar_chart, "Progress", const RoutinePage()),
               _buildDrawerItem(Icons.menu_book, "Vocabulary", const LiveQuizPage()),
           _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const QuestionScreen()),

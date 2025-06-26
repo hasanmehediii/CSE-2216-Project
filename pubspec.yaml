@@ -39,6 +39,8 @@ dependencies:
   firebase_auth: ^4.16.0
   cloud_firestore: ^4.17.5
   firebase_auth_web: ^5.8.10
+  youtube_player_iframe: ^2.3.0
+  url_launcher: ^6.1.0
 
 
 
