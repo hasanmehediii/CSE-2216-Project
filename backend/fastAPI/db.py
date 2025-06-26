@@ -12,3 +12,4 @@ client = AsyncIOMotorClient(MONGO_DETAILS)
 database = client[DATABASE_NAME]
 collection = database["users"]
 words_collection = database["words"]
+videos_collection = database["videos"]

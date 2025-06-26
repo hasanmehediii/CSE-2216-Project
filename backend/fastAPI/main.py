@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from auth import auth_router  # Import the router that handles /signup and /login
+from video_routes import router as video_router  # Import the video routes router
 from db import client, words_collection  # Ensure your MongoDB collection for words is correctly imported
 from pydantic import BaseModel
 from typing import Dict
@@ -21,6 +22,12 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
+# Include the auth router for login and signup
+app.include_router(auth_router)
+
+# Include the video routes for fetching videos based on language
+app.include_router(video_router)
+
 # Define the Word Pydantic model to match MongoDB document structure
 class Word(BaseModel):
     english_word: str
@@ -29,10 +36,7 @@ class Word(BaseModel):
     englishMeaning: str
 
     class Config:
-        orm_mode = True
-
-# Include the auth router for login and signup
-app.include_router(auth_router)
+        orm_mode = True  # Ensure that Pydantic models can be converted to/from MongoDB documents
 
 # Endpoint to get words from MongoDB
 @app.get("/words", response_model=list[Word])

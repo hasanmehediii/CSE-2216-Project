@@ -1,9 +1,7 @@
-// lib/screens/home_screens/video_lessons.dart
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:youtube_player_iframe/youtube_player_iframe.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../../providers/user_profile_provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoLessonsPage extends StatefulWidget {
   const VideoLessonsPage({super.key});
@@ -16,81 +14,103 @@ class _VideoLessonsPageState extends State<VideoLessonsPage> {
   String _selectedLanguage = 'Spanish'; // Default language
   final List<String> _languages = ['Spanish', 'German', 'Arabic', 'Chinese', 'French'];
 
-  // Placeholder video data (reusing your provided video IDs)
-  final Map<String, List<Map<String, String>>> _videoData = {
-    'Spanish': [
-      {'title': 'Day 1', 'videoId': 'WHxYhsgobCM'},
-      {'title': 'Day 2', 'videoId': '2SIdIAMzHH0'},
-      {'title': 'Day 3', 'videoId': 'hsLYD1Jyf3A'},
-      {'title': 'Day 4', 'videoId': '8yuiUvi568I'},
-      {'title': 'Day 5', 'videoId': '3yO_FR8yiQk'},
-      {'title': 'Day 6', 'videoId': 'cjXoSBulHRM'},
-      {'title': 'Day 7', 'videoId': 'TqQDNUjDByQ'},
-      {'title': 'Day 8', 'videoId': 'nE178FMQ1MQ'},
-      {'title': 'Day 9', 'videoId': 'JTrjZNspkWA'},
-      {'title': 'Day 10', 'videoId': 'bp9OZoQu3A0'},
-    ],
-    'German': [
-      {'title': 'Day 1', 'videoId': '0p4RCJ8P5ko'},
-      {'title': 'Day 2', 'videoId': 'lI4c_R8Wxuc'},
-      {'title': 'Day 3', 'videoId': 'xg60VxyK-9I'},
-      {'title': 'Day 4', 'videoId': 'sDTCuXvSNFw'},
-      {'title': 'Day 5', 'videoId': 'mNX1wpIQ4Uk'},
-      {'title': 'Day 6', 'videoId': 'hAkxKMlYUI4'},
-      {'title': 'Day 7', 'videoId': 'paDNTjoWExI'},
-      {'title': 'Day 8', 'videoId': 'rD8x9ydyEzw'},
-      {'title': 'Day 9', 'videoId': 'nf1rzqG3nvA'},
-      {'title': 'Day 10', 'videoId': 'r9os9Q6t6Xc'},
-    ],
-    'Arabic': [
-      {'title': 'Day 1', 'videoId': 'dQw4w9WgXcQ'},
-      {'title': 'Day 2', 'videoId': '3JcmQONgXhM'},
-      {'title': 'Day 3', 'videoId': 'kJQP7kiw5Fk'},
-      {'title': 'Day 4', 'videoId': '9bZkp7q19f0'},
-      {'title': 'Day 5', 'videoId': 'fJ9rUzIMcZQ'},
-      {'title': 'Day 6', 'videoId': 'hT_nvWreIhg'},
-      {'title': 'Day 7', 'videoId': '2Vv-BfVoq4g'},
-      {'title': 'Day 8', 'videoId': 'YQHsXMglC9A'},
-      {'title': 'Day 9', 'videoId': 'tPEE9ZwTmy0'},
-      {'title': 'Day 10', 'videoId': 'sCj_bL8mr-A'},
-    ],
-    'Chinese': [
-      {'title': 'Day 1', 'videoId': 'dQw4w9WgXcQ'},
-      {'title': 'Day 2', 'videoId': '3JcmQONgXhM'},
-      {'title': 'Day 3', 'videoId': 'kJQP7kiw5Fk'},
-      {'title': 'Day 4', 'videoId': '9bZkp7q19f0'},
-      {'title': 'Day 5', 'videoId': 'fJ9rUzIMcZQ'},
-      {'title': 'Day 6', 'videoId': 'hT_nvWreIhg'},
-      {'title': 'Day 7', 'videoId': '2Vv-BfVoq4g'},
-      {'title': 'Day 8', 'videoId': 'YQHsXMglC9A'},
-      {'title': 'Day 9', 'videoId': 'tPEE9ZwTmy0'},
-      {'title': 'Day 10', 'videoId': 'sCj_bL8mr-A'},
-    ],
-    'French': [
-      {'title': 'Day 1', 'videoId': 'dQw4w9WgXcQ'},
-      {'title': 'Day 2', 'videoId': '3JcmQONgXhM'},
-      {'title': 'Day 3', 'videoId': 'kJQP7kiw5Fk'},
-      {'title': 'Day 4', 'videoId': '9bZkp7q19f0'},
-      {'title': 'Day 5', 'videoId': 'fJ9rUzIMcZQ'},
-      {'title': 'Day 6', 'videoId': 'hT_nvWreIhg'},
-      {'title': 'Day 7', 'videoId': '2Vv-BfVoq4g'},
-      {'title': 'Day 8', 'videoId': 'YQHsXMglC9A'},
-      {'title': 'Day 9', 'videoId': 'tPEE9ZwTmy0'},
-      {'title': 'Day 10', 'videoId': 'sCj_bL8mr-A'},
-    ],
-  };
+  late YoutubePlayerController _controller;
+
+  List<Map<String, String>> _videoData = []; // Store video data here
+  bool _isLoading = true; // Flag to handle loading state
+
+  @override
+  void dispose() {
+    _controller.dispose(); // Dispose of the controller when done
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchVideos(_selectedLanguage); // Fetch the videos on page load
+  }
+
+  // Fetch video data from the backend
+  Future<void> fetchVideos(String language) async {
+    final url = Uri.parse('http://127.0.0.1:8000/videos/$language');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        print("Fetched data: $data");  // Debug: log the data
+
+        // Ensure the data has the right format and extract the video data
+        List<Map<String, String>> videos = [];
+        if (data['videos'] != null) {
+          videos = List<Map<String, String>>.from(
+            (data['videos'] as List).map((video) {
+              return {
+                'title': video['title'] as String,
+                'videoId': video['videoId'] as String,
+              };
+            }),
+          );
+        }
+
+        setState(() {
+          _videoData = videos; // Set the fetched data to the state
+          _isLoading = false;  // Set loading to false after data is fetched
+        });
+      } else {
+        throw Exception('Failed to load videos');
+      }
+    } catch (e) {
+      print('Error fetching videos: $e');
+      setState(() {
+        _videoData = [];
+        _isLoading = false;
+      });
+    }
+  }
+
+  // Play selected video
+  void _playVideo(BuildContext context, String videoId) {
+    _controller = YoutubePlayerController(
+      initialVideoId: videoId, // The video ID to start the video
+      flags: const YoutubePlayerFlags(
+        autoPlay: true, // Auto play the video
+        mute: false,     // Do not mute the video by default
+      ),
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.zero,
+          content: SizedBox(
+            width: double.maxFinite,
+            height: 300,
+            child: YoutubePlayer(
+              controller: _controller,
+              aspectRatio: 16 / 9,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _controller.dispose(); // Properly dispose the controller
+                Navigator.of(context).pop();
+              },
+              child: const Text("Close"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isPremium = Provider.of<UserProfileProvider>(context).isPremium;
-
-    if (!isPremium) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacementNamed(context, '/home');
-      });
-      return const SizedBox();
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Video Lessons"),
@@ -112,6 +132,8 @@ class _VideoLessonsPageState extends State<VideoLessonsPage> {
                 if (newValue != null) {
                   setState(() {
                     _selectedLanguage = newValue;
+                    _isLoading = true; // Set loading to true when fetching new videos
+                    fetchVideos(_selectedLanguage); // Fetch new videos on language change
                   });
                 }
               },
@@ -124,17 +146,21 @@ class _VideoLessonsPageState extends State<VideoLessonsPage> {
           ),
         ],
       ),
-      body: GridView.builder(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator()) // Show loading indicator while fetching
+          : _videoData.isEmpty
+          ? const Center(child: Text("No videos available"))
+          : GridView.builder(
         padding: const EdgeInsets.all(16.0),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3, // Three tiles per row
+          crossAxisCount: 2, // Two tiles per row
           crossAxisSpacing: 16.0,
           mainAxisSpacing: 16.0,
           childAspectRatio: 0.75, // Adjust for thumbnail and title
         ),
-        itemCount: _videoData[_selectedLanguage]!.length,
+        itemCount: _videoData.length,
         itemBuilder: (context, index) {
-          final video = _videoData[_selectedLanguage]![index];
+          final video = _videoData[index];
           return GestureDetector(
             onTap: () => _playVideo(context, video['videoId']!),
             child: AnimatedContainer(
@@ -218,60 +244,5 @@ class _VideoLessonsPageState extends State<VideoLessonsPage> {
         },
       ),
     );
-  }
-
-  void _playVideo(BuildContext context, String videoId) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final controller = YoutubePlayerController(
-          initialVideoId: videoId,
-          params: const YoutubePlayerParams(
-            autoPlay: true,
-            mute: false,
-            showControls: true,
-            showFullscreenButton: true,
-          ),
-        );
-
-        return AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          content: SizedBox(
-            width: double.maxFinite,
-            height: 300,
-            child: YoutubePlayerIFrame(
-              controller: controller,
-              aspectRatio: 16 / 9,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                controller.close();
-                Navigator.of(context).pop();
-              },
-              child: const Text("Close"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Fallback to open YouTube in browser
-  Future<void> _openYouTube(String videoId) async {
-    final url = Uri.parse('https://www.youtube.com/watch?v=$videoId');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Could not open YouTube")),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }
