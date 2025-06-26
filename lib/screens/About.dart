@@ -1,3 +1,5 @@
+// lib/screens/about_us_screen.dart
+
 import 'package:flutter/material.dart';
 
 class AboutUsPage extends StatefulWidget {
@@ -10,6 +12,30 @@ class AboutUsPage extends StatefulWidget {
 class _AboutUsPageState extends State<AboutUsPage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+
+  // Data for team members
+  final List<Map<String, String>> teamMembers = const [
+    {
+      'name': 'Abdullah Evne Masood', // Name from your screenshot
+      'email': 'abdullahbmasood@gmail.com', // Email from your screenshot
+      'image': 'assets/person1.png', // All images are now .png
+    },
+    {
+      'name': 'Mehedi Hasan', // Placeholder name
+      'email': 'mehedi-2022415897@cs.du.ac.bd', // Placeholder email
+      'image': 'assets/person2.png', // All images are now .png
+    },
+    {
+      'name': 'Ibna Afra Roza', // Placeholder name
+      'email': 'ibnaafra-2022015891@cs.du.ac.bd', // Placeholder email
+      'image': 'assets/person3.png', // All images are now .png
+    },
+    {
+      'name': 'Nafisha Akhter', // Placeholder name
+      'email': 'nafisha3588@gmail.com', // Placeholder email
+      'image': 'assets/person4.png', // All images are now .png
+    },
+  ];
 
   @override
   void initState() {
@@ -85,6 +111,32 @@ class _AboutUsPageState extends State<AboutUsPage> with SingleTickerProviderStat
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 40),
+
+                      // New Section: Meet Our Team
+                      const Text(
+                        'Meet Our Team',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueAccent,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Iterate through the team members to create their cards
+                      ...teamMembers.map((member) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: TeamMemberCard(
+                            name: member['name']!,
+                            email: member['email']!,
+                            imagePath: member['image']!,
+                          ),
+                        );
+                      }).toList(),
+
+                      const SizedBox(height: 40),
                       // Back Button to return to the previous page
                       SizedBox(
                         width: double.infinity,
@@ -123,6 +175,73 @@ class _AboutUsPageState extends State<AboutUsPage> with SingleTickerProviderStat
           fontSize: 60,
           fontWeight: FontWeight.bold,
           color: Colors.black,
+        ),
+      ),
+    );
+  }
+}
+
+// A custom widget for displaying individual team member information
+class TeamMemberCard extends StatelessWidget {
+  final String name;
+  final String email;
+  final String imagePath;
+
+  const TeamMemberCard({
+    super.key,
+    required this.name,
+    required this.email,
+    required this.imagePath,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 60,
+              backgroundColor: Colors.grey[200], // Placeholder background
+              // Use Image.asset directly as a child to handle errorBuilder
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+                width: 120, // Ensure fixed width and height for consistency
+                height: 120,
+                errorBuilder: (context, error, stackTrace) {
+                  debugPrint('Error loading image $imagePath: $error');
+                  return const Icon(
+                    Icons.person,
+                    size: 80,
+                    color: Colors.grey,
+                  ); // Fallback icon
+                },
+              ),
+            ),
+            const SizedBox(height: 15),
+            Text(
+              name,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              email,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[700],
+              ),
+            ),
+          ],
         ),
       ),
     );

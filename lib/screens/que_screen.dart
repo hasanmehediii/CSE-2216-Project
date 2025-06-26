@@ -6,6 +6,12 @@ import '../database/models/que_service.dart';
 import '../database/models/que_card.dart';
 import 'result_screen.dart';
 
+class ExamCard {
+  final String title;
+  final bool isUnlocked;
+  ExamCard({required this.title, required this.isUnlocked});
+}
+
 class QuestionScreen extends StatefulWidget {
   const QuestionScreen({super.key});
 
@@ -18,7 +24,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
   String selectedLanguage = "English";
   final List<String> languages = [
     "English", "French", "Spanish", "Chinese", "Japanese"
-
   ];
 
   int currentIndex = 0;
@@ -28,6 +33,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
   Duration remaining = const Duration(minutes: 30);
   Map<int, int> selectedAnswers = {};
   List<Question> todaysQuestions = [];
+
+  // Define the list of exam cards with 2 unlocked and 8 locked
+  List<ExamCard> examCards = List.generate(10, (index) {
+    return ExamCard(
+      title: "Exam ${index + 1}",
+      isUnlocked: index < 2, // The first 2 exams are unlocked
+    );
+  });
 
   @override
   void initState() {
@@ -94,6 +107,15 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
   }
 
+  void _startExam(int examIndex) async {
+    if (examCards[examIndex].isUnlocked) {
+      setState(() {
+        hasStarted = true;
+      });
+      await initQuiz();
+    }
+  }
+
   @override
   void dispose() {
     if (hasStarted) timer.cancel();
@@ -103,58 +125,40 @@ class _QuestionScreenState extends State<QuestionScreen> {
   @override
   Widget build(BuildContext context) {
     if (!hasStarted) {
-      // Show MCQ Intro UI
+      // Show the list of exam cards
       return Scaffold(
         appBar: AppBar(
-          title: const Text("MCQ Test"),
+          title: const Text("Select an Exam"),
           centerTitle: true,
           backgroundColor: Colors.blue,
         ),
         body: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                '1st MCQ Exam on $selectedLanguage',
+                'Choose an exam to start',
                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  setState(() {
-                    hasStarted = true;
-                  });
-                  await initQuiz();
-                },
-                icon: const Icon(Icons.play_arrow),
-                label: const Text("Start"),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
-                  textStyle: const TextStyle(fontSize: 18),
-                  backgroundColor: Colors.green,
-                ),
-              ),
-              const SizedBox(height: 20),
-              DropdownButtonFormField<String>(
-                value: selectedLanguage,
-                items: languages.map((lang) {
-                  return DropdownMenuItem<String>(
-                    value: lang,
-                    child: Text(lang),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      selectedLanguage = value;
-                    });
-                  }
-                },
-                decoration: const InputDecoration(
-                  labelText: "Select Language",
-                  border: OutlineInputBorder(),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: examCards.length,
+                  itemBuilder: (context, index) {
+                    final examCard = examCards[index];
+                    return Card(
+                      color: examCard.isUnlocked ? Colors.green : Colors.grey,
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      child: ListTile(
+                        title: Text(
+                          examCard.title,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        onTap: () => _startExam(index),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
