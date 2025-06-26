@@ -10,6 +10,7 @@ import 'services/auth_service.dart';
 import 'services/storage_service.dart';
 import 'screens/que_screen.dart';
 import 'screens/result_screen.dart';
+import '../screens/home_screens/video_lessons.dart';
 
 
 void main() {
@@ -39,6 +40,7 @@ class LanguageLearningApp extends StatelessWidget {
         '/about': (context) => const AboutUsPage(),
         '/mcq': (context) => const QuestionScreen(),
         '/result': (context) => const ResultScreen(score: 0, total: 0, day: 0), // placeholder
+        '/video': (context) => const VideoLessonsPage(),
       },
     );
   }

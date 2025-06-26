@@ -7,6 +7,7 @@ class UserProfile {
   final String? gender;
   final String nid;
   final String dob;
+  final bool isPremium; // Add isPremium field
 
   UserProfile({
     required this.fullName,
@@ -17,6 +18,7 @@ class UserProfile {
     this.gender,
     required this.nid,
     required this.dob,
+    required this.isPremium,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class UserProfile {
       gender: json['gender'],
       nid: json['nid'],
       dob: json['dob'],
+      isPremium: json['is_premium'] ?? false,
     );
   }
 
@@ -42,6 +45,7 @@ class UserProfile {
       'gender': gender,
       'nid': nid,
       'dob': dob,
+      'is_premium': isPremium,
     };
   }
 }
