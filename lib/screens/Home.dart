@@ -1,4 +1,4 @@
-// Home.dart
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/storage_service.dart';
@@ -8,10 +8,10 @@ import 'home_screens/dashboard.dart';
 import 'home_screens/live_quiz.dart';
 import 'home_screens/routine.dart';
 import 'home_screens/writing.dart';
-//import 'home_screens/mcq.dart';
 import 'home_screens/settings.dart';
 import 'home_screens/pro.dart';
 import 'home_screens/video_lessons.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,26 +20,50 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
+class _HomeScreenState extends State<HomeScreen> {
+  int _currentAdIndex = 0;
+  final PageController _pageController = PageController();
+  late Timer _adTimer;
+
+  final List<String> adImages = [
+    'assets/ad1.jpg',
+    'assets/ad2.jpg',
+    'assets/ad3.jpg',
+  ];
+
+  final List<Map<String, String>> languages = [
+    {"name": "English", "info": "10,000 learners"},
+    {"name": "Spanish", "info": "20,000 learners"},
+    {"name": "German", "info": "12,000 learners"},
+    {"name": "Arabic", "info": "15,000 learners"},
+    {"name": "French", "info": "18,000 learners"},
+  ];
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 6),
-      vsync: this,
-    )..repeat(reverse: true);
-    _animation = Tween<double>(begin: 0, end: 30).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _adTimer = Timer.periodic(const Duration(seconds: 6), (Timer timer) {
+      if (_pageController.hasClients) {
+        _currentAdIndex = (_currentAdIndex + 1) % adImages.length;
+        _pageController.animateToPage(
+          _currentAdIndex,
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _adTimer.cancel();
+    _pageController.dispose();
     super.dispose();
+  }
+
+  void _navigateTo(Widget page) {
+    Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
   }
 
   Future<void> _logout(BuildContext context) async {
@@ -48,11 +72,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     if (mounted) {
       Navigator.pushReplacementNamed(context, '/login');
     }
-  }
-
-  void _navigateTo(Widget page) {
-    Navigator.pop(context); // Close drawer
-    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
   }
 
   @override
@@ -67,10 +86,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             children: [
               const Padding(
                 padding: EdgeInsets.all(16),
-                child: Text(
-                  'LangBuddy',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
+                child: Text('LangBuddy', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               ),
               const Divider(),
               _buildDrawerItem(Icons.workspace_premium, "Get Pro", const ProPage()),
@@ -78,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 _buildDrawerItem(Icons.video_library, "Video Lessons", const VideoLessonsPage()),
               _buildDrawerItem(Icons.bar_chart, "Progress", const RoutinePage()),
               _buildDrawerItem(Icons.menu_book, "Vocabulary", const LiveQuizPage()),
-          _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const QuestionScreen()),
+              _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const QuestionScreen()),
               _buildDrawerItem(Icons.edit_note, "Written Test", const WritingTestPage()),
               _buildDrawerItem(Icons.settings, "Settings", const SettingsPage()),
               const Spacer(),
@@ -102,157 +118,64 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         centerTitle: true,
         backgroundColor: Colors.blue,
       ),
-      body: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          return Stack(
-            children: [
-              Positioned(top: _animation.value, left: _animation.value, child: _buildFadedLetter('A')),
-              Positioned(top: 100 + _animation.value, right: 20 + _animation.value, child: _buildFadedLetter('あ')),
-              Positioned(bottom: 100 - _animation.value, left: 20 + _animation.value, child: _buildFadedLetter('ب')),
-              Positioned(bottom: 50 + _animation.value, right: 50 - _animation.value, child: _buildFadedLetter('文')),
-              Positioned(top: 30 + _animation.value, right: 100 - _animation.value, child: _buildFadedLetter('अ')),
-              Positioned(top: 200 - _animation.value, left: 80 + _animation.value, child: _buildFadedLetter('অ')),
-              Positioned(bottom: 200 + _animation.value, right: 70 - _animation.value, child: _buildFadedLetter('ñ')),
-              Positioned(top: 250 + _animation.value, left: 50 - _animation.value, child: _buildFadedLetter('é')),
-              SingleChildScrollView(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      alignment: Alignment.center,
-                      child: Text(
-                        userProfile != null
-                            ? "Welcome, ${userProfile.fullName}!"
-                            : "Welcome, Guest!",
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue[800],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    if (userProfile != null) ...[
-                      const SizedBox(height: 10),
-                      Text(
-                        'Email: ${userProfile.email}',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      Text(
-                        'Username: ${userProfile.username}',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ],
-                    const SizedBox(height: 40),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text("Choose a Language"),
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    "English", "Bangla", "Spanish", "Chinese", "Japanese",
-                                    "French", "Hindi", "Arabic", "German", "Russian",
-                                    "Portuguese", "Italian", "Korean", "Turkish", "Urdu",
-                                    "Dutch", "Greek", "Thai", "Swahili", "Persian"
-                                  ].map((language) {
-                                    return ListTile(
-                                      title: Text(language),
-                                      onTap: () {
-                                        Navigator.of(context).pop();
-                                        print("Selected language: $language");
-                                      },
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text("Close"),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      icon: const Icon(Icons.language),
-                      label: const Text("Select Language"),
-                    ),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20.0),
-                      child: Column(
-                        children: [
-                          const Text("Your Learning Progress", style: TextStyle(fontSize: 18)),
-                          const SizedBox(height: 10),
-                          AnimatedContainer(
-                            duration: const Duration(seconds: 2),
-                            curve: Curves.easeInOut,
-                            child: LinearProgressIndicator(
-                              value: 0.6,
-                              backgroundColor: Colors.grey[300],
-                              color: Colors.green,
-                              minHeight: 8,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text("60% Completed", style: TextStyle(fontSize: 16, color: Colors.green)),
-                        ],
-                      ),
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: () => _navigateTo(const StudentDashboard()),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
-                        backgroundColor: Colors.purple,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        shadowColor: Colors.purpleAccent,
-                        elevation: 5,
-                      ),
-                      icon: const Icon(Icons.dashboard, size: 24, color: Colors.white),
-                      label: const Text('Student Dashboard', style: TextStyle(fontSize: 18, color: Colors.white)),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton.icon(
-                      onPressed: () => _navigateTo(const LiveQuizPage()),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
-                        backgroundColor: Colors.orange,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        shadowColor: Colors.orangeAccent,
-                        elevation: 5,
-                      ),
-                      icon: const Icon(Icons.quiz, size: 24, color: Colors.white),
-                      label: const Text('Live Quiz', style: TextStyle(fontSize: 18, color: Colors.white)),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton.icon(
-                      onPressed: () => _navigateTo(const RoutinePage()),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 50),
-                        backgroundColor: Colors.teal,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        shadowColor: Colors.tealAccent,
-                        elevation: 5,
-                      ),
-                      icon: const Icon(Icons.schedule, size: 24, color: Colors.white),
-                      label: const Text('Routine', style: TextStyle(fontSize: 18, color: Colors.white)),
-                    ),
+      body: Column(
+        children: [
+          SizedBox(
+            height: 180,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: adImages.length,
+              itemBuilder: (context, index) {
+                return Image.asset(adImages[index], fit: BoxFit.cover);
+              },
+            ),
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text("Popular Languages", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 130,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: languages.length,
+              itemBuilder: (context, index) {
+                final lang = languages[index];
+                return _buildLanguageCard(lang["name"]!, lang["info"]!, index);
+              },
+            ),
+          ),
+          const Spacer(),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: Column(
+              children: [
+                const Text(
+                  'All rights reserved 2025, Version 25.24.1',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.facebook, color: Colors.blue, size: 24),
+                    SizedBox(width: 16),
+                    Icon(Icons.code, color: Colors.black, size: 24), // GitHub
+                    SizedBox(width: 16),
+                    Icon(Icons.business_center, color: Color(0xFF0A66C2), size: 24), // LinkedIn
+                    SizedBox(width: 16),
+                    Icon(Icons.email, color: Colors.red, size: 24),
                   ],
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -265,12 +188,68 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildFadedLetter(String letter) {
-    return Opacity(
-      opacity: 0.04,
-      child: Text(
-        letter,
-        style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.black),
+  Widget _buildLanguageCard(String language, String subtitle, int index) {
+    final colors = [Colors.blue, Colors.red, Colors.green, Colors.orange, Colors.purple];
+
+    return Container(
+      width: 160,
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: colors[index % colors.length].withOpacity(0.9),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 6,
+            offset: const Offset(2, 4),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 8,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.3),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+              ),
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    language,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
