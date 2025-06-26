@@ -16,7 +16,7 @@ class _VideoLessonsPageState extends State<VideoLessonsPage> {
   String _selectedLanguage = 'Spanish'; // Default language
   final List<String> _languages = ['Spanish', 'German', 'Arabic', 'Chinese', 'French'];
 
-  // Placeholder video data (replace with actual YouTube video IDs or URLs)
+  // Placeholder video data (reusing your provided video IDs)
   final Map<String, List<Map<String, String>>> _videoData = {
     'Spanish': [
       {'title': 'Day 1', 'videoId': 'WHxYhsgobCM'},
@@ -85,7 +85,6 @@ class _VideoLessonsPageState extends State<VideoLessonsPage> {
     final isPremium = Provider.of<UserProfileProvider>(context).isPremium;
 
     if (!isPremium) {
-      // Redirect non-premium users (shouldn't happen due to drawer restriction)
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacementNamed(context, '/home');
       });
@@ -95,8 +94,9 @@ class _VideoLessonsPageState extends State<VideoLessonsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Video Lessons"),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.blue[900],
         centerTitle: true,
+        elevation: 0,
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -105,7 +105,7 @@ class _VideoLessonsPageState extends State<VideoLessonsPage> {
               items: _languages.map((String language) {
                 return DropdownMenuItem<String>(
                   value: language,
-                  child: Text(language),
+                  child: Text(language, style: const TextStyle(fontWeight: FontWeight.w600)),
                 );
               }).toList(),
               onChanged: (String? newValue) {
@@ -115,48 +115,103 @@ class _VideoLessonsPageState extends State<VideoLessonsPage> {
                   });
                 }
               },
-              underline: const SizedBox(), // Remove default underline
+              underline: const SizedBox(),
               style: const TextStyle(color: Colors.white, fontSize: 16),
-              dropdownColor: Colors.blue[700],
+              dropdownColor: Colors.blue[800],
               iconEnabledColor: Colors.white,
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
         ],
       ),
-      body: ListView.builder(
+      body: GridView.builder(
         padding: const EdgeInsets.all(16.0),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3, // Three tiles per row
+          crossAxisSpacing: 16.0,
+          mainAxisSpacing: 16.0,
+          childAspectRatio: 0.75, // Adjust for thumbnail and title
+        ),
         itemCount: _videoData[_selectedLanguage]!.length,
         itemBuilder: (context, index) {
           final video = _videoData[_selectedLanguage]![index];
-          return Card(
-            elevation: 4,
-            margin: const EdgeInsets.symmetric(vertical: 8.0),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: InkWell(
-              onTap: () => _playVideo(context, video['videoId']!),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                    child: Image.network(
-                      'https://img.youtube.com/vi/${video['videoId']}/hqdefault.jpg',
-                      height: 200,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
+          return GestureDetector(
+            onTap: () => _playVideo(context, video['videoId']!),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      video['title']!,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(-2, -2),
                   ),
                 ],
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.blue[50]!, Colors.blue[100]!],
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Stack(
+                  children: [
+                    // Thumbnail
+                    Positioned.fill(
+                      child: Image.network(
+                        'https://img.youtube.com/vi/${video['videoId']}/hqdefault.jpg',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => const Center(
+                          child: Icon(Icons.error, color: Colors.red, size: 40),
+                        ),
+                      ),
+                    ),
+                    // Gradient overlay
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withOpacity(0.6),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Title
+                    Positioned(
+                      bottom: 12,
+                      left: 12,
+                      right: 12,
+                      child: Text(
+                        video['title']!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black54,
+                              blurRadius: 4,
+                              offset: Offset(1, 1),
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
