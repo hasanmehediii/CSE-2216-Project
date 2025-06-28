@@ -1,6 +1,9 @@
+import 'dart:html' as html; // Import html for Web Speech API
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';  // For JSON decoding
+import 'package:flutter_tts/flutter_tts.dart';  // For Text-to-Speech
 
 class LiveQuizPage extends StatefulWidget {
   const LiveQuizPage({super.key});
@@ -13,6 +16,7 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
   int _currentIndex = 0;
   String _selectedLanguage = 'spanish';  // Default language
   List<Map<String, dynamic>> _words = [];
+  FlutterTts _flutterTts = FlutterTts();  // Initialize Text-to-Speech instance
 
   // List of available languages
   List<String> _languages = ['spanish', 'german', 'arabic', 'chinese', 'french'];
@@ -51,6 +55,29 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
     setState(() {
       _currentIndex = (_currentIndex - 1 + _words.length) % _words.length;
     });
+  }
+
+  // Function to pronounce a word using TTS
+  Future<void> _speak(String word) async {
+    if (kIsWeb) {
+      // Web-specific implementation using the Web Speech API
+      final speech = html.window.speechSynthesis;
+      final utterance = html.SpeechSynthesisUtterance(word);
+
+      // Optional: Configure the speech parameters (rate, pitch, etc.)
+      utterance.rate = 0.8;  // Speed of speech (0.1 to 10)
+      utterance.pitch = 1.0; // Pitch of the voice (0 to 2)
+      utterance.volume = 1.0; // Volume (0 to 1)
+
+      // Speak the word
+      speech?.speak(utterance);
+    } else {
+      // Native mobile platforms (Android/iOS)
+      await _flutterTts.setLanguage("en-US");
+      await _flutterTts.setSpeechRate(0.5);
+      await _flutterTts.setPitch(1.0);
+      await _flutterTts.speak(word); // Speak the word on mobile platforms
+    }
   }
 
   @override
@@ -193,6 +220,25 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
                       ),
                     ],
                   ),
+                ),
+
+                // Microphone Icons below each card
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.mic, color: Colors.teal),
+                      onPressed: () {
+                        _speak(selectedWordTranslation); // Speak translation
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.mic, color: Colors.teal),
+                      onPressed: () {
+                        _speak(currentWord['wordText']); // Speak English word
+                      },
+                    ),
+                  ],
                 ),
 
                 // Navigation buttons (Previous and Next)
