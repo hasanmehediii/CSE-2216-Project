@@ -9,10 +9,7 @@ class ProPage extends StatefulWidget {
   State<ProPage> createState() => _ProPageState();
 }
 
-class _ProPageState extends State<ProPage> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
+class _ProPageState extends State<ProPage> {
   final TextEditingController cardNumberController = TextEditingController();
   final TextEditingController expiryController = TextEditingController();
   final TextEditingController cvvController = TextEditingController();
@@ -22,35 +19,6 @@ class _ProPageState extends State<ProPage> with SingleTickerProviderStateMixin {
   final TextEditingController pinController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 6),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _animation = Tween<double>(begin: 0, end: 30).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Widget _buildFadedLetter(String letter) {
-    return Opacity(
-      opacity: 0.05,
-      child: Text(
-        letter,
-        style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.black),
-      ),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -58,102 +26,187 @@ class _ProPageState extends State<ProPage> with SingleTickerProviderStateMixin {
         backgroundColor: Colors.blue,
         centerTitle: true,
       ),
-      body: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          return Stack(
-            children: [
-              // Animated background letters
-              Positioned(top: _animation.value, left: _animation.value, child: _buildFadedLetter('A')),
-              Positioned(top: 100 + _animation.value, right: 20 + _animation.value, child: _buildFadedLetter('あ')),
-              Positioned(bottom: 100 - _animation.value, left: 20 + _animation.value, child: _buildFadedLetter('ب')),
-              Positioned(bottom: 50 + _animation.value, right: 50 - _animation.value, child: _buildFadedLetter('文')),
-              Positioned(top: 30 + _animation.value, right: 100 - _animation.value, child: _buildFadedLetter('अ')),
-              Positioned(top: 200 - _animation.value, left: 80 + _animation.value, child: _buildFadedLetter('অ')),
-              Positioned(bottom: 200 + _animation.value, right: 70 - _animation.value, child: _buildFadedLetter('ñ')),
-              Positioned(top: 250 + _animation.value, left: 50 - _animation.value, child: _buildFadedLetter('é')),
-
-              // Foreground content
-              SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+      body: Stack(
+        children: [
+          // Background with low opacity text in different languages
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.05, // Set low opacity for background text
+              child: Container(
+                color: Colors.blueAccent.withOpacity(0.1), // Optional: add a subtle background color
+                child: Stack(
                   children: [
-                    const SizedBox(height: 20),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    // Add text in different languages across the screen
+                    Positioned(
+                      top: 20,
+                      left: 50,
+                      child: Text(
+                        "Hello",
+                        style: TextStyle(
+                          fontSize: 60,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          letterSpacing: 5,
+                        ),
                       ),
-                      onPressed: _showPaymentDialog,
-                      icon: const Icon(Icons.workspace_premium, color: Colors.white),
-                      label: const Text("Upgrade to Pro", style: TextStyle(color: Colors.white)),
                     ),
-                    const SizedBox(height: 30),
-                    const Text(
-                      "🏆 Why Upgrade to Pro?",
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Free Version Column
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text("Free Version", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                              SizedBox(height: 10),
-                              Text("✅ Access to daily vocabulary quizzes"),
-                              Text("✅ Basic conversation practice"),
-                              Text("✅ Grammar & pronunciation guides"),
-                              Text("✅ Limited flashcards and exercises"),
-                              Text("🚫 No offline mode"),
-                              Text("🚫 No personalized learning path"),
-                              Text("🚫 Ads in app"),
-                              Text("🚫 No certificate"),
-                              Text("🚫 No progress tracking"),
-                              Text("🚫 No access to group speaking clubs"),
-                            ],
-                          ),
+                    Positioned(
+                      top: 100,
+                      right: 30,
+                      child: Text(
+                        "こんにちは", // Japanese for "Hello"
+                        style: TextStyle(
+                          fontSize: 60,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          letterSpacing: 5,
                         ),
-
-                        const SizedBox(width: 20),
-
-                        // Pro Version Column
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text("Pro (Subscription)", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                              SizedBox(height: 10),
-                              Text("✅ Everything in Free, plus:"),
-                              Text("✅ 1-on-1 Video Calling Lessons with native speakers"),
-                              Text("✅ AI-powered speaking feedback"),
-                              Text("✅ Unlimited flashcards with spaced repetition"),
-                              Text("✅ Offline access to lessons"),
-                              Text("✅ Personalized curriculum based on your goals"),
-                              Text("✅ Ad-free experience"),
-                              Text("✅ Get certified upon course completion"),
-                              Text("✅ Full progress tracking and analytics"),
-                              Text("✅ Join live group practice sessions"),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 40),
+                    Positioned(
+                      bottom: 100,
+                      left: 50,
+                      child: Text(
+                        "مرحبا", // Arabic for "Hello"
+                        style: TextStyle(
+                          fontSize: 60,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          letterSpacing: 5,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 50,
+                      right: 40,
+                      child: Text(
+                        "Hola", // Spanish for "Hello"
+                        style: TextStyle(
+                          fontSize: 60,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          letterSpacing: 5,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ],
-          );
-        },
+            ),
+          ),
+
+          // Main content of the page
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Smaller PNG Image with dynamic scaling
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.3, // 30% of screen width
+                  height: MediaQuery.of(context).size.width * 0.3, // 30% of screen width (making it square-like)
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/confused.png'), // Add your PNG file to assets
+                      fit: BoxFit.contain,  // Ensures the image fits within the container
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Upgrade to Pro Button
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  onPressed: _showPaymentDialog,
+                  icon: const Icon(Icons.workspace_premium, color: Colors.white),
+                  label: const Text("Upgrade to Pro", style: TextStyle(color: Colors.white)),
+                ),
+                const SizedBox(height: 30),
+
+                // Why Upgrade to Pro Section
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Text(
+                    "🏆 Why Upgrade to Pro?",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Free and Pro Version Comparison using Cards
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Card(
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text("Free Version", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                          SizedBox(height: 10),
+                          Text("✅ Access to daily vocabulary quizzes"),
+                          Text("✅ Basic conversation practice"),
+                          Text("✅ Grammar & pronunciation guides"),
+                          Text("✅ Limited flashcards and exercises"),
+                          Text("🚫 No offline mode"),
+                          Text("🚫 No personalized learning path"),
+                          Text("🚫 Ads in app"),
+                          Text("🚫 No certificate"),
+                          Text("🚫 No progress tracking"),
+                          Text("🚫 No access to group speaking clubs"),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Pro Version Comparison using Cards
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Card(
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text("Pro (Subscription)", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                          SizedBox(height: 10),
+                          Text("✅ Everything in Free, plus:"),
+                          Text("✅ 1-on-1 Video Calling Lessons with native speakers"),
+                          Text("✅ AI-powered speaking feedback"),
+                          Text("✅ Unlimited flashcards with spaced repetition"),
+                          Text("✅ Offline access to lessons"),
+                          Text("✅ Personalized curriculum based on your goals"),
+                          Text("✅ Ad-free experience"),
+                          Text("✅ Get certified upon course completion"),
+                          Text("✅ Full progress tracking and analytics"),
+                          Text("✅ Join live group practice sessions"),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
+  // Payment Dialogs
   void _showPaymentDialog() {
     showDialog(
       context: context,

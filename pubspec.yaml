@@ -80,6 +80,8 @@ flutter:
     - assets/person2.png
     - assets/person3.png
     - assets/person4.png
+    - assets/confused.png
+    - assets/good.png
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

@@ -12,7 +12,6 @@ import 'home_screens/settings.dart';
 import 'home_screens/pro.dart';
 import 'home_screens/video_lessons.dart';
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -32,11 +31,17 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   final List<Map<String, String>> languages = [
-    {"name": "English", "info": "10,000 learners"},
-    {"name": "Spanish", "info": "20,000 learners"},
-    {"name": "German", "info": "12,000 learners"},
-    {"name": "Arabic", "info": "15,000 learners"},
-    {"name": "French", "info": "18,000 learners"},
+    {"name": "English", "info": "10,000 learners", "rating": "4.5", "students": "10,000"},
+    {"name": "Spanish", "info": "20,000 learners", "rating": "4.7", "students": "20,000"},
+    {"name": "German", "info": "12,000 learners", "rating": "4.6", "students": "12,000"},
+    {"name": "Arabic", "info": "15,000 learners", "rating": "4.8", "students": "15,000"},
+    {"name": "French", "info": "18,000 learners", "rating": "4.4", "students": "18,000"},
+  ];
+
+  final List<Map<String, String>> courses = [
+    {"name": "Summer Course", "info": "500 learners", "rating": "4.5", "students": "500"},
+    {"name": "Spring Course", "info": "300 learners", "rating": "4.7", "students": "300"},
+    {"name": "One Shot Course", "info": "150 learners", "rating": "4.6", "students": "150"},
   ];
 
   @override
@@ -90,8 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const Divider(),
               _buildDrawerItem(Icons.workspace_premium, "Get Pro", const ProPage()),
-              if (isPremium)
-                _buildDrawerItem(Icons.video_library, "Video Lessons", const VideoLessonsPage()),
+              if (isPremium) _buildDrawerItem(Icons.video_library, "Video Lessons", const VideoLessonsPage()),
               _buildDrawerItem(Icons.bar_chart, "Progress", const RoutinePage()),
               _buildDrawerItem(Icons.menu_book, "Vocabulary", const LiveQuizPage()),
               _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const QuestionScreen()),
@@ -118,68 +122,113 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
         backgroundColor: Colors.blue,
       ),
-      body: Column(
-        children: [
-          SizedBox(
-            height: 180,
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: adImages.length,
-              itemBuilder: (context, index) {
-                return Image.asset(adImages[index], fit: BoxFit.cover);
-              },
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Image Carousel for Ads
+            SizedBox(
+              height: 180,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: adImages.length,
+                itemBuilder: (context, index) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(adImages[index], fit: BoxFit.cover),
+                  );
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text("Popular Languages", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text("Popular Languages", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 130,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: languages.length,
-              itemBuilder: (context, index) {
-                final lang = languages[index];
-                return _buildLanguageCard(lang["name"]!, lang["info"]!, index);
-              },
-            ),
-          ),
-          const Spacer(),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: Column(
-              children: [
-                const Text(
-                  'All rights reserved 2025, Version 25.24.1',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+            const SizedBox(height: 10),
+            // Language Cards Section (2 columns)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, // Two columns
+                  crossAxisSpacing: 30, // Increased space between the cards
+                  mainAxisSpacing: 30, // Increased space between the cards
+                  childAspectRatio: 1, // Aspect ratio to ensure square cards
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.facebook, color: Colors.blue, size: 24),
-                    SizedBox(width: 16),
-                    Icon(Icons.code, color: Colors.black, size: 24), // GitHub
-                    SizedBox(width: 16),
-                    Icon(Icons.business_center, color: Color(0xFF0A66C2), size: 24), // LinkedIn
-                    SizedBox(width: 16),
-                    Icon(Icons.email, color: Colors.red, size: 24),
-                  ],
-                ),
-              ],
+                itemCount: languages.length,
+                itemBuilder: (context, index) {
+                  final lang = languages[index];
+                  return _buildLanguageCard(lang["name"]!, lang["info"]!, lang["rating"]!, lang["students"]!, index);
+                },
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            // Running Courses Section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text("Running Courses", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Course Cards Section (same as language cards)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, // Two columns
+                  crossAxisSpacing: 30, // Increased space between the cards
+                  mainAxisSpacing: 30, // Increased space between the cards
+                  childAspectRatio: 1, // Aspect ratio to ensure square cards
+                ),
+                itemCount: courses.length,
+                itemBuilder: (context, index) {
+                  final course = courses[index];
+                  return _buildLanguageCard(course["name"]!, course["info"]!, course["rating"]!, course["students"]!, index);
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Footer
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: Column(
+                children: [
+                  const Text(
+                    'All rights reserved 2025, Version 25.24.1',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.facebook, color: Colors.blue, size: 24),
+                      SizedBox(width: 16),
+                      Icon(Icons.code, color: Colors.black, size: 24), // GitHub
+                      SizedBox(width: 16),
+                      Icon(Icons.business_center, color: Color(0xFF0A66C2), size: 24), // LinkedIn
+                      SizedBox(width: 16),
+                      Icon(Icons.email, color: Colors.red, size: 24),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
+  // Function to build each drawer item
   ListTile _buildDrawerItem(IconData icon, String label, Widget page) {
     return ListTile(
       leading: Icon(icon),
@@ -188,68 +237,81 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildLanguageCard(String language, String subtitle, int index) {
-    final colors = [Colors.blue, Colors.red, Colors.green, Colors.orange, Colors.purple];
+  // Function to build each language or course card
+  Widget _buildLanguageCard(String title, String subtitle, String rating, String students, int index) {
+    final List<Color> cardColors = [
+      Colors.blue.shade100,
+      Colors.green.shade100,
+      Colors.orange.shade100,
+      Colors.red.shade100,
+      Colors.purple.shade100
+    ];
 
     return Container(
-      width: 160,
-      margin: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: colors[index % colors.length].withOpacity(0.9),
-        borderRadius: BorderRadius.circular(16),
+        color: cardColors[index % cardColors.length], // Alternate colors for each card
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black26,
-            blurRadius: 6,
-            offset: const Offset(2, 4),
+            blurRadius: 12, // Slightly more pronounced shadow
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 8,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.3),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.language,
+              color: Colors.blue.shade700,
+              size: 40,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              style: const TextStyle(
+                color: Colors.black54,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.star, color: Colors.yellow, size: 18),
+                const SizedBox(width: 4),
+                Text(
+                  rating,
+                  style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                 ),
-              ),
+              ],
             ),
-          ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    language,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.people, color: Colors.black, size: 18),
+                const SizedBox(width: 4),
+                Text(
+                  students,
+                  style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

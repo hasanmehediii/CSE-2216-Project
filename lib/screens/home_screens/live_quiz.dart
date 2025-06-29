@@ -17,6 +17,7 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
   String _selectedLanguage = 'spanish';  // Default language
   List<Map<String, dynamic>> _words = [];
   FlutterTts _flutterTts = FlutterTts();  // Initialize Text-to-Speech instance
+  bool _showPopup = true; // Flag to control popup visibility
 
   // List of available languages
   List<String> _languages = ['spanish', 'german', 'arabic', 'chinese', 'french'];
@@ -84,6 +85,45 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
   void initState() {
     super.initState();
     _fetchWords();  // Fetch words when the screen is initialized
+
+    // Show popup after a delay to give the screen time to load
+    Future.delayed(Duration.zero, () {
+      if (_showPopup) {
+        _showWelcomeDialog(); // Show the popup dialog
+      }
+    });
+  }
+
+  // Function to show the popup dialog
+  void _showWelcomeDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent closing the dialog by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Let's Start Learning Words!"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('assets/good.png', height: 100, width: 100), // PNG Image
+              const SizedBox(height: 10),
+              const Text("Let's start learning words with images!"),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _showPopup = false; // Hide the popup after closing
+                });
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text("Start Learning"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
