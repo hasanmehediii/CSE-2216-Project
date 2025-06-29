@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cseduapp/screens/About.dart';
@@ -11,7 +12,6 @@ import 'services/storage_service.dart';
 import 'screens/que_screen.dart';
 import 'screens/result_screen.dart';
 import '../screens/home_screens/video_lessons.dart';
-
 
 void main() {
   runApp(
@@ -33,7 +33,7 @@ class LanguageLearningApp extends StatelessWidget {
       title: 'Language Learning App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const AuthWrapper(),
+      home: const SplashScreen(), // Show SplashScreen first
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
@@ -42,6 +42,68 @@ class LanguageLearningApp extends StatelessWidget {
         '/result': (context) => const ResultScreen(score: 0, total: 0, day: 0), // placeholder
         '/video': (context) => const VideoLessonsPage(),
       },
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Wait for 3 seconds and then navigate to the WelcomeScreen
+    Future.delayed(const Duration(seconds: 5), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.blueAccent,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Text "LangBuddy" above the image
+            const Text(
+              'LangBuddy',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Splash screen image (icon)
+            Image.asset(
+              'assets/splash.png', // Ensure the splash.png is placed in your assets folder
+              width: 150, // You can adjust the width as per your design requirement
+              height: 150,
+            ),
+            const SizedBox(height: 20),
+            // Text below the image
+            const Text(
+              'World\'s Best Language Learning App',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.white70,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
