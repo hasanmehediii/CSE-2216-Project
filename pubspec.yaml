@@ -39,10 +39,14 @@ dependencies:
   firebase_auth: ^4.16.0
   cloud_firestore: ^4.17.5
   firebase_auth_web: ^5.8.10
-  youtube_player_iframe: ^2.3.0
+  youtube_player_iframe: ^5.2.1
   url_launcher: ^6.1.0
-  youtube_player_flutter: ^8.0.0
+  youtube_player_flutter: ^9.1.1
   flutter_tts: ^3.0.0
+  cached_network_image: ^3.2.0
+  webview_flutter: ^4.0.0
+  flutter_inappwebview: ^6.1.5
+
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1

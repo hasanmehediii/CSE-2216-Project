@@ -28,7 +28,7 @@ class UserProfileProvider with ChangeNotifier {
 
     try {
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/user/profile'),
+        Uri.parse('http://192.168.0.103:8000/user/profile'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ class UserProfileProvider with ChangeNotifier {
 
     try {
       final response = await http.patch(
-        Uri.parse('http://127.0.0.1:8000/user/premium'),
+        Uri.parse('http://192.168.0.103:8000/user/premium'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

@@ -1,10 +1,12 @@
-import 'dart:html' as html; // Import html for Web Speech API
-import 'package:flutter/foundation.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart'; // To use kIsWeb
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';  // For JSON decoding
 import 'package:flutter_tts/flutter_tts.dart';  // For Text-to-Speech
 
+// Conditionally import 'dart:html' for web platform only
+import 'package:flutter/foundation.dart' show kIsWeb;
 class LiveQuizPage extends StatefulWidget {
   const LiveQuizPage({super.key});
 
@@ -24,7 +26,7 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
 
   // Fetch data from FastAPI
   Future<void> _fetchWords() async {
-    final response = await http.get(Uri.parse('http://127.0.0.1:8000/words'));  // FastAPI endpoint
+    final response = await http.get(Uri.parse('http://192.168.0.103:8000/words'));  // FastAPI endpoint
 
     if (response.statusCode == 200) {
       // If the server returns a 200 OK response, parse the JSON
@@ -62,22 +64,19 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
   Future<void> _speak(String word) async {
     if (kIsWeb) {
       // Web-specific implementation using the Web Speech API
-      final speech = html.window.speechSynthesis;
-      final utterance = html.SpeechSynthesisUtterance(word);
+      //final speech = html.window.speechSynthesis;
+      //final utterance = html.SpeechSynthesisUtterance(word);
 
-      // Optional: Configure the speech parameters (rate, pitch, etc.)
-      utterance.rate = 0.8;  // Speed of speech (0.1 to 10)
-      utterance.pitch = 1.0; // Pitch of the voice (0 to 2)
-      utterance.volume = 1.0; // Volume (0 to 1)
-
-      // Speak the word
-      speech?.speak(utterance);
+      // // Optional: Configure the speech parameters (rate, pitch, etc.)
+      // utterance.rate = 0.8;  // Speed of speech (0.1 to 10)
+      // utterance.pitch = 1.0; // Pitch of the voice (0 to 2)
+      // utterance.volume = 1.0; // Volume (0 to 1)
+      //
+      // // Speak the word
+      // speech?.speak(utterance);
     } else {
-      // Native mobile platforms (Android/iOS)
-      await _flutterTts.setLanguage("en-US");
-      await _flutterTts.setSpeechRate(0.5);
-      await _flutterTts.setPitch(1.0);
-      await _flutterTts.speak(word); // Speak the word on mobile platforms
+      // Mobile platforms (Android/iOS) – No TTS functionality on mobile
+      print("TTS not supported on this platform.");
     }
   }
 
@@ -175,8 +174,10 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(15),
-                        child: Image.network(
-                          currentWord['imageUrl'] ?? "",
+                        child: CachedNetworkImage(
+                          imageUrl: currentWord['imageUrl'] ?? "",
+                          placeholder: (context, url) => CircularProgressIndicator(), // Show a loading spinner while the image is loading
+                          errorWidget: (context, url, error) => Icon(Icons.error), // Show an error icon if the image fails to load
                           height: 200,
                           width: double.infinity,
                           fit: BoxFit.cover,
@@ -262,24 +263,25 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
                   ),
                 ),
 
-                // Microphone Icons below each card
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.mic, color: Colors.teal),
-                      onPressed: () {
-                        _speak(selectedWordTranslation); // Speak translation
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.mic, color: Colors.teal),
-                      onPressed: () {
-                        _speak(currentWord['wordText']); // Speak English word
-                      },
-                    ),
-                  ],
-                ),
+                // Microphone Icons below each card (Only for Web)
+                if (kIsWeb)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.mic, color: Colors.teal),
+                        onPressed: () {
+                          _speak(selectedWordTranslation); // Speak translation
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.mic, color: Colors.teal),
+                        onPressed: () {
+                          _speak(currentWord['wordText']); // Speak English word
+                        },
+                      ),
+                    ],
+                  ),
 
                 // Navigation buttons (Previous and Next)
                 Row(

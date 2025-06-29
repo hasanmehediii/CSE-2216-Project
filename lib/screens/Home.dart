@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisCount: 2, // Two columns
                   crossAxisSpacing: 30, // Increased space between the cards
                   mainAxisSpacing: 30, // Increased space between the cards
-                  childAspectRatio: 1, // Aspect ratio to ensure square cards
+                  childAspectRatio: 0.75, // Aspect ratio to ensure square cards
                 ),
                 itemCount: languages.length,
                 itemBuilder: (context, index) {
@@ -187,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisCount: 2, // Two columns
                   crossAxisSpacing: 30, // Increased space between the cards
                   mainAxisSpacing: 30, // Increased space between the cards
-                  childAspectRatio: 1, // Aspect ratio to ensure square cards
+                  childAspectRatio: 0.7, // Aspect ratio to ensure square cards
                 ),
                 itemCount: courses.length,
                 itemBuilder: (context, index) {
@@ -219,6 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Icon(Icons.email, color: Colors.red, size: 24),
                     ],
                   ),
+                  const SizedBox(height: 10),
                 ],
               ),
             ),

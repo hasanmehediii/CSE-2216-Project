@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../screens/Home.dart';
 
 class AuthService {
-  final String baseUrl = 'http://127.0.0.1:8000';
+  final String baseUrl = 'http://192.168.0.103:8000';
 
 
   Future<void> signUp({

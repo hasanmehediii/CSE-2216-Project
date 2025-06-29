@@ -28,7 +28,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
       final nid = _nidController.text.trim();
       final phone = _phoneController.text.trim();
 
-      final url = Uri.parse('http://127.0.0.1:8000/forgot-password');
+      final url = Uri.parse('http://192.168.0.103:8000/forgot-password');
       final response = await http.post(url, body: jsonEncode({
         'email': email,
         'nid': nid,
