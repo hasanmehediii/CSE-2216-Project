@@ -187,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisCount: 2, // Two columns
                   crossAxisSpacing: 30, // Increased space between the cards
                   mainAxisSpacing: 30, // Increased space between the cards
-                  childAspectRatio: 0.7, // Aspect ratio to ensure square cards
+                  childAspectRatio: 0.6, // Aspect ratio to ensure square cards
                 ),
                 itemCount: courses.length,
                 itemBuilder: (context, index) {

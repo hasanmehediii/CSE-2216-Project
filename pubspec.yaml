@@ -46,7 +46,9 @@ dependencies:
   cached_network_image: ^3.2.0
   webview_flutter: ^4.0.0
   flutter_inappwebview: ^6.1.5
-
+  flutter_map: ^8.1.1
+  latlong2: ^0.9.1
+  geolocator: ^9.0.1
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
