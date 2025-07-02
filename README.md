@@ -49,7 +49,6 @@ LangBuddy is a cross-platform language learning application. This was built by *
    
 4. Run frontend:
     ```bash
-   cd frontend
    flutter pub get
    flutter run
     ```
@@ -63,7 +62,18 @@ LangBuddy is a cross-platform language learning application. This was built by *
 
 
 ## 🙌 Contributors:
-1. Abdullah Ibne Masood (03)
-2. Ibna Afra Roza (16)
-3. Nafisha Akter Tuli (40)
-4. Mehedi Hasan (22)
+### 👤 Abdullah Ibne Masood
+- **Email**: [abdullahibnemasoodr@gmail.com](mailto:abdullahibnemasoodr@gmail.com)
+- **GitHub**: [AbdullahIbneMasoodRegan](https://github.com/AbdullahIbneMasoodRegan)
+
+### 👤 Ibna Afra Roza
+- **Email**: [ibnaafra-2022015891@cs.du.ac.bd](mailto:ibnaafra-2022015891@cs.du.ac.bd)
+- **GitHub**: [Roza-fail](https://www.github.com/Roza-fail)
+
+### 👤 Nafisha Akhter
+- **Email**: [nafisha3558@gmail.com](mailto:nafisha3558@gmail.com)
+- **GitHub**: [nafisha3588](https://github.com/nafisha3588)
+
+### 👤 Mehedi Hasan
+- **Email**: [mehedi-2022415897@cs.du.ac.bd](mailto:mehedi-2022415897@cs.du.ac.bd)
+- **GitHub**: [hasan-mehedii](https://www.github.com/hasan-mehedii)
