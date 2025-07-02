@@ -19,7 +19,6 @@ LangBuddy is a cross-platform language learning application. This was built by *
 | Frontend                       | Flutter            |
 | Backend                        | FastAPI (Python)   |
 | Database                       | MongoDB            |
-| ------------------------------ | ------------------ |
 
 ## 🛠️ Getting Started
 
