@@ -4,7 +4,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 
 class OfflineBranchesScreen extends StatefulWidget {
-  const OfflineBranchesScreen({super.key});
+  final bool showAppBar;
+  const OfflineBranchesScreen({super.key, this.showAppBar = true});
 
   @override
   State<OfflineBranchesScreen> createState() => _OfflineBranchesScreenState();
@@ -68,46 +69,60 @@ class _OfflineBranchesScreenState extends State<OfflineBranchesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Offline Branches'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context); // Go back to settings page
-          },
+    Widget mapView = _currentPosition == null
+        ? const Center(child: CircularProgressIndicator())
+        : FlutterMap(
+      options: MapOptions(
+        initialCenter: LatLng(
+          _currentPosition!.latitude,
+          _currentPosition!.longitude,
         ),
+        initialZoom: 10.0,
       ),
-      body: _currentPosition == null
-          ? const Center(child: CircularProgressIndicator())
-          : FlutterMap(
-        options: MapOptions(
-          initialCenter: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-          initialZoom: 10.0,
+      children: [
+        TileLayer(
+          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          subdomains: ['a', 'b', 'c'],
         ),
-        children: [
-          TileLayer(
-            urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            subdomains: ['a', 'b', 'c'],
-          ),
-          MarkerLayer(
-            markers: [
-              Marker(
-                width: 80.0,
-                height: 80.0,
-                point: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-                child: const Icon(Icons.location_on, color: Colors.blue, size: 40),
+        MarkerLayer(
+          markers: [
+            Marker(
+              width: 80.0,
+              height: 80.0,
+              point: LatLng(
+                _currentPosition!.latitude,
+                _currentPosition!.longitude,
               ),
-              ...branches.map((location) => Marker(
+              child: const Icon(Icons.location_on,
+                  color: Colors.blue, size: 40),
+            ),
+            ...branches.map(
+                  (location) => Marker(
                 width: 80.0,
                 height: 80.0,
                 point: location,
-                child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
-              )).toList(),
-            ],
-          ),
-        ],
-      ),
+                child: const Icon(Icons.location_pin,
+                    color: Colors.red, size: 40),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
+
+    if (widget.showAppBar) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Offline Branches'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: mapView,
+      );
+    } else {
+      return mapView;
+    }
   }
 }

@@ -99,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildDrawerItem(Icons.bar_chart, "Progress", const RoutinePage()),
               _buildDrawerItem(Icons.menu_book, "Vocabulary", const LiveQuizPage()),
               _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const QuestionScreen()),
-              _buildDrawerItem(Icons.edit_note, "Written Test", const WritingTestPage()),
+              _buildDrawerItem(Icons.edit_note, "Live Class", const WritingTestPage()),
               _buildDrawerItem(Icons.settings, "Settings", const SettingsPage()),
               const Spacer(),
               const Divider(),

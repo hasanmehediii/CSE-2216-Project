@@ -26,7 +26,7 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
 
   // Fetch data from FastAPI
   Future<void> _fetchWords() async {
-    final response = await http.get(Uri.parse('http://192.168.0.103:8000/words'));  // FastAPI endpoint
+    final response = await http.get(Uri.parse('http://192.168.3.107:8000/words'));  // FastAPI endpoint
 
     if (response.statusCode == 200) {
       // If the server returns a 200 OK response, parse the JSON

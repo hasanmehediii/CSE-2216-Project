@@ -143,19 +143,42 @@ class _QuestionScreenState extends State<QuestionScreen> {
               ),
               const SizedBox(height: 30),
               Expanded(
-                child: ListView.builder(
+                child: GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 1, // Square cards
+                  ),
                   itemCount: examCards.length,
                   itemBuilder: (context, index) {
                     final examCard = examCards[index];
-                    return Card(
-                      color: examCard.isUnlocked ? Colors.green : Colors.grey,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: ListTile(
-                        title: Text(
-                          examCard.title,
-                          style: const TextStyle(color: Colors.white),
+                    return GestureDetector(
+                      onTap: () => _startExam(index),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: examCard.isUnlocked ? Colors.green : Colors.grey,
+                          borderRadius: BorderRadius.circular(12),
+                          image: DecorationImage(
+                            image: AssetImage(examCard.isUnlocked
+                                ? 'assets/unlocked_texture.png' // Replace with actual texture asset
+                                : 'assets/locked_texture.png'), // Locked texture
+                            fit: BoxFit.cover,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
                         ),
-                        onTap: () => _startExam(index),
+                        child: Center(
+                          child: Text(
+                            examCard.title,
+                            style: const TextStyle(color: Colors.white, fontSize: 18),
+                          ),
+                        ),
                       ),
                     );
                   },

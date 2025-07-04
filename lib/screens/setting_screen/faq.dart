@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class FAQScreen extends StatelessWidget {
-  FAQScreen({super.key});
+  final bool showAppBar;
+  FAQScreen({super.key, this.showAppBar = true});
 
   final List<Map<String, String>> faq = [
     {'question': 'What is our mission?', 'answer': 'To provide the best service.'},
@@ -18,46 +19,48 @@ class FAQScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('FAQ'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context); // Go back to settings page
-          },
-        ),
-      ),
-      body: ListView.builder(
-        itemCount: faq.length,
-        itemBuilder: (context, index) {
-          return Card(
-            margin: const EdgeInsets.all(8.0),
-            child: ListTile(
-              title: Text(faq[index]['question']!),
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text(faq[index]['question']!),
-                      content: Text(faq[index]['answer']!),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop(); // Close the dialog
-                          },
-                          child: const Text('Close'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
-          );
-        },
-      ),
+    Widget content = ListView.builder(
+      itemCount: faq.length,
+      itemBuilder: (context, index) {
+        return Card(
+          margin: const EdgeInsets.all(8.0),
+          child: ListTile(
+            title: Text(faq[index]['question']!),
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text(faq[index]['question']!),
+                    content: Text(faq[index]['answer']!),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Close'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },
     );
+
+    if (showAppBar) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('FAQ'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: content,
+      );
+    } else {
+      return content;
+    }
   }
 }
