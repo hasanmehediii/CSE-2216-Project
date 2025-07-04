@@ -49,6 +49,7 @@ dependencies:
   flutter_map: ^8.1.1
   latlong2: ^0.9.1
   geolocator: ^9.0.1
+  jitsi_meet_flutter_sdk: ^0.1.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
