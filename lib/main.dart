@@ -5,6 +5,7 @@ import 'package:cseduapp/screens/About.dart';
 import 'package:cseduapp/screens/Login.dart';
 import 'package:cseduapp/screens/Home.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'providers/user_profile_provider.dart';
 import 'services/auth_service.dart';
@@ -13,7 +14,8 @@ import 'screens/que_screen.dart';
 import 'screens/result_screen.dart';
 import '../screens/home_screens/video_lessons.dart';
 
-void main() {
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
   runApp(
     MultiProvider(
       providers: [

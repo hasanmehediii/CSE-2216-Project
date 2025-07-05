@@ -1,9 +1,9 @@
 import 'dart:async';
+import 'package:cseduapp/screens/home_screens/mcq.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/storage_service.dart';
 import '../providers/user_profile_provider.dart';
-import '../screens/que_screen.dart';
 import 'home_screens/dashboard.dart';
 import 'home_screens/live_quiz.dart';
 import 'home_screens/routine.dart';
@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
               if (isPremium) _buildDrawerItem(Icons.video_library, "Video Lessons", const VideoLessonsPage()),
               _buildDrawerItem(Icons.bar_chart, "Progress", const RoutinePage()),
               _buildDrawerItem(Icons.menu_book, "Vocabulary", const LiveQuizPage()),
-              _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const QuestionScreen()),
+              _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const MCQTestPage()),
               _buildDrawerItem(Icons.edit_note, "Live Class", const WritingTestPage()),
               _buildDrawerItem(Icons.settings, "Settings", const SettingsPage()),
               const Spacer(),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -33,7 +34,7 @@ class _VideoLessonsPageState extends State<VideoLessonsPage> {
 
   // Fetch video data from the backend
   Future<void> fetchVideos(String language) async {
-    final url = Uri.parse('http://192.168.3.107:8000/videos/$language');
+    final url = Uri.parse('${dotenv.env['BASE_URL'] ?? 'http://192.168.3.107:8000'}/videos/$language');
 
     try {
       final response = await http.get(url);

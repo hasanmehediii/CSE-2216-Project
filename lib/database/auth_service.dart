@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import '../screens/Home.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {
-  final String baseUrl = 'http://192.168.3.107:8000';
+  final String baseUrl = dotenv.env['BASE_URL']!;
 
 
   Future<void> signUp({

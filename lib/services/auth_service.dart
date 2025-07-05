@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../models/user_profile.dart';
 import 'package:flutter/material.dart';
 
 class AuthService {
-  static const String baseUrl = 'http://192.168.3.107:8000';
+  static final String baseUrl = dotenv.env['BASE_URL']!;
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     final url = Uri.parse('$baseUrl/login');

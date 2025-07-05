@@ -246,6 +246,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.1"
+  flutter_dotenv:
+    dependency: "direct main"
+    description:
+      name: flutter_dotenv
+      sha256: b7c7be5cd9f6ef7a78429cabd2774d3c4af50e79cb2b7593e3d5d763ef95c61b
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.2.1"
   flutter_inappwebview:
     dependency: "direct main"
     description:
@@ -472,14 +480,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.20.2"
-  jitsi_meet_flutter_sdk:
-    dependency: "direct main"
-    description:
-      name: jitsi_meet_flutter_sdk
-      sha256: "78455757568bd12341d403014945d225b5cfd23eb4bfd057632ed2f916662c15"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.9"
   js:
     dependency: transitive
     description:

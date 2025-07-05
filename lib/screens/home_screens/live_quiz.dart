@@ -1,11 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart'; // To use kIsWeb
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';  // For JSON decoding
-import 'package:flutter_tts/flutter_tts.dart';  // For Text-to-Speech
+import 'dart:convert';
 
-// Conditionally import 'dart:html' for web platform only
 import 'package:flutter/foundation.dart' show kIsWeb;
 class LiveQuizPage extends StatefulWidget {
   const LiveQuizPage({super.key});
@@ -18,7 +17,6 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
   int _currentIndex = 0;
   String _selectedLanguage = 'spanish';  // Default language
   List<Map<String, dynamic>> _words = [];
-  FlutterTts _flutterTts = FlutterTts();  // Initialize Text-to-Speech instance
   bool _showPopup = true; // Flag to control popup visibility
 
   // List of available languages
@@ -26,7 +24,8 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
 
   // Fetch data from FastAPI
   Future<void> _fetchWords() async {
-    final response = await http.get(Uri.parse('http://192.168.3.107:8000/words'));  // FastAPI endpoint
+    final baseUrl = dotenv.env['BASE_URL'] ?? 'http://192.168.3.107:8000';
+    final response = await http.get(Uri.parse('$baseUrl/words'));
 
     if (response.statusCode == 200) {
       // If the server returns a 200 OK response, parse the JSON

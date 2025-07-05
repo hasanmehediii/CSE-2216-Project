@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../models/user_profile.dart';
 import '../services/storage_service.dart';
@@ -28,7 +29,7 @@ class UserProfileProvider with ChangeNotifier {
 
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.3.107:8000/user/profile'),
+      Uri.parse('${dotenv.env['BASE_URL'] ?? 'http://192.168.3.107:8000'}/user/profile'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -56,7 +57,7 @@ class UserProfileProvider with ChangeNotifier {
 
     try {
       final response = await http.patch(
-        Uri.parse('http://192.168.3.107:8000/user/premium'),
+      Uri.parse('${dotenv.env['BASE_URL']}/user/premium'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
