@@ -14,25 +14,24 @@ class MCQTestPage extends StatefulWidget {
 class _MCQTestPageState extends State<MCQTestPage> {
   bool examStarted = false;
   List<dynamic> questions = [];
-  List<int?> userAnswers = []; // Store user's selected option indices
-  int currentQuestionIndex = 0;
+  List<int?> userAnswers = [];
+  int _remainingSeconds = 300;
   Timer? _timer;
-  int _remainingSeconds = 300; // 5 minutes
   String selectedLanguage = '';
   final List<String> languages = ['Spanish', 'German', 'Chinese', 'Arabic', 'French'];
+  final List<Color> cardColors = [
+    Colors.blue.shade200,
+    Colors.green.shade200,
+    Colors.purple.shade200,
+  ];
 
   Future<void> startExam(String language) async {
     selectedLanguage = language.toLowerCase();
     final url = Uri.parse("${dotenv.env['BASE_URL']}/mcq/$selectedLanguage");
-    print('Requesting URL: $url'); // Debug
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 10));
-      print('Response status: ${response.statusCode}'); // Debug
-      print('Response body: ${response.body}'); // Debug
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('Parsed data: $data'); // Debug
         if (data['questions'] == null || data['questions'].isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('No questions available for $language')),
@@ -46,15 +45,14 @@ class _MCQTestPageState extends State<MCQTestPage> {
         }
         setState(() {
           questions = data['questions'];
-          userAnswers = List.filled(questions.length, null); // Initialize user answers
+          userAnswers = List.filled(questions.length, null);
           examStarted = true;
-          currentQuestionIndex = 0;
           _remainingSeconds = 300;
         });
         _startTimer();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load MCQs: ${response.statusCode} - ${response.body}')),
+          SnackBar(content: Text('Failed to load MCQs: ${response.statusCode}')),
         );
         setState(() {
           examStarted = false;
@@ -63,7 +61,6 @@ class _MCQTestPageState extends State<MCQTestPage> {
         });
       }
     } catch (e) {
-      print('Error: $e'); // Debug
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading MCQs: $e')),
       );
@@ -93,19 +90,38 @@ class _MCQTestPageState extends State<MCQTestPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Language'),
+        title: const Text('Select Language', style: TextStyle(fontWeight: FontWeight.bold)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: languages.map((lang) {
-              return ListTile(
-                title: Text(lang),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  startExam(lang);
-                },
-              );
-            }).toList(),
+            children: [
+              Image.asset(
+                'assets/good.png',
+                height: 100,
+                width: 100,
+              ),
+              const SizedBox(height: 10),
+              ...languages.map((lang) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue.shade300,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      startExam(lang);
+                    },
+                    child: Text(
+                      lang,
+                      style: const TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ],
           ),
         ),
       ),
@@ -116,7 +132,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Time's Up"),
+        title: const Text("Time's Up", style: TextStyle(fontWeight: FontWeight.bold)),
         content: const Text("Your 5 minutes are over."),
         actions: [
           TextButton(
@@ -124,14 +140,49 @@ class _MCQTestPageState extends State<MCQTestPage> {
               Navigator.of(context).pop();
               setState(() {
                 examStarted = false;
-                // Keep questions and userAnswers for results
               });
             },
-            child: const Text("View Results"),
+            child: const Text("View Results", style: TextStyle(color: Colors.blue)),
           ),
         ],
       ),
     );
+  }
+
+  void _showEndExamDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("End Exam", style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text("Are you sure you want to submit and end the exam?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              setState(() {
+                examStarted = false;
+                _timer?.cancel();
+              });
+            },
+            child: const Text("Submit", style: TextStyle(color: Colors.blue)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _calculateScore() {
+    int score = 0;
+    for (int i = 0; i < questions.length; i++) {
+      if (userAnswers[i] == questions[i]['answer_index']) {
+        score++;
+      }
+    }
+    return score;
   }
 
   @override
@@ -145,16 +196,31 @@ class _MCQTestPageState extends State<MCQTestPage> {
     if (!examStarted) {
       if (questions.isNotEmpty && userAnswers.isNotEmpty) {
         // Results screen
+        final score = _calculateScore();
         return Scaffold(
-          appBar: AppBar(title: const Text("MCQ Results")),
+          appBar: AppBar(
+            title: const Text("MCQ Results"),
+            backgroundColor: Colors.blue.shade700,
+          ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Exam Results",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                Text(
+                  "Exam Results - Score: $score/${questions.length}",
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Image.asset(
+                  score <= 3
+                      ? 'assets/reactions/sad.png'
+                      : (score <= 7 ? 'assets/reactions/mid.png' : 'assets/reactions/happy.png'),
+                  height: 120,
                 ),
                 const SizedBox(height: 20),
                 ...List.generate(questions.length, (index) {
@@ -162,42 +228,57 @@ class _MCQTestPageState extends State<MCQTestPage> {
                   final userAnswer = userAnswers[index];
                   final correctAnswerIndex = question['answer_index'] as int;
                   final isCorrect = userAnswer == correctAnswerIndex;
-                  return Card(
-                    elevation: 2,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Question ${index + 1}: ${question['question']}",
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 10),
-                          ...List.generate(question['options'].length, (i) {
-                            final isSelected = userAnswer == i;
-                            final isCorrectOption = i == correctAnswerIndex;
-                            return Container(
-                              color: isSelected
-                                  ? (isCorrect ? Colors.green[100] : Colors.red[100])
-                                  : (isCorrectOption ? Colors.green[100] : null),
-                              child: ListTile(
-                                title: Text(question['options'][i].toString()),
-                                leading: Radio<int>(
-                                  value: i,
-                                  groupValue: userAnswer,
-                                  onChanged: null, // Disable interaction in results
+                  return AnimatedOpacity(
+                    opacity: 1.0,
+                    duration: const Duration(milliseconds: 500),
+                    child: Card(
+                      elevation: 4,
+                      color: isCorrect ? Colors.green.shade100 : Colors.red.shade100,
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Question ${index + 1}: ${question['question']}",
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 10),
+                            ...List.generate(question['options'].length, (i) {
+                              final isSelected = userAnswer == i;
+                              final isCorrectOption = i == correctAnswerIndex;
+                              return Container(
+                                margin: const EdgeInsets.symmetric(vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? (isCorrect ? Colors.green.shade300 : Colors.red.shade300)
+                                      : (isCorrectOption ? Colors.green.shade200 : Colors.white),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.grey.shade300),
                                 ),
+                                child: ListTile(
+                                  title: Text(question['options'][i].toString()),
+                                  leading: Radio<int>(
+                                    value: i,
+                                    groupValue: userAnswer,
+                                    onChanged: null,
+                                  ),
+                                ),
+                              );
+                            }),
+                            const SizedBox(height: 10),
+                            Text(
+                              "Correct Answer: ${question['options'][correctAnswerIndex]}",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue,
                               ),
-                            );
-                          }),
-                          const SizedBox(height: 10),
-                          Text(
-                            "Correct Answer: ${question['options'][correctAnswerIndex]}",
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.blue),
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -213,9 +294,18 @@ class _MCQTestPageState extends State<MCQTestPage> {
                         _timer?.cancel();
                       });
                     },
-                    child: const Text("Return to Exams"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue.shade700,
+                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: const Text(
+                      "Return to Exams",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
                   ),
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -223,7 +313,10 @@ class _MCQTestPageState extends State<MCQTestPage> {
       }
       // Exam selection grid
       return Scaffold(
-        appBar: AppBar(title: const Text("MCQ Exams")),
+        appBar: AppBar(
+          title: const Text("MCQ Exams"),
+          backgroundColor: Colors.blue.shade700,
+        ),
         body: GridView.count(
           crossAxisCount: 2,
           padding: const EdgeInsets.all(16),
@@ -232,14 +325,22 @@ class _MCQTestPageState extends State<MCQTestPage> {
           children: List.generate(3, (index) {
             return GestureDetector(
               onTap: _showLanguageSelectionDialog,
-              child: Card(
-                elevation: 4,
-                margin: const EdgeInsets.all(8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                child: Center(
-                  child: Text(
-                    "Exam ${index + 1}",
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              child: AnimatedScale(
+                scale: 1.0,
+                duration: const Duration(milliseconds: 300),
+                child: Card(
+                  elevation: 6,
+                  color: cardColors[index % cardColors.length],
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  child: Center(
+                    child: Text(
+                      "Exam ${index + 1}",
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -248,76 +349,106 @@ class _MCQTestPageState extends State<MCQTestPage> {
         ),
       );
     } else if (questions.isEmpty) {
-      print('Questions is empty: $questions'); // Debug
       return Scaffold(
-        appBar: AppBar(title: const Text("MCQ Exam")),
+        appBar: AppBar(title: const Text("MCQ Exam"), backgroundColor: Colors.blue.shade700),
         body: const Center(child: CircularProgressIndicator()),
       );
-    } else if (currentQuestionIndex >= questions.length) {
-      setState(() {
-        examStarted = false; // Show results
-      });
-      return const SizedBox(); // Immediately re-render with results
     } else {
-      print('Questions loaded: $questions'); // Debug
-      final question = questions[currentQuestionIndex];
-      if (question['question'] == null || question['options'] == null || question['options'].length < 4) {
-        print('Invalid question data: $question'); // Debug
-        return Scaffold(
-          appBar: AppBar(title: const Text("MCQ Exam")),
-          body: Center(child: const Text("Invalid question data")),
-        );
-      }
-
       return Scaffold(
         appBar: AppBar(
           title: const Text("MCQ Exam"),
+          backgroundColor: Colors.blue.shade700,
           actions: [
             Padding(
               padding: const EdgeInsets.all(16),
               child: Center(
                 child: Text(
                   "${_remainingSeconds ~/ 60}:${(_remainingSeconds % 60).toString().padLeft(2, '0')}",
-                  style: const TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
             ),
           ],
         ),
-        body: Padding(
+        body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Question ${currentQuestionIndex + 1} of ${questions.length}",
-                style: const TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                question['question'].toString(),
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              ...List.generate(question['options'].length, (i) {
-                return Card(
-                  elevation: 2,
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  child: ListTile(
-                    title: Text(question['options'][i].toString()),
-                    onTap: () {
-                      setState(() {
-                        userAnswers[currentQuestionIndex] = i; // Record user answer
-                        if (currentQuestionIndex < questions.length - 1) {
-                          currentQuestionIndex++;
-                        } else {
-                          examStarted = false; // Show results
-                        }
-                      });
-                    },
+              ...List.generate(questions.length, (index) {
+                final question = questions[index];
+                // Simplified validation to ensure all questions are shown
+                if (question['question'] == null || question['options'] == null) {
+                  return const SizedBox();
+                }
+                return AnimatedSlide(
+                  offset: Offset(0, index * 0.1),
+                  duration: const Duration(milliseconds: 500),
+                  child: Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Question ${index + 1}: ${question['question']}",
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 10),
+                          ...List.generate(question['options'].length, (i) {
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  userAnswers[index] = i;
+                                });
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: userAnswers[index] == i ? Colors.blue.shade100 : Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.grey.shade300),
+                                ),
+                                child: ListTile(
+                                  title: Text(question['options'][i].toString()),
+                                  leading: Radio<int>(
+                                    value: i,
+                                    groupValue: userAnswers[index],
+                                    onChanged: (value) {
+                                      setState(() {
+                                        userAnswers[index] = value;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
                   ),
                 );
               }),
+              const SizedBox(height: 400),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _showEndExamDialog,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade700,
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text(
+                    "Submit Exam",
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
