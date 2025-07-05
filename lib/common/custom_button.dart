@@ -20,11 +20,21 @@ class CustomButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Colors.black87,
+          backgroundColor: Colors.transparent, // Remove the default color
+          disabledForegroundColor: Colors.transparent.withOpacity(0.38), disabledBackgroundColor: Colors.transparent.withOpacity(0.12),
+          shadowColor: Colors.black.withOpacity(0.5), // Add shadow effect
+          elevation: 10, // Add shadow elevation for depth
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(32),
+            borderRadius: BorderRadius.circular(32), // Round corners
+          ),
+        ).copyWith(
+          backgroundColor: MaterialStateProperty.all(
+            LinearGradient(
+              colors: [Colors.blue, Colors.purple], // Gradient colors
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ).createShader(Rect.fromLTWH(0.0, 0.0, 300.0, 70.0)) as Color?,
           ),
         ),
         child: child ??

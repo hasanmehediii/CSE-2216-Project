@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:cseduapp/screens/About.dart';
-import 'package:cseduapp/screens/Login.dart';
-import 'package:cseduapp/screens/Home.dart';
+import 'package:lottie/lottie.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +10,10 @@ import 'services/auth_service.dart';
 import 'services/storage_service.dart';
 import 'screens/que_screen.dart';
 import 'screens/result_screen.dart';
-import '../screens/home_screens/video_lessons.dart';
+import 'screens/home_screens/video_lessons.dart';
+import 'package:cseduapp/screens/Login.dart';
+import 'package:cseduapp/screens/About.dart';
+import 'package:cseduapp/screens/Home.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
@@ -110,39 +111,6 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _checkLoginStatus(context),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
-        }
-        return snapshot.data == true ? const HomeScreen() : const WelcomeScreen();
-      },
-    );
-  }
-
-  Future<bool> _checkLoginStatus(BuildContext context) async {
-    final token = await StorageService.getToken();
-    if (token != null) {
-      try {
-        final profile = await AuthService().fetchUserProfile(token);
-        Provider.of<UserProfileProvider>(context, listen: false).setUserProfile(profile);
-        await StorageService.saveUserProfile(profile);
-        return true;
-      } catch (e) {
-        await StorageService.clearStorage();
-        return false;
-      }
-    }
-    return false;
-  }
-}
-
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
@@ -150,8 +118,7 @@ class WelcomeScreen extends StatefulWidget {
   State<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen>
-    with SingleTickerProviderStateMixin {
+class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -178,7 +145,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LangBuddy'),
+        title: const Text('Language Learning App'),
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
       ),
@@ -204,10 +171,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.language, size: 100, color: Colors.blueAccent),
+                      // Lottie animation for the logo
+                      SizedBox(
+                        width: 200,
+                        height: 200,
+                        child: Lottie.asset(
+                          'assets/gifs/login.json', // replace with your actual file
+                          repeat: true,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                       const SizedBox(height: 20),
                       const Text(
-                        "Welcome to LangBuddy",
+                        "LangBuddy",
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,

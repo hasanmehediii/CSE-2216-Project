@@ -50,6 +50,7 @@ dependencies:
   latlong2: ^0.9.1
   geolocator: ^9.0.1
   flutter_dotenv: ^5.1.0
+  lottie: ^2.7.0
   #jitsi_meet_flutter_sdk: ^0.1.0
 
 dev_dependencies:
@@ -92,6 +93,8 @@ flutter:
     - assets/good.png
     - assets/splash.png
     - .env
+    - assets/gifs/login.json
+    - assets/gifs/loginn.json
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

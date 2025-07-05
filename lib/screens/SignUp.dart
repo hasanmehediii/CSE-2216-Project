@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart'; // Import Lottie package
 import '../services/auth_service.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -92,7 +93,6 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,6 +122,16 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                   key: _formKey,
                   child: Column(
                     children: [
+                      // Lottie Animation for Sign Up (placed at the top)
+                      SizedBox(
+                        width: 200,
+                        height: 200,
+                        child: Lottie.asset(
+                          'assets/gifs/loginn.json', // Replace with your actual Lottie JSON file
+                          repeat: true,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                       const SizedBox(height: 20),
                       const Text("Create Your Account", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
                       const SizedBox(height: 30),
@@ -217,9 +227,8 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                       ),
                       if (_dob == null)
                         const Padding(
-                          padding: EdgeInsets.only(left: 8, top: 4),
-                          child: Align(alignment: Alignment.centerLeft, child: Text("Date of Birth is required", style: TextStyle(color: Colors.red, fontSize: 12))),
-                        ),
+                            padding: EdgeInsets.only(left: 8, top: 4),
+                            child: Align(alignment: Alignment.centerLeft, child: Text("Date of Birth is required", style: TextStyle(color: Colors.red, fontSize: 12)))),
                       const SizedBox(height: 10),
 
                       CheckboxListTile(
