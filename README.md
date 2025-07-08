@@ -20,6 +20,26 @@ LangBuddy is a cross-platform language learning application. This was built by *
 | Backend                        | FastAPI (Python)   |
 | Database                       | MongoDB            |
 
+
+## **Screenshots 📸**
+
+| ![Start](readme/welcome.jpg) | ![Login](readme/login.jpg) |
+|:-------------------:|:------------------:|
+| _Welcome Screen._ | _Login Screen._ |
+
+| ![Home](readme/home.jpg) | ![Pro](readme/getpro.jpg) |
+|:-------------------:|:------------------:|
+| _Home Screen._ | _Pro purchase Screen._ |
+
+| ![Video](readme/video.jpg) | ![Location](readme/location.jpg) |
+|:-------------------:|:------------------:|
+| _Recorded Lecture Screen._ | _Offline branch Screen._ |
+
+| ![MCQ](readme/mcq.jpg) | ![Vocabulary](readme/vocabulary.jpg) |
+|:-------------------:|:------------------:|
+| _MCQ exam Screen._ | _Vocabulary Screen._ |
+
+--- 
 ## 🛠️ Getting Started
 
 ### Prerequisites
