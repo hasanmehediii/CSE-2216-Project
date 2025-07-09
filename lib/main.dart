@@ -6,8 +6,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'providers/user_profile_provider.dart';
-import 'services/auth_service.dart';
-import 'services/storage_service.dart';
 import 'screens/que_screen.dart';
 import 'screens/result_screen.dart';
 import 'screens/home_screens/video_lessons.dart';
@@ -36,13 +34,13 @@ class LanguageLearningApp extends StatelessWidget {
       title: 'Language Learning App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const SplashScreen(), // Show SplashScreen first
+      home: const SplashScreen(),
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
         '/about': (context) => const AboutUsPage(),
         '/mcq': (context) => const QuestionScreen(),
-        '/result': (context) => const ResultScreen(score: 0, total: 0, day: 0), // placeholder
+        '/result': (context) => const ResultScreen(score: 0, total: 0, day: 0),
         '/video': (context) => const VideoLessonsPage(),
       },
     );
@@ -79,7 +77,6 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Text "LangBuddy" above the image
             const Text(
               'LangBuddy',
               style: TextStyle(
@@ -91,12 +88,11 @@ class _SplashScreenState extends State<SplashScreen> {
             const SizedBox(height: 20),
             // Splash screen image (icon)
             Image.asset(
-              'assets/splash.png', // Ensure the splash.png is placed in your assets folder
-              width: 150, // You can adjust the width as per your design requirement
+              'assets/splash.png',
+              width: 150,
               height: 150,
             ),
             const SizedBox(height: 20),
-            // Text below the image
             const Text(
               'World\'s Best Language Learning App',
               style: TextStyle(
@@ -154,7 +150,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
         builder: (context, child) {
           return Stack(
             children: [
-              // Floating faded letters
               _floatingLetter('A', top: _animation.value, left: _animation.value),
               _floatingLetter('あ', top: 100 + _animation.value, right: 20 + _animation.value),
               _floatingLetter('ب', bottom: 100 - _animation.value, left: 20 + _animation.value),
@@ -164,19 +159,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
               _floatingLetter('ñ', bottom: 200 + _animation.value, right: 70 - _animation.value),
               _floatingLetter('é', top: 250 + _animation.value, left: 50 - _animation.value),
 
-              // Main content
               Center(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Lottie animation for the logo
                       SizedBox(
                         width: 200,
                         height: 200,
                         child: Lottie.asset(
-                          'assets/gifs/login.json', // replace with your actual file
+                          'assets/gifs/login.json',
                           repeat: true,
                           fit: BoxFit.contain,
                         ),
@@ -199,7 +192,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                       ),
                       const SizedBox(height: 40),
 
-                      // Get Started Button
                       _buildButton(
                         context,
                         label: "Get Started",
@@ -209,7 +201,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                       ),
                       const SizedBox(height: 20),
 
-                      // About Us Button
                       _buildButton(
                         context,
                         label: "About Us",
@@ -219,7 +210,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                       ),
                       const SizedBox(height: 20),
 
-                      // Exit Button
                       _buildButton(
                         context,
                         label: "Exit",
