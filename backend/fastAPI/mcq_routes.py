@@ -5,21 +5,29 @@ mcq_router = APIRouter()
 mcq_collection = database["mcqs"]
 
 @mcq_router.get("/mcq/{language}")
-async def get_mcqs_by_language(language: str):
+async def get_mcqs_by_language(language: str, skip: int = 0):
     supported_languages = ["spanish", "german", "chinese", "arabic", "french"]
 
     if language.lower() not in supported_languages:
         raise HTTPException(status_code=400, detail="Unsupported language")
 
+    if skip < 0:
+        raise HTTPException(status_code=400, detail="Skip parameter must be non-negative")
+
     # Debug: Check collection existence and document count
     collection_names = await database.list_collection_names()
     print(f"Collections in database: {collection_names}")
-    doc_count = await mcq_collection.count_documents({})
-    print(f"Documents in mcq_questions: {doc_count}")
+    doc_count = await mcq_collection.count_documents({"languages." + language.lower(): {"$exists": True}})
+    print(f"Documents in mcq_questions for {language}: {doc_count}")
 
-    cursor = mcq_collection.find().limit(10)
+    # Check if there are enough questions for the requested skip
+    if skip >= doc_count:
+        raise HTTPException(status_code=404, detail=f"Not enough questions for {language} at skip {skip}")
+
+    # Fetch questions with pagination (skip and limit)
+    cursor = mcq_collection.find({"languages." + language.lower(): {"$exists": True}}).skip(skip).limit(10)
     results = await cursor.to_list(length=10)
-    print(f"Queried documents: {results}")  # Debug
+    print(f"Queried documents (skip={skip}, limit=10): {results}")  # Debug
 
     mcqs = []
     for q in results:
@@ -34,7 +42,7 @@ async def get_mcqs_by_language(language: str):
         })
 
     if not mcqs:
-        raise HTTPException(status_code=404, detail=f"No questions found for {language}")
+        raise HTTPException(status_code=404, detail=f"No valid questions found for {language} at skip {skip}")
 
-    print(f"Returning MCQs: {mcqs}")  # Debug
+    print(f"Returning MCQs (skip={skip}): {mcqs}")  # Debug
     return {"language": language, "questions": mcqs}

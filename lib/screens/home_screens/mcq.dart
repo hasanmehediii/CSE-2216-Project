@@ -25,9 +25,9 @@ class _MCQTestPageState extends State<MCQTestPage> {
     Colors.purple.shade200,
   ];
 
-  Future<void> startExam(String language) async {
+  Future<void> startExam(String language, int examIndex) async {
     selectedLanguage = language.toLowerCase();
-    final url = Uri.parse("${dotenv.env['BASE_URL']}/mcq/$selectedLanguage");
+    final url = Uri.parse("${dotenv.env['BASE_URL']}/mcq/$selectedLanguage?skip=${examIndex * 10}");
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
@@ -86,7 +86,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
     });
   }
 
-  void _showLanguageSelectionDialog() {
+  void _showLanguageSelectionDialog(int examIndex) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -112,7 +112,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
                     ),
                     onPressed: () {
                       Navigator.of(context).pop();
-                      startExam(lang);
+                      startExam(lang, examIndex);
                     },
                     child: Text(
                       lang,
@@ -322,9 +322,9 @@ class _MCQTestPageState extends State<MCQTestPage> {
           padding: const EdgeInsets.all(16),
           mainAxisSpacing: 16,
           crossAxisSpacing: 16,
-          children: List.generate(3, (index) {
+          children: List.generate(15, (index) {
             return GestureDetector(
-              onTap: _showLanguageSelectionDialog,
+              onTap: () => _showLanguageSelectionDialog(index),
               child: AnimatedScale(
                 scale: 1.0,
                 duration: const Duration(milliseconds: 300),
