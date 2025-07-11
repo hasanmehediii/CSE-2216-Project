@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -9,7 +10,6 @@ void main() async {
   await dotenv.load();
   runApp(const LanguageMatchGame());
 }
-
 
 class PictureMatchWord {
   final String word;
@@ -67,13 +67,11 @@ class _MatchPageState extends State<MatchPage> {
   List<PictureMatchWord> items = [];
   bool isLoading = true;
 
-
   List<String> words = [];
   final Map<String, bool> matched = {};
   int secondsLeft = 30;
   Timer? timer;
 
-  @override
   @override
   void initState() {
     super.initState();
@@ -86,7 +84,6 @@ class _MatchPageState extends State<MatchPage> {
         setState(() {
           items = fetchedItems;
           words = fetchedItems.map((e) => e.word).toList();
-          //words.add('distractor'); // optional
           words.shuffle();
           isLoading = false;
         });
@@ -111,7 +108,6 @@ class _MatchPageState extends State<MatchPage> {
     });
   }
 
-
   Future<String?> _showLanguagePopup(BuildContext context) async {
     return showDialog<String>(
       context: context,
@@ -134,10 +130,6 @@ class _MatchPageState extends State<MatchPage> {
     );
   }
 
-
-
-
-
   @override
   void dispose() {
     timer?.cancel();
@@ -153,6 +145,13 @@ class _MatchPageState extends State<MatchPage> {
     }
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: CupertinoColors.systemBlue,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         title: const Text('Match the Words to Pictures'),
         actions: [
           Padding(
@@ -166,86 +165,99 @@ class _MatchPageState extends State<MatchPage> {
           )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: items.map((item) {
-                  return DragTarget<String>(
-                    onWillAccept: (data) => true,
-                    onAccept: (receivedWord) {
-                      setState(() {
-                        matched[item.word] = (item.word == receivedWord);
-                      });
-                    },
-                    builder: (context, candidateData, rejectedData) {
-                      bool isMatched = matched[item.word] == true;
-                      return Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: isMatched ? Colors.green : Colors.black,
-                            width: 3,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.white70, Colors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: items.map((item) {
+                      return DragTarget<String>(
+                        onWillAccept: (data) => true,
+                        onAccept: (receivedWord) {
+                          setState(() {
+                            matched[item.word] = (item.word == receivedWord);
+                          });
+                        },
+                        builder: (context, candidateData, rejectedData) {
+                          bool isMatched = matched[item.word] == true;
+                          return Container(
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: isMatched ? Colors.green : Colors.black,
+                                width: 3,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                            child: Column(
+                              children: [
+                                Image.network(item.imageLink, height: 80),
+                                if (isMatched)
+                                  Text(item.word, style: const TextStyle(fontSize: 18, color: Colors.green))
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const VerticalDivider(thickness: 2),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: words.map((word) {
+                      return Draggable<String>(
+                        data: word,
+                        feedback: Material(
+                          color: Colors.transparent,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade200,
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 3)],
+                            ),
+                            child: Text(word, style: const TextStyle(fontSize: 18, color: Colors.white)),
                           ),
-                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Column(
-                          children: [
-                            Image.network(item.imageLink, height: 80),
-                            if (isMatched)
-                              Text(item.word, style: const TextStyle(fontSize: 18, color: Colors.green))
-                          ],
+                        childWhenDragging: Opacity(
+                          opacity: 0.4,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                            child: Text(word, style: const TextStyle(fontSize: 18)),
+                          ),
+                        ),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(word, style: const TextStyle(fontSize: 18)),
                         ),
                       );
-                    },
-                  );
-                }).toList(),
-
-              ),
+                    }).toList(),
+                  ),
+                )
+              ],
             ),
-            const VerticalDivider(thickness: 2),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: words.map((word) {
-                  return Draggable<String>(
-                    data: word,
-                    feedback: Material(
-                      color: Colors.transparent,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade200,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 3)],
-                        ),
-                        child: Text(word, style: const TextStyle(fontSize: 18, color: Colors.white)),
-                      ),
-                    ),
-                    childWhenDragging: Opacity(
-                      opacity: 0.4,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                        child: Text(word, style: const TextStyle(fontSize: 18)),
-                      ),
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(word, style: const TextStyle(fontSize: 18)),
-                    ),
-                  );
-                }).toList(),
-
-              ),
-            )
-          ],
+          ),
         ),
       ),
     );
