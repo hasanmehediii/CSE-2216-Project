@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -44,7 +43,14 @@ class LanguageMatchGame extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Picture Match Game',
-      theme: ThemeData(primarySwatch: Colors.teal),
+      theme: ThemeData(
+        primarySwatch: Colors.teal,
+        scaffoldBackgroundColor: Colors.transparent,
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+        ),
+      ),
       home: const MatchPage(),
     );
   }
@@ -115,13 +121,30 @@ class _MatchPageState extends State<MatchPage> {
       builder: (context) {
         final List<String> languages = ['french', 'spanish', 'german', 'arabic', 'chinese'];
         return AlertDialog(
-          title: const Text("Choose a Language"),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white.withOpacity(0.95),
+          title: const Text(
+            "Choose a Language",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.teal,
+              fontSize: 22,
+            ),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: languages.map((lang) {
-              return ListTile(
-                title: Text(lang[0].toUpperCase() + lang.substring(1)),
-                onTap: () => Navigator.of(context).pop(lang),
+              return Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: ListTile(
+                  title: Text(
+                    lang[0].toUpperCase() + lang.substring(1),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  onTap: () => Navigator.of(context).pop(lang),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
               );
             }).toList(),
           ),
@@ -139,43 +162,78 @@ class _MatchPageState extends State<MatchPage> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal, Colors.blueAccent],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+        ),
       );
     }
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: CupertinoColors.systemBlue,
+        title: const Text(
+          'Match the Words to Pictures',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            color: Colors.white,
+          ),
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal, Colors.blueAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        title: const Text('Match the Words to Pictures'),
         actions: [
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Center(
-              child: Text(
-                'Time: $secondsLeft s',
-                style: const TextStyle(fontSize: 18),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Time: $secondsLeft s',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
-          )
+          ),
         ],
       ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.white70, Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            colors: [Colors.teal, Colors.blueAccent],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(20.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -192,22 +250,52 @@ class _MatchPageState extends State<MatchPage> {
                         },
                         builder: (context, candidateData, rejectedData) {
                           bool isMatched = matched[item.word] == true;
-                          return Container(
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            padding: const EdgeInsets.all(8),
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            margin: const EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: isMatched ? Colors.green : Colors.black,
+                                color: isMatched ? Colors.green : Colors.white.withOpacity(0.3),
                                 width: 3,
                               ),
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.white.withOpacity(0.8),
+                              borderRadius: BorderRadius.circular(15),
+                              color: Colors.white.withOpacity(0.9),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
                             child: Column(
                               children: [
-                                Image.network(item.imageLink, height: 80),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.network(
+                                    item.imageLink,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => const Icon(
+                                      Icons.error,
+                                      color: Colors.red,
+                                      size: 50,
+                                    ),
+                                  ),
+                                ),
                                 if (isMatched)
-                                  Text(item.word, style: const TextStyle(fontSize: 18, color: Colors.green))
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: Text(
+                                      item.word,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
                           );
@@ -216,7 +304,10 @@ class _MatchPageState extends State<MatchPage> {
                     }).toList(),
                   ),
                 ),
-                const VerticalDivider(thickness: 2),
+                const VerticalDivider(
+                  thickness: 2,
+                  color: Colors.white30,
+                ),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -226,35 +317,74 @@ class _MatchPageState extends State<MatchPage> {
                         feedback: Material(
                           color: Colors.transparent,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                             decoration: BoxDecoration(
-                              color: Colors.blue.shade200,
-                              borderRadius: BorderRadius.circular(8),
-                              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 3)],
+                              color: Colors.blueAccent.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                            child: Text(word, style: const TextStyle(fontSize: 18, color: Colors.white)),
+                            child: Text(
+                              word,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ),
                         childWhenDragging: Opacity(
                           opacity: 0.4,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                            child: Text(word, style: const TextStyle(fontSize: 18)),
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                            margin: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.blueAccent.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              word,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ),
                         child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          margin: const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                           decoration: BoxDecoration(
-                            color: Colors.blue.shade100,
-                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.blueAccent.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          child: Text(word, style: const TextStyle(fontSize: 18)),
+                          child: Text(
+                            word,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       );
                     }).toList(),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -273,18 +403,89 @@ class ScorePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Your Score')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Score: $score / $total', style: const TextStyle(fontSize: 24)),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Back to Home'),
-            )
-          ],
+      appBar: AppBar(
+        title: const Text(
+          'Your Score',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            color: Colors.white,
+          ),
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal, Colors.blueAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal, Colors.blueAccent],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Score: $score / $total',
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      score == total ? 'Perfect Score!' : 'Great Effort!',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: score == total ? Colors.green : Colors.blueAccent,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 5,
+                ),
+                child: const Text(
+                  'Back to Home',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

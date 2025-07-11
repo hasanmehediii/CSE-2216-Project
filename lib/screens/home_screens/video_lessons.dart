@@ -114,7 +114,12 @@ class _VideoLessonsPageState extends State<VideoLessonsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Video Lessons"),
+        title: const Text(
+            "Video Lessons",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 22, color: Colors.white
+            )
+        ),
         backgroundColor: Colors.blue[900],
         centerTitle: true,
         elevation: 0,
@@ -141,7 +146,7 @@ class _VideoLessonsPageState extends State<VideoLessonsPage> {
               underline: const SizedBox(),
               style: const TextStyle(color: Colors.white, fontSize: 16),
               dropdownColor: Colors.blue[800],
-              iconEnabledColor: Colors.white,
+              iconEnabledColor: Colors.white60,
               borderRadius: BorderRadius.circular(12),
             ),
           ),
