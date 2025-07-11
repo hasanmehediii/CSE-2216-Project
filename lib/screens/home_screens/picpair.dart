@@ -1,8 +1,40 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
   runApp(const LanguageMatchGame());
+}
+
+
+class PictureMatchWord {
+  final String word;
+  final String imageLink;
+
+  PictureMatchWord({required this.word, required this.imageLink});
+
+  factory PictureMatchWord.fromJson(Map<String, dynamic> json) {
+    return PictureMatchWord(
+      word: json['word'],
+      imageLink: json['image_link'],
+    );
+  }
+}
+
+Future<List<PictureMatchWord>> fetchPictureMatchWords(String lang) async {
+  final baseUrl = dotenv.env['BASE_URL'];
+  final response = await http.get(Uri.parse('$baseUrl/picture-match?lang=$lang'));
+
+  if (response.statusCode == 200) {
+    final List<dynamic> jsonList = json.decode(response.body);
+    return jsonList.map((e) => PictureMatchWord.fromJson(e)).toList();
+  } else {
+    throw Exception('Failed to load words');
+  }
 }
 
 class LanguageMatchGame extends StatelessWidget {
@@ -32,43 +64,79 @@ class MatchPage extends StatefulWidget {
 }
 
 class _MatchPageState extends State<MatchPage> {
-  final List<MatchItem> items = [
-    MatchItem(word: 'pomme', imageAsset: 'assets/apple.png'),
-    MatchItem(word: 'banane', imageAsset: 'assets/banana.png'),
-    MatchItem(word: 'raisin', imageAsset: 'assets/grapes.png'),
-    MatchItem(word: 'pastèque', imageAsset: 'assets/watermelon.png'),
-    MatchItem(word: 'ananas', imageAsset: 'assets/pineapple.png'),
-  ];
+  List<PictureMatchWord> items = [];
+  bool isLoading = true;
 
-  final List<String> words = [
-    'pomme', 'banane', 'raisin', 'pastèque', 'ananas', 'chaise'
-  ];
 
+  List<String> words = [];
   final Map<String, bool> matched = {};
-
   int secondsLeft = 30;
   Timer? timer;
 
   @override
+  @override
   void initState() {
     super.initState();
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      setState(() {
-        if (secondsLeft > 0) {
-          secondsLeft--;
-        } else {
-          timer?.cancel();
-          int score = matched.values.where((v) => v == true).length;
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ScorePage(score: score, total: items.length),
-            ),
-          );
-        }
+
+    Future.delayed(Duration.zero, () async {
+      final selectedLang = await _showLanguagePopup(context);
+      if (selectedLang == null) return;
+
+      fetchPictureMatchWords(selectedLang).then((fetchedItems) {
+        setState(() {
+          items = fetchedItems;
+          words = fetchedItems.map((e) => e.word).toList();
+          //words.add('distractor'); // optional
+          words.shuffle();
+          isLoading = false;
+        });
+      });
+
+      timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+        setState(() {
+          if (secondsLeft > 0) {
+            secondsLeft--;
+          } else {
+            timer?.cancel();
+            int score = matched.values.where((v) => v == true).length;
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ScorePage(score: score, total: items.length),
+              ),
+            );
+          }
+        });
       });
     });
   }
+
+
+  Future<String?> _showLanguagePopup(BuildContext context) async {
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        final List<String> languages = ['french', 'spanish', 'german', 'arabic', 'chinese'];
+        return AlertDialog(
+          title: const Text("Choose a Language"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: languages.map((lang) {
+              return ListTile(
+                title: Text(lang[0].toUpperCase() + lang.substring(1)),
+                onTap: () => Navigator.of(context).pop(lang),
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
+
+
+
 
   @override
   void dispose() {
@@ -78,6 +146,11 @@ class _MatchPageState extends State<MatchPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Match the Words to Pictures'),
@@ -121,7 +194,7 @@ class _MatchPageState extends State<MatchPage> {
                         ),
                         child: Column(
                           children: [
-                            Image.asset(item.imageAsset, height: 80),
+                            Image.network(item.imageLink, height: 80),
                             if (isMatched)
                               Text(item.word, style: const TextStyle(fontSize: 18, color: Colors.green))
                           ],
@@ -130,6 +203,7 @@ class _MatchPageState extends State<MatchPage> {
                     },
                   );
                 }).toList(),
+
               ),
             ),
             const VerticalDivider(thickness: 2),
