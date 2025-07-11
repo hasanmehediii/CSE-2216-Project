@@ -102,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     return Scaffold(
       backgroundColor: Colors.blue[50],
       appBar: AppBar(
-        title: const Text('LangBuddy'),
+        title: const Text('LangMastero'),
         backgroundColor: Colors.blueAccent.withOpacity(0.8),
         elevation: 0,
         centerTitle: true,

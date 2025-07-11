@@ -169,7 +169,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                       ),
                       const SizedBox(height: 20),
                       const Text(
-                        "LangBuddy",
+                        "LangMastero",
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,

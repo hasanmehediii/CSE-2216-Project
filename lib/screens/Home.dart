@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const Padding(
                 padding: EdgeInsets.all(16),
-                child: Text('LangBuddy', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                child: Text('LangMastero', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               ),
               const Divider(),
               _buildDrawerItem(Icons.workspace_premium, "Get Pro", const ProPage()),
@@ -120,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       appBar: AppBar(
-        title: const Text('LangBuddy'),
+        title: const Text('LangMastero'),
         centerTitle: true,
         backgroundColor: Colors.blue,
       ),
