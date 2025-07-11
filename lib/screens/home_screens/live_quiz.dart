@@ -14,15 +14,13 @@ class LiveQuizPage extends StatefulWidget {
 
 class _LiveQuizPageState extends State<LiveQuizPage> {
   int _currentIndex = 0;
-  String _selectedLanguage = 'spanish'; // Default language
+  String _selectedLanguage = 'spanish';
   List<Map<String, dynamic>> _words = [];
-  bool _showPopup = true; // Flag to control popup visibility
-  final FlutterTts _flutterTts = FlutterTts(); // Initialize flutter_tts
+  bool _showPopup = true;
+  final FlutterTts _flutterTts = FlutterTts();
 
-  // List of available languages
   List<String> _languages = ['spanish', 'german', 'arabic', 'chinese', 'french'];
 
-  // Fetch data from FastAPI
   Future<void> _fetchWords() async {
     final baseUrl = dotenv.env['BASE_URL'] ?? 'http://192.168.3.107:8000';
     final response = await http.get(Uri.parse('$baseUrl/words'));
@@ -53,7 +51,6 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
     }
   }
 
-  // ✅ Updated: Helper function to sanitize strings
   String _sanitizeString(dynamic input) {
     if (input == null) return '';
     if (input is Map) {
@@ -150,13 +147,22 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Let's Start Learning Words!"),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white,
+          title: const Text(
+            "Let's Start Learning Words!",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.teal),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset('assets/good.png', height: 100, width: 100),
-              const SizedBox(height: 10),
-              const Text("Let's start learning words with images!"),
+              const SizedBox(height: 16),
+              const Text(
+                "Let's start learning words with images!",
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
           actions: [
@@ -167,7 +173,13 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
                 });
                 Navigator.of(context).pop();
               },
-              child: const Text("Start Learning"),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.teal,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text("Start Learning", style: TextStyle(fontSize: 16)),
             ),
           ],
         );
@@ -179,12 +191,16 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
   Widget build(BuildContext context) {
     if (_words.isEmpty) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Word Display'),
-          backgroundColor: Colors.teal,
-          leading: const BackButton(),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal, Colors.blueAccent],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: const Center(child: CircularProgressIndicator(color: Colors.white)),
         ),
-        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -193,168 +209,235 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Word Display'),
-        backgroundColor: Colors.teal,
-        leading: const BackButton(),
+        title: const Text(
+          'Word Display',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: Colors.white),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal, Colors.blueAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        leading: const BackButton(color: Colors.white),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                if (currentWord['imageUrl'] != null && currentWord['imageUrl'] is String)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 30.0),
-                    child: Container(
-                      height: 200,
+      extendBodyBehindAppBar: true,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal, Colors.blueAccent],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    if (currentWord['imageUrl'] != null && currentWord['imageUrl'] is String)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 30.0),
+                        child: Container(
+                          height: 220,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 3,
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: CachedNetworkImage(
+                              imageUrl: currentWord['imageUrl'] ?? "",
+                              placeholder: (context, url) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+                              errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.white, size: 50),
+                              height: 220,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      Container(),
+
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
                         borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey,
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: CachedNetworkImage(
-                          imageUrl: currentWord['imageUrl'] ?? "",
-                          placeholder: (context, url) => const CircularProgressIndicator(),
-                          errorWidget: (context, url, error) => const Icon(Icons.error),
-                          height: 200,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
+                      child: DropdownButton<String>(
+                        value: _selectedLanguage,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedLanguage = newValue!;
+                          });
+                        },
+                        items: _languages.map<DropdownMenuItem<String>>((String language) {
+                          return DropdownMenuItem<String>(
+                            value: language,
+                            child: Text(
+                              language.toUpperCase(),
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.teal),
+                            ),
+                          );
+                        }).toList(),
+                        underline: Container(),
+                        icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
                       ),
                     ),
-                  )
-                else
-                  Container(),
 
-                DropdownButton<String>(
-                  value: _selectedLanguage,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedLanguage = newValue!;
-                    });
-                  },
-                  items: _languages.map<DropdownMenuItem<String>>((String language) {
-                    return DropdownMenuItem<String>(
-                      value: language,
-                      child: Text(language.toUpperCase()),
-                    );
-                  }).toList(),
-                ),
+                    const SizedBox(height: 20),
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Card(
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(25.0),
-                            child: Column(
-                              children: [
-                                Text(
-                                  _selectedLanguage.toUpperCase(),
-                                  style: const TextStyle(fontSize: 16, color: Colors.black54),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  selectedWordTranslation,
-                                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepOrange),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Card(
+                            elevation: 8,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            color: Colors.white.withOpacity(0.95),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    _selectedLanguage.toUpperCase(),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    selectedWordTranslation,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.orange,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Card(
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(25.0),
-                            child: Column(
-                              children: [
-                                const Text(
-                                  'English',
-                                  style: TextStyle(fontSize: 16, color: Colors.black54),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  currentWord['englishMeaning'] ?? "Unknown",
-                                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueAccent),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Card(
+                            elevation: 8,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            color: Colors.white.withOpacity(0.95),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    'English',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    currentWord['englishMeaning'] ?? "Unknown",
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blueAccent,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // ✅ Pronunciation buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.mic, color: Colors.teal),
-                      onPressed: () {
-                        _speak(selectedWordTranslation, language: _selectedLanguage);
-                      },
+                      ],
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.mic, color: Colors.teal),
-                      onPressed: () {
-                        _speak(currentWord['wordText'], language: 'english');
-                      },
+
+                    const SizedBox(height: 20),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.volume_up, color: Colors.white, size: 32),
+                          onPressed: () {
+                            _speak(selectedWordTranslation, language: _selectedLanguage);
+                          },
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.teal.withOpacity(0.8),
+                            padding: const EdgeInsets.all(12),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.volume_up, color: Colors.white, size: 32),
+                          onPressed: () {
+                            _speak(currentWord['wordText'], language: 'english');
+                          },
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.blueAccent.withOpacity(0.8),
+                            padding: const EdgeInsets.all(12),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: _previousWord,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                            elevation: 5,
+                          ),
+                          icon: const Icon(Icons.arrow_back, size: 24),
+                          label: const Text('Previous', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: _nextWord,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                            elevation: 5,
+                          ),
+                          icon: const Icon(Icons.arrow_forward, size: 24),
+                          label: const Text('Next', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: _previousWord,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Previous', style: TextStyle(fontSize: 18)),
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: _nextWord,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      icon: const Icon(Icons.arrow_forward),
-                      label: const Text('Next', style: TextStyle(fontSize: 18)),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
         ),
