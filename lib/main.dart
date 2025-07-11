@@ -7,6 +7,7 @@ import 'providers/user_profile_provider.dart';
 import 'screens/que_screen.dart';
 import 'screens/result_screen.dart';
 import 'screens/home_screens/video_lessons.dart';
+import 'screens/home_screens/sentence_builder.dart';
 import 'package:cseduapp/screens/Login.dart';
 import 'package:cseduapp/screens/About.dart';
 import 'package:cseduapp/screens/Home.dart';
@@ -40,6 +41,7 @@ class LanguageLearningApp extends StatelessWidget {
         '/mcq': (context) => const QuestionScreen(),
         '/result': (context) => const ResultScreen(score: 0, total: 0, day: 0),
         '/video': (context) => const VideoLessonsPage(),
+        '/sentence-builder': (context) => const SentenceBuilderGame(),
       },
     );
   }

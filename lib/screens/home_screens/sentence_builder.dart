@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SentenceBuilderGame extends StatefulWidget {
   const SentenceBuilderGame({super.key});
@@ -13,15 +16,6 @@ class _SentenceBuilderGameState extends State<SentenceBuilderGame> {
   List<String> shuffledWords = [];
   List<String> userSentence = [];
   String resultMessage = '';
-
-  final Map<String, List<Map<String, dynamic>>> sentenceData = {
-    "french": [
-      {"sentence": "Je vais à l'école", "words": ["Je", "vais", "à", "l'", "école"]},
-    ],
-    "spanish": [
-      {"sentence": "Ella come una manzana", "words": ["Ella", "come", "una", "manzana"]},
-    ]
-  };
 
   @override
   void initState() {
@@ -38,7 +32,7 @@ class _SentenceBuilderGameState extends State<SentenceBuilderGame> {
           title: const Text("Choose a Language"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: ['french', 'spanish'].map((lang) {
+            children: ['english', 'spanish', 'german', 'arabic', 'french', 'chinese'].map((lang) {
               return ListTile(
                 title: Text(lang[0].toUpperCase() + lang.substring(1)),
                 onTap: () => Navigator.of(context).pop(lang),
@@ -52,11 +46,44 @@ class _SentenceBuilderGameState extends State<SentenceBuilderGame> {
     if (lang != null) {
       setState(() {
         selectedLang = lang;
-        final data = sentenceData[lang]![0];
-        correctSentence = data["words"];
-        shuffledWords = List<String>.from(correctSentence)..shuffle();
-        userSentence = [];
-        resultMessage = '';
+      });
+      fetchSentence(lang);
+    }
+  }
+
+  Future<void> fetchSentence(String lang) async {
+    final baseUrl = dotenv.env['BASE_URL']!;
+    final url = Uri.parse('$baseUrl/sentence-builder/random-sentence');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final sentence = data[lang];
+
+        if (sentence != null) {
+          List<String> words = sentence.trim().split(RegExp(r'\s+'));
+
+          setState(() {
+            correctSentence = words;
+            shuffledWords = List<String>.from(words)..shuffle();
+            userSentence = [];
+            resultMessage = '';
+          });
+        } else {
+          setState(() {
+            resultMessage = 'No sentence available in "$lang".';
+          });
+        }
+      } else {
+        setState(() {
+          resultMessage = '❌ Error fetching sentence: ${response.statusCode}';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        resultMessage = '❌ Failed to connect to backend.\n$e';
       });
     }
   }
@@ -98,10 +125,11 @@ class _SentenceBuilderGameState extends State<SentenceBuilderGame> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 10),
-            Text('Arrange the words to form a correct sentence in $selectedLang',
-                style: const TextStyle(fontSize: 18)),
+            Text(
+              'Arrange the words to form a correct sentence in $selectedLang',
+              style: const TextStyle(fontSize: 18),
+            ),
             const SizedBox(height: 20),
-
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -112,7 +140,6 @@ class _SentenceBuilderGameState extends State<SentenceBuilderGame> {
                 );
               }).toList(),
             ),
-
             const SizedBox(height: 30),
             const Text('Your Sentence:', style: TextStyle(fontSize: 18)),
             const SizedBox(height: 10),
@@ -122,7 +149,6 @@ class _SentenceBuilderGameState extends State<SentenceBuilderGame> {
                 return Chip(label: Text(word));
               }).toList(),
             ),
-
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -140,15 +166,17 @@ class _SentenceBuilderGameState extends State<SentenceBuilderGame> {
                 ),
               ],
             ),
-
             const SizedBox(height: 30),
-            Text(resultMessage,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 18,
-                    color: resultMessage.startsWith('✅')
-                        ? Colors.green
-                        : Colors.red)),
+            Text(
+              resultMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                color: resultMessage.startsWith('✅')
+                    ? Colors.green
+                    : Colors.red,
+              ),
+            ),
           ],
         ),
       ),
