@@ -1,9 +1,8 @@
 import 'dart:async';
-import 'package:cseduapp/screens/home_screens/mcq.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/storage_service.dart';
-import '../providers/user_profile_provider.dart';
+import '../../services/storage_service.dart';
+import '../../providers/user_profile_provider.dart';
 import 'home_screens/dashboard.dart';
 import 'home_screens/live_quiz.dart';
 import 'home_screens/routine.dart';
@@ -11,6 +10,9 @@ import 'home_screens/writing.dart';
 import 'home_screens/settings.dart';
 import 'home_screens/pro.dart';
 import 'home_screens/video_lessons.dart';
+import '../screens/que_screen.dart';
+import '../screens/result_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -73,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _logout(BuildContext context) async {
     await StorageService.clearStorage();
-    Provider.of<UserProfileProvider>(context, listen: false).clearUserProfile();
+    Provider.of<UserProfileProvider>(context, listen: false).clearProfile();
     if (mounted) {
       Navigator.pushReplacementNamed(context, '/login');
     }
@@ -81,8 +83,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userProfile = Provider.of<UserProfileProvider>(context).userProfile;
-    final isPremium = Provider.of<UserProfileProvider>(context).isPremium;
+    final userProvider = Provider.of<UserProfileProvider>(context);
+    final userProfile = userProvider.userProfile;
+
+    if (userProfile == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (userProfile.email == 'admin@gmail.com') {
+      Future.microtask(() {
+        Navigator.pushReplacementNamed(context, '/admin');
+      });
+      return const Scaffold();
+    }
+
+    final isPremium = userProvider.isPremium;
 
     return Scaffold(
       drawer: Drawer(
@@ -98,14 +115,14 @@ class _HomeScreenState extends State<HomeScreen> {
               if (isPremium) _buildDrawerItem(Icons.video_library, "Video Lessons", const VideoLessonsPage()),
               _buildDrawerItem(Icons.bar_chart, "Progress", const RoutinePage()),
               _buildDrawerItem(Icons.menu_book, "Vocabulary", const LiveQuizPage()),
-              _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const MCQTestPage()),
+              _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const QuestionScreen()),
               _buildDrawerItem(Icons.edit_note, "Live Class", const WritingTestPage()),
               _buildDrawerItem(Icons.settings, "Settings", const SettingsPage()),
               const Spacer(),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.person),
-                title: Text(userProfile?.fullName ?? 'Guest'),
+                title: Text(userProfile.fullName),
                 onTap: () => _navigateTo(const StudentDashboard()),
               ),
               ListTile(
@@ -140,96 +157,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text("Popular Languages", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-            ),
-            const SizedBox(height: 10),
-            // Language Cards Section (2 columns)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // Two columns
-                  crossAxisSpacing: 30, // Increased space between the cards
-                  mainAxisSpacing: 30, // Increased space between the cards
-                  childAspectRatio: 0.75, // Aspect ratio to ensure square cards
-                ),
-                itemCount: languages.length,
-                itemBuilder: (context, index) {
-                  final lang = languages[index];
-                  return _buildLanguageCard(lang["name"]!, lang["info"]!, lang["rating"]!, lang["students"]!, index);
-                },
-              ),
-            ),
+            _buildSection("Popular Languages", languages),
             const SizedBox(height: 20),
-            // Running Courses Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text("Running Courses", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-            ),
-            const SizedBox(height: 10),
-            // Course Cards Section (same as language cards)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // Two columns
-                  crossAxisSpacing: 30, // Increased space between the cards
-                  mainAxisSpacing: 30, // Increased space between the cards
-                  childAspectRatio: 0.6, // Aspect ratio to ensure square cards
-                ),
-                itemCount: courses.length,
-                itemBuilder: (context, index) {
-                  final course = courses[index];
-                  return _buildLanguageCard(course["name"]!, course["info"]!, course["rating"]!, course["students"]!, index);
-                },
-              ),
-            ),
+            _buildSection("Running Courses", courses),
             const SizedBox(height: 20),
-            // Footer
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: Column(
-                children: [
-                  const Text(
-                    'All rights reserved 2025, Version 25.24.1',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.facebook, color: Colors.blue, size: 24),
-                      SizedBox(width: 16),
-                      Icon(Icons.code, color: Colors.black, size: 24), // GitHub
-                      SizedBox(width: 16),
-                      Icon(Icons.business_center, color: Color(0xFF0A66C2), size: 24), // LinkedIn
-                      SizedBox(width: 16),
-                      Icon(Icons.email, color: Colors.red, size: 24),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                ],
-              ),
-            ),
+            _buildFooter(),
           ],
         ),
       ),
     );
   }
 
-  // Function to build each drawer item
   ListTile _buildDrawerItem(IconData icon, String label, Widget page) {
     return ListTile(
       leading: Icon(icon),
@@ -238,7 +176,40 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Function to build each language or course card
+  Widget _buildSection(String title, List<Map<String, String>> items) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 30,
+              mainAxisSpacing: 30,
+              childAspectRatio: 0.75,
+            ),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return _buildLanguageCard(
+                item["name"]!,
+                item["info"]!,
+                item["rating"]!,
+                item["students"]!,
+                index,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLanguageCard(String title, String subtitle, String rating, String students, int index) {
     final List<Color> cardColors = [
       Colors.blue.shade100,
@@ -250,69 +221,71 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: cardColors[index % cardColors.length], // Alternate colors for each card
+        color: cardColors[index % cardColors.length],
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black26,
-            blurRadius: 12, // Slightly more pronounced shadow
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.language,
-              color: Colors.blue.shade700,
-              size: 40,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              style: const TextStyle(
-                color: Colors.black54,
-                fontSize: 12,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.star, color: Colors.yellow, size: 18),
-                const SizedBox(width: 4),
-                Text(
-                  rating,
-                  style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.people, color: Colors.black, size: 18),
-                const SizedBox(width: 4),
-                Text(
-                  students,
-                  style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ],
-        ),
+      padding: const EdgeInsets.all(10.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.language, size: 40, color: Colors.indigo),
+          const SizedBox(height: 10),
+          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.star, color: Colors.amber, size: 18),
+              const SizedBox(width: 4),
+              Text(rating, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.people, color: Colors.black, size: 18),
+              const SizedBox(width: 4),
+              Text(students, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFooter() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        children: const [
+          Text(
+            'All rights reserved 2025, Version 25.24.1',
+            style: TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+          SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.facebook, color: Colors.blue, size: 24),
+              SizedBox(width: 16),
+              Icon(Icons.code, color: Colors.black, size: 24),
+              SizedBox(width: 16),
+              Icon(Icons.business_center, color: Color(0xFF0A66C2), size: 24),
+              SizedBox(width: 16),
+              Icon(Icons.email, color: Colors.red, size: 24),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -7,6 +7,7 @@ import '../services/storage_service.dart';
 import 'SignUp.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_profile_provider.dart';
+import '../models/user_profile.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,7 +17,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin {
-  final _emailController = TextEditingController();
+  final _userEmailController = TextEditingController();
+  final _adminEmailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _emailFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
@@ -24,6 +26,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
   bool _obscureText = true;
   bool _isLoggingIn = false;
+  int _loginMode = 0; // 0 for User, 1 for Admin
+  final PageController _pageController = PageController(initialPage: 0);
 
   late AnimationController _bgController;
   late Animation<double> _bgAnimation;
@@ -53,19 +57,24 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   void dispose() {
     _bgController.dispose();
     _exitAnimationController.dispose();
-    _emailController.dispose();
+    _userEmailController.dispose();
+    _adminEmailController.dispose();
     _passwordController.dispose();
     _emailFocusNode.dispose();
     _passwordFocusNode.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
   String? _validateEmail(String? mail) {
     if (mail == null || mail.isEmpty) return 'Please enter your email';
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[a-zA-Z]{2,7}$');
+    final emailRegex = RegExp(
+        r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    );
     if (!emailRegex.hasMatch(mail)) return 'Please enter a valid email';
     return null;
   }
+
 
   String? _validatePassword(String? password) {
     if (password == null || password.isEmpty) return 'Please enter your password';
@@ -76,12 +85,48 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   Future<void> _login() async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() => _isLoggingIn = true);
+
       try {
+        final email = _loginMode == 0 ? _userEmailController.text.trim() : _adminEmailController.text.trim();
+        final password = _passwordController.text.trim();
+
+        if (_loginMode == 1) {
+          // Hardcoded Admin Login
+          if (email == "admin@gmail.com" && password == "admin1234") {
+
+
+            await StorageService.saveToken("admin-token");
+            final adminProfile = UserProfile(
+              fullName: "LangBuddy Admin",
+              username: "admin",
+              email: "admin@gmail.com",
+              phoneNumber: "00000000000",
+              countryCode: "+88",
+              gender: "Other",
+              nid: "0000000000",
+              dob: "2000-01-01",
+              isPremium: true,
+            );
+
+            await StorageService.saveToken("admin-token");
+            await StorageService.saveUserProfile(adminProfile); // ✅ Save JSON in storage
+
+            Provider.of<UserProfileProvider>(context, listen: false)
+                .setUserProfile(adminProfile); // ✅ Pass original object to provider
+
+
+            await _exitAnimationController.forward();
+            Navigator.pushReplacementNamed(context, '/admin'); // ✅ Navigate to Admin screen
+            return;
+          } else {
+            throw Exception("Invalid admin credentials");
+          }
+        }
+
+        // Normal user login via backend
         final authService = AuthService();
-        final result = await authService.login(
-          _emailController.text.trim(),
-          _passwordController.text,
-        );
+        final result = await authService.login(email, password);
+
         await StorageService.saveToken(result['token']);
         await StorageService.saveUserProfile(result['profile']);
         Provider.of<UserProfileProvider>(context, listen: false).setUserProfile(result['profile']);
@@ -91,10 +136,123 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       } catch (e) {
         setState(() => _isLoggingIn = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text("Error: $e")),
         );
+        print("Login failed: $e");
       }
     }
+  }
+
+  Widget _buildLoginButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blueAccent,
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          elevation: 8,
+          shadowColor: Colors.black.withOpacity(0.3),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+        onPressed: _isLoggingIn ? null : _login,
+        child: _isLoggingIn
+            ? const CircularProgressIndicator(color: Colors.white)
+            : const Text('Login', style: TextStyle(fontSize: 20, color: Colors.white)),
+      ),
+    );
+  }
+
+  Widget _buildUserLoginForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CustomTextField(
+            controller: _userEmailController,
+            hintText: 'Email',
+            prefixIcon: const Icon(Icons.email),
+            keyboardType: TextInputType.emailAddress,
+            validator: _validateEmail,
+            focusNode: _emailFocusNode,
+          ),
+          const SizedBox(height: 20),
+          CustomTextField(
+            controller: _passwordController,
+            hintText: 'Password',
+            obscureText: _obscureText,
+            prefixIcon: const Icon(Icons.lock),
+            suffixIcon: IconButton(
+              icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
+              onPressed: () => setState(() => _obscureText = !_obscureText),
+            ),
+            validator: _validatePassword,
+            focusNode: _passwordFocusNode,
+          ),
+          const SizedBox(height: 30),
+          _buildLoginButton(),
+          const SizedBox(height: 15),
+          TextButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SignUpPage()),
+            ),
+            child: const Text(
+              "Don't have an account? Sign Up",
+              style: TextStyle(fontSize: 16, color: Colors.blueAccent, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdminLoginForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CustomTextField(
+            controller: _adminEmailController,
+            hintText: 'Admin Email',
+            prefixIcon: const Icon(Icons.admin_panel_settings),
+            keyboardType: TextInputType.emailAddress,
+            validator: _validateEmail,
+            focusNode: _emailFocusNode,
+          ),
+          const SizedBox(height: 20),
+          CustomTextField(
+            controller: _passwordController,
+            hintText: 'Admin Password',
+            obscureText: _obscureText,
+            prefixIcon: const Icon(Icons.lock),
+            suffixIcon: IconButton(
+              icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
+              onPressed: () => setState(() => _obscureText = !_obscureText),
+            ),
+            validator: _validatePassword,
+            focusNode: _passwordFocusNode,
+          ),
+          const SizedBox(height: 30),
+          _buildLoginButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFadedLetter(String letter) {
+    return Opacity(
+      opacity: 0.05,
+      child: Text(
+        letter,
+        style: const TextStyle(
+          fontSize: 60,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
+      ),
+    );
   }
 
   @override
@@ -109,7 +267,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       ),
       body: Stack(
         children: [
-          // Animated moving faded letters in background
           AnimatedBuilder(
             animation: _bgAnimation,
             builder: (context, child) {
@@ -128,7 +285,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             },
           ),
 
-          // Login Card UI
           Center(
             child: ScaleTransition(
               scale: Tween<double>(begin: 1, end: 0).animate(CurvedAnimation(
@@ -148,81 +304,63 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
                     margin: const EdgeInsets.symmetric(horizontal: 24),
                     child: SingleChildScrollView(
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Cartoon logo animation
-                            SizedBox(
-                              width: 200,
-                              height: 200,
-                              child: Lottie.asset(
-                                'assets/gifs/loginn.json', // replace with your actual file
-                                repeat: true,
-                                fit: BoxFit.contain,
-                              ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 200,
+                            height: 200,
+                            child: Lottie.asset(
+                              _loginMode == 0
+                                  ? 'assets/gifs/loginn.json'
+                                  : 'assets/gifs/admin_office.json',
+                              repeat: true,
+                              fit: BoxFit.contain,
                             ),
-                            const SizedBox(height: 10),
-                            Text(
-                              'Login to Continue',
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue[800],
-                              ),
-                            ),
-                            const SizedBox(height: 30),
-                            CustomTextField(
-                              controller: _emailController,
-                              hintText: 'Email',
-                              prefixIcon: const Icon(Icons.email),
-                              keyboardType: TextInputType.emailAddress,
-                              validator: _validateEmail,
-                              focusNode: _emailFocusNode,
-                            ),
-                            const SizedBox(height: 20),
-                            CustomTextField(
-                              controller: _passwordController,
-                              hintText: 'Password',
-                              obscureText: _obscureText,
-                              prefixIcon: const Icon(Icons.lock),
-                              suffixIcon: IconButton(
-                                icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
-                                onPressed: () => setState(() => _obscureText = !_obscureText),
-                              ),
-                              validator: _validatePassword,
-                              focusNode: _passwordFocusNode,
-                            ),
-                            const SizedBox(height: 30),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blueAccent,
-                                  padding: const EdgeInsets.symmetric(vertical: 18),
-                                  elevation: 8,
-                                  shadowColor: Colors.black.withOpacity(0.3),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                          const SizedBox(height: 10),
+                          Column(
+                            children: [
+                              Text(
+                                'Login to Continue',
+                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue[800],
                                 ),
-                                onPressed: _isLoggingIn ? null : _login,
-                                child: _isLoggingIn
-                                    ? const CircularProgressIndicator(color: Colors.white)
-                                    : const Text('Login', style: TextStyle(fontSize: 20, color: Colors.white)),
                               ),
+                              const SizedBox(height: 10),
+                              ToggleButtons(
+                                isSelected: [_loginMode == 0, _loginMode == 1],
+                                onPressed: (index) {
+                                  setState(() {
+                                    _loginMode = index;
+                                    _formKey.currentState?.reset();
+                                  });
+                                  _pageController.animateToPage(index,
+                                      duration: const Duration(milliseconds: 400), curve: Curves.easeInOut);
+                                },
+                                borderRadius: BorderRadius.circular(10),
+                                selectedColor: Colors.white,
+                                fillColor: Colors.blueAccent,
+                                color: Colors.blueAccent,
+                                constraints: const BoxConstraints(minHeight: 40, minWidth: 100),
+                                children: const [Text("User"), Text("Admin")],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          SizedBox(
+                            height: 400,
+                            child: PageView(
+                              controller: _pageController,
+                              physics: const NeverScrollableScrollPhysics(),
+                              children: [
+                                _buildUserLoginForm(),
+                                _buildAdminLoginForm(),
+                              ],
                             ),
-                            const SizedBox(height: 15),
-                            TextButton(
-                              onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const SignUpPage()),
-                              ),
-                              child: const Text(
-                                "Don't have an account? Sign Up",
-                                style: TextStyle(fontSize: 16, color: Colors.blueAccent, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -231,20 +369,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildFadedLetter(String letter) {
-    return Opacity(
-      opacity: 0.05,
-      child: Text(
-        letter,
-        style: const TextStyle(
-          fontSize: 60,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ),
       ),
     );
   }

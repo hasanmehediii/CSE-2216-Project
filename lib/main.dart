@@ -12,6 +12,7 @@ import 'screens/home_screens/video_lessons.dart';
 import 'package:cseduapp/screens/Login.dart';
 import 'package:cseduapp/screens/About.dart';
 import 'package:cseduapp/screens/Home.dart';
+import 'screens/admin_home_screen.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
@@ -38,6 +39,7 @@ class LanguageLearningApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
+        '/admin': (context) => const AdminHomeScreen(),
         '/about': (context) => const AboutUsPage(),
         '/mcq': (context) => const QuestionScreen(),
         '/result': (context) => const ResultScreen(score: 0, total: 0, day: 0),

@@ -4,10 +4,10 @@ class UserProfile {
   final String email;
   final String phoneNumber;
   final String countryCode;
-  final String? gender;
   final String nid;
   final String dob;
-  final bool isPremium; // Add isPremium field
+  final String? gender;
+  final bool isPremium; // ✅ New field added
 
   UserProfile({
     required this.fullName,
@@ -15,10 +15,10 @@ class UserProfile {
     required this.email,
     required this.phoneNumber,
     required this.countryCode,
-    this.gender,
     required this.nid,
     required this.dob,
-    required this.isPremium,
+    this.gender,
+    this.isPremium = false, // ✅ defaulted to false
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -28,10 +28,10 @@ class UserProfile {
       email: json['email'],
       phoneNumber: json['phoneNumber'],
       countryCode: json['countryCode'],
-      gender: json['gender'],
       nid: json['nid'],
       dob: json['dob'],
-      isPremium: json['is_premium'] ?? false,
+      gender: json['gender'],
+      isPremium: json['isPremium'] ?? false, // ✅ null-safe
     );
   }
 
@@ -42,10 +42,10 @@ class UserProfile {
       'email': email,
       'phoneNumber': phoneNumber,
       'countryCode': countryCode,
-      'gender': gender,
       'nid': nid,
       'dob': dob,
-      'is_premium': isPremium,
+      'gender': gender,
+      'isPremium': isPremium, // ✅ ensure it's saved too
     };
   }
 }
