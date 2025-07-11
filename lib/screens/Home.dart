@@ -10,6 +10,7 @@ import 'home_screens/routine.dart';
 import 'home_screens/writing.dart';
 import 'home_screens/settings.dart';
 import 'home_screens/pro.dart';
+import 'home_screens/picpair.dart';
 import 'home_screens/video_lessons.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -99,6 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildDrawerItem(Icons.bar_chart, "Progress", const RoutinePage()),
               _buildDrawerItem(Icons.menu_book, "Vocabulary", const LiveQuizPage()),
               _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const MCQTestPage()),
+              _buildDrawerItem(Icons.image_search, "Picture Match Game", const MatchPage()),
               _buildDrawerItem(Icons.edit_note, "Live Class", const WritingTestPage()),
               _buildDrawerItem(Icons.settings, "Settings", const SettingsPage()),
               const Spacer(),
