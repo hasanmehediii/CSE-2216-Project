@@ -26,9 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
   late Timer _adTimer;
 
   final List<String> adImages = [
-    'assets/ad1.jpg',
-    'assets/ad2.jpg',
-    'assets/ad3.jpg',
+    'assets/ad1.png',
+    'assets/ad2.png',
+    'assets/ad3.png',
   ];
 
   final List<Map<String, String>> languages = [
