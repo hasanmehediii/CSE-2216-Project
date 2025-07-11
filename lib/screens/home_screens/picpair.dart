@@ -215,15 +215,34 @@ class _MatchPageState extends State<MatchPage> {
                     data: word,
                     feedback: Material(
                       color: Colors.transparent,
-                      child: Text(word, style: const TextStyle(fontSize: 18, color: Colors.blue)),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade200,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 3)],
+                        ),
+                        child: Text(word, style: const TextStyle(fontSize: 18, color: Colors.white)),
+                      ),
                     ),
                     childWhenDragging: Opacity(
                       opacity: 0.4,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        child: Text(word, style: const TextStyle(fontSize: 18)),
+                      ),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       child: Text(word, style: const TextStyle(fontSize: 18)),
                     ),
-                    child: Text(word, style: const TextStyle(fontSize: 18)),
                   );
                 }).toList(),
+
               ),
             )
           ],
