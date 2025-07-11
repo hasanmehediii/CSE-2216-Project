@@ -12,6 +12,8 @@ import 'home_screens/settings.dart';
 import 'home_screens/pro.dart';
 import 'home_screens/picpair.dart';
 import 'home_screens/video_lessons.dart';
+import 'home_screens/sentence_builder.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -101,6 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildDrawerItem(Icons.menu_book, "Vocabulary", const LiveQuizPage()),
               _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const MCQTestPage()),
               _buildDrawerItem(Icons.image_search, "Flash Cards", const MatchPage()),
+              _buildDrawerItem(Icons.text_snippet, "Sentence Builder", const SentenceBuilderGame()),
               _buildDrawerItem(Icons.edit_note, "Live Class", const WritingTestPage()),
               _buildDrawerItem(Icons.settings, "Settings", const SettingsPage()),
               const Spacer(),
