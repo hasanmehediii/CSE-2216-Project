@@ -73,7 +73,7 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              'LangBuddy',
+              'LangMastero',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
