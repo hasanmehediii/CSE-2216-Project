@@ -41,6 +41,7 @@ async def get_words():
     words = await words_cursor.to_list(length=100)
     for word in words:
         word["englishMeaning"] = word.get("english_word", "")
+        word.pop("_id", None)
     return words
 
 @app.on_event("startup")

@@ -42,7 +42,7 @@ dependencies:
   youtube_player_iframe: ^5.2.1
   url_launcher: ^6.1.0
   youtube_player_flutter: ^9.1.1
-  flutter_tts: ^3.0.0
+  flutter_tts: ^4.0.2
   cached_network_image: ^3.2.0
   webview_flutter: ^4.0.0
   flutter_inappwebview: ^6.1.5
