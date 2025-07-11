@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 void main() {
   runApp(const LanguageMatchGame());
@@ -40,20 +41,62 @@ class _MatchPageState extends State<MatchPage> {
   ];
 
   final List<String> words = [
-    'pomme', 'banane', 'raisin', 'pastèque', 'ananas', 'chaise' // distractor
+    'pomme', 'banane', 'raisin', 'pastèque', 'ananas', 'chaise'
   ];
 
   final Map<String, bool> matched = {};
 
+  int secondsLeft = 30;
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+      setState(() {
+        if (secondsLeft > 0) {
+          secondsLeft--;
+        } else {
+          timer?.cancel();
+          int score = matched.values.where((v) => v == true).length;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ScorePage(score: score, total: items.length),
+            ),
+          );
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Match the Words to Pictures')),
+      appBar: AppBar(
+        title: const Text('Match the Words to Pictures'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: Text(
+                'Time: $secondsLeft s',
+                style: const TextStyle(fontSize: 18),
+              ),
+            ),
+          )
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            // Images Column
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -90,7 +133,6 @@ class _MatchPageState extends State<MatchPage> {
               ),
             ),
             const VerticalDivider(thickness: 2),
-            // Words Column
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -109,6 +151,33 @@ class _MatchPageState extends State<MatchPage> {
                   );
                 }).toList(),
               ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ScorePage extends StatelessWidget {
+  final int score;
+  final int total;
+
+  const ScorePage({super.key, required this.score, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Your Score')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Score: $score / $total', style: const TextStyle(fontSize: 24)),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Back to Home'),
             )
           ],
         ),
