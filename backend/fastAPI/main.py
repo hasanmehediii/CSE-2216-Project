@@ -9,6 +9,7 @@ from mcq_routes import mcq_router
 from picture_match_routes import router as picture_match_router
 from sentence_routes import router as sentence_router
 from password_reset import router as password_reset_router
+from edit_profile_route import router as edit_profile_router
 
 
 app = FastAPI()
@@ -29,6 +30,7 @@ app.include_router(mcq_router)
 app.include_router(picture_match_router)
 app.include_router(sentence_router)
 app.include_router(password_reset_router)
+app.include_router(edit_profile_router)
 
 class Word(BaseModel):
     english_word: str

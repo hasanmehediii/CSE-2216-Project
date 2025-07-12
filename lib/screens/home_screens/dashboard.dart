@@ -118,7 +118,7 @@ class StudentDashboard extends StatelessWidget {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      // Action for the button (optional)
+                      Navigator.pushNamed(context, '/edit-profile');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blueAccent,

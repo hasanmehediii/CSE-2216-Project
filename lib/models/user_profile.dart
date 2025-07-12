@@ -1,13 +1,13 @@
 class UserProfile {
-  final String fullName;
-  final String username;
-  final String email;
-  final String phoneNumber;
-  final String countryCode;
-  final String nid;
-  final String dob;
-  final String? gender;
-  final bool isPremium; // ✅ New field added
+   String fullName;
+   String username;
+   String email;
+   String phoneNumber;
+   String countryCode;
+   String nid;
+   String dob;
+   String? gender;
+   bool isPremium; // ✅ New field added
 
   UserProfile({
     required this.fullName,
