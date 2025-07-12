@@ -18,8 +18,8 @@ class AdminHomeScreen extends StatelessWidget {
             children: [
               const Padding(
                 padding: EdgeInsets.all(16),
-                child: Text('LangBuddy Admin',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                child: Text('LangMastero Admin',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ),
               const Divider(),
               _drawerItem(Icons.add_box, "MCQ Insert"),
@@ -35,7 +35,14 @@ class AdminHomeScreen extends StatelessWidget {
         ),
       ),
       appBar: AppBar(
-        title: const Text('LangBuddy Admin Panel'),
+        title: const Text(
+            'LangMastero Admin Panel',
+          style: TextStyle(
+            fontSize: 20,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Colors.indigo,
         centerTitle: true,
       ),
@@ -46,7 +53,7 @@ class AdminHomeScreen extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  'LangBuddy Admin Panel',
+                  'LangMastero Admin Panel',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
