@@ -9,9 +9,11 @@ import 'home_screens/routine.dart';
 import 'home_screens/writing.dart';
 import 'home_screens/settings.dart';
 import 'home_screens/pro.dart';
+import 'home_screens/picpair.dart';
 import 'home_screens/video_lessons.dart';
 import '../screens/que_screen.dart';
 import '../screens/result_screen.dart';
+import 'home_screens/sentence_builder.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -27,9 +29,9 @@ class _HomeScreenState extends State<HomeScreen> {
   late Timer _adTimer;
 
   final List<String> adImages = [
-    'assets/ad1.jpg',
-    'assets/ad2.jpg',
-    'assets/ad3.jpg',
+    'assets/ad1.png',
+    'assets/ad2.png',
+    'assets/ad3.png',
   ];
 
   final List<Map<String, String>> languages = [
@@ -108,14 +110,16 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const Padding(
                 padding: EdgeInsets.all(16),
-                child: Text('LangBuddy', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                child: Text('LangMastero', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               ),
               const Divider(),
               _buildDrawerItem(Icons.workspace_premium, "Get Pro", const ProPage()),
               if (isPremium) _buildDrawerItem(Icons.video_library, "Video Lessons", const VideoLessonsPage()),
               _buildDrawerItem(Icons.bar_chart, "Progress", const RoutinePage()),
               _buildDrawerItem(Icons.menu_book, "Vocabulary", const LiveQuizPage()),
-              _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const QuestionScreen()),
+              _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const MCQTestPage()),
+              _buildDrawerItem(Icons.image_search, "Flash Cards", const MatchPage()),
+              _buildDrawerItem(Icons.text_snippet, "Sentence Builder", const SentenceBuilderGame()),
               _buildDrawerItem(Icons.edit_note, "Live Class", const WritingTestPage()),
               _buildDrawerItem(Icons.settings, "Settings", const SettingsPage()),
               const Spacer(),
@@ -135,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       appBar: AppBar(
-        title: const Text('LangBuddy'),
+        title: const Text('LangMastero'),
         centerTitle: true,
         backgroundColor: Colors.blue,
       ),

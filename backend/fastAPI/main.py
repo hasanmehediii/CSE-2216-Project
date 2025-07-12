@@ -6,6 +6,9 @@ from db import client, words_collection
 from pydantic import BaseModel
 from typing import Dict
 from mcq_routes import mcq_router
+from picture_match_routes import router as picture_match_router
+from sentence_routes import router as sentence_router
+
 
 app = FastAPI()
 
@@ -22,6 +25,8 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(video_router)
 app.include_router(mcq_router)
+app.include_router(picture_match_router)
+app.include_router(sentence_router)
 
 class Word(BaseModel):
     english_word: str
@@ -38,6 +43,7 @@ async def get_words():
     words = await words_cursor.to_list(length=100)
     for word in words:
         word["englishMeaning"] = word.get("english_word", "")
+        word.pop("_id", None)
     return words
 
 @app.on_event("startup")

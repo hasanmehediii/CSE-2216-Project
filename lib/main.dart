@@ -1,14 +1,13 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'providers/user_profile_provider.dart';
 import 'screens/que_screen.dart';
 import 'screens/result_screen.dart';
 import 'screens/home_screens/video_lessons.dart';
+import 'screens/home_screens/sentence_builder.dart';
 import 'package:cseduapp/screens/Login.dart';
 import 'package:cseduapp/screens/About.dart';
 import 'package:cseduapp/screens/Home.dart';
@@ -44,6 +43,7 @@ class LanguageLearningApp extends StatelessWidget {
         '/mcq': (context) => const QuestionScreen(),
         '/result': (context) => const ResultScreen(score: 0, total: 0, day: 0),
         '/video': (context) => const VideoLessonsPage(),
+        '/sentence-builder': (context) => const SentenceBuilderGame(),
       },
     );
   }
@@ -57,12 +57,9 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-
   @override
   void initState() {
     super.initState();
-
-    // Wait for 3 seconds and then navigate to the WelcomeScreen
     Future.delayed(const Duration(seconds: 5), () {
       Navigator.pushReplacement(
         context,
@@ -80,7 +77,7 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              'LangBuddy',
+              'LangMastero',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -88,7 +85,6 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            // Splash screen image (icon)
             Image.asset(
               'assets/splash.png',
               width: 150,
@@ -160,7 +156,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
               _floatingLetter('অ', top: 200 - _animation.value, left: 80 + _animation.value),
               _floatingLetter('ñ', bottom: 200 + _animation.value, right: 70 - _animation.value),
               _floatingLetter('é', top: 250 + _animation.value, left: 50 - _animation.value),
-
               Center(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
@@ -178,11 +173,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                       ),
                       const SizedBox(height: 20),
                       const Text(
-                        "LangBuddy",
+                        "LangMastero",
                         style: TextStyle(
-                          fontSize: 28,
+                          fontSize: 32,
                           fontWeight: FontWeight.bold,
                           color: Colors.blueAccent,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 4.0,
+                              color: Colors.black26,
+                              offset: Offset(2.0, 2.0),
+                            ),
+                          ],
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -190,10 +192,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                       const Text(
                         "Your buddy for language learning!",
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 18, color: Colors.black54),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
                       ),
                       const SizedBox(height: 40),
-
                       _buildButton(
                         context,
                         label: "Get Started",
@@ -202,22 +207,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                         route: '/login',
                       ),
                       const SizedBox(height: 20),
-
                       _buildButton(
                         context,
                         label: "About Us",
                         icon: Icons.info_outline,
                         color: Colors.lightBlue,
                         route: '/about',
-                      ),
-                      const SizedBox(height: 20),
-
-                      _buildButton(
-                        context,
-                        label: "Exit",
-                        icon: Icons.exit_to_app,
-                        color: Colors.redAccent,
-                        onPressed: () => _showExitDialog(context),
                       ),
                     ],
                   ),
@@ -251,49 +246,30 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     required IconData icon,
     required Color color,
     String? route,
-    VoidCallback? onPressed,
   }) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed: onPressed ?? () => Navigator.pushNamed(context, route!),
-        icon: Icon(icon),
-        label: Text(label),
+        onPressed: () => Navigator.pushNamed(context, route!),
+        icon: Icon(icon, size: 24, color: Colors.white),
+        label: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
-          padding: const EdgeInsets.symmetric(vertical: 18),
-          textStyle: const TextStyle(fontSize: 18),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+          textStyle: const TextStyle(fontSize: 20),
+          elevation: 8,
+          shadowColor: Colors.black45,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
-      ),
-    );
-  }
-
-  void _showExitDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Exit App"),
-        content: const Text("Are you sure you want to exit?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () {
-              if (kIsWeb) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Exit is not supported on Web')),
-                );
-              } else if (Platform.isAndroid || Platform.isIOS) {
-                Navigator.of(context).maybePop();
-              } else {
-                exit(0);
-              }
-            },
-            child: const Text("Exit"),
-          ),
-        ],
       ),
     );
   }

@@ -17,6 +17,9 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nidController = TextEditingController();
+  String _passwordStrength = '';
+  Color _strengthColor = Colors.transparent;
+
 
   String? _selectedCode;
   String? _gender;
@@ -93,11 +96,33 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
     }
   }
 
+  void _checkPasswordStrength(String password) {
+    setState(() {
+      if (password.isEmpty) {
+        _passwordStrength = '';
+        _strengthColor = Colors.transparent;
+      } else if (password.length < 6) {
+        _passwordStrength = 'Weak';
+        _strengthColor = Colors.red;
+      } else if (password.length < 8 ||
+          !RegExp(r'[A-Z]').hasMatch(password) ||
+          !RegExp(r'[0-9]').hasMatch(password) ||
+          !RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
+        _passwordStrength = 'Medium';
+        _strengthColor = Colors.orange;
+      } else {
+        _passwordStrength = 'Strong';
+        _strengthColor = Colors.green;
+      }
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LangBuddy'),
+        title: const Text('LangMastero'),
         backgroundColor: Colors.blueAccent,
         centerTitle: true,
       ),
@@ -190,9 +215,19 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                       TextFormField(
                         controller: _passwordController,
                         obscureText: true,
+                        onChanged: _checkPasswordStrength,
                         decoration: const InputDecoration(labelText: "Password", border: OutlineInputBorder()),
                         validator: (value) => value == null || value.length < 6 ? "Password must be at least 6 characters" : null,
                       ),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          _passwordStrength.isNotEmpty ? 'Strength: $_passwordStrength' : '',
+                          style: TextStyle(color: _strengthColor, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+
                       const SizedBox(height: 15),
 
                       TextFormField(

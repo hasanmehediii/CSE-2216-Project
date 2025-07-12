@@ -22,70 +22,105 @@ class _ProPageState extends State<ProPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Get Pro"),
-        backgroundColor: Colors.blue,
+        title: const Text(
+          "Get Pro",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         centerTitle: true,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal, Colors.blueAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
+      extendBodyBehindAppBar: true,
       body: Stack(
         children: [
           // Background with low opacity text in different languages
           Positioned.fill(
             child: Opacity(
-              opacity: 0.05, // Set low opacity for background text
+              opacity: 0.03,
               child: Container(
-                color: Colors.blueAccent.withOpacity(0.1), // Optional: add a subtle background color
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.teal, Colors.blueAccent],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
                 child: Stack(
                   children: [
-                    // Add text in different languages across the screen
                     Positioned(
-                      top: 20,
-                      left: 50,
-                      child: Text(
-                        "Hello",
-                        style: TextStyle(
-                          fontSize: 60,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          letterSpacing: 5,
+                      top: 50,
+                      left: 30,
+                      child: Transform.rotate(
+                        angle: -0.1,
+                        child: Text(
+                          "Hello",
+                          style: TextStyle(
+                            fontSize: 70,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white.withOpacity(0.5),
+                            letterSpacing: 3,
+                          ),
                         ),
                       ),
                     ),
                     Positioned(
-                      top: 100,
+                      top: 150,
+                      right: 20,
+                      child: Transform.rotate(
+                        angle: 0.1,
+                        child: Text(
+                          "こんにちは",
+                          style: TextStyle(
+                            fontSize: 70,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white.withOpacity(0.5),
+                            letterSpacing: 3,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 120,
+                      left: 40,
+                      child: Transform.rotate(
+                        angle: -0.05,
+                        child: Text(
+                          "مرحبا",
+                          style: TextStyle(
+                            fontSize: 70,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white.withOpacity(0.5),
+                            letterSpacing: 3,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 60,
                       right: 30,
-                      child: Text(
-                        "こんにちは", // Japanese for "Hello"
-                        style: TextStyle(
-                          fontSize: 60,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          letterSpacing: 5,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 100,
-                      left: 50,
-                      child: Text(
-                        "مرحبا", // Arabic for "Hello"
-                        style: TextStyle(
-                          fontSize: 60,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          letterSpacing: 5,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 50,
-                      right: 40,
-                      child: Text(
-                        "Hola", // Spanish for "Hello"
-                        style: TextStyle(
-                          fontSize: 60,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          letterSpacing: 5,
+                      child: Transform.rotate(
+                        angle: 0.05,
+                        child: Text(
+                          "Hola",
+                          style: TextStyle(
+                            fontSize: 70,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white.withOpacity(0.5),
+                            letterSpacing: 3,
+                          ),
                         ),
                       ),
                     ),
@@ -95,19 +130,28 @@ class _ProPageState extends State<ProPage> {
             ),
           ),
 
-          // Main content of the page
+          // Main content
           SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Smaller PNG Image with dynamic scaling
+                const SizedBox(height: 100),
+                // Image
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.3, // 30% of screen width
-                  height: MediaQuery.of(context).size.width * 0.3, // 30% of screen width (making it square-like)
+                  width: MediaQuery.of(context).size.width * 0.35,
+                  height: MediaQuery.of(context).size.width * 0.35,
                   decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/confused.png'), // Add your PNG file to assets
-                      fit: BoxFit.contain,  // Ensures the image fits within the container
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    image: const DecorationImage(
+                      image: AssetImage('assets/confused.png'),
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),
@@ -116,50 +160,66 @@ class _ProPageState extends State<ProPage> {
                 // Upgrade to Pro Button
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    backgroundColor: Colors.teal,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 5,
                   ),
                   onPressed: _showPaymentDialog,
-                  icon: const Icon(Icons.workspace_premium, color: Colors.white),
-                  label: const Text("Upgrade to Pro", style: TextStyle(color: Colors.white)),
+                  icon: const Icon(Icons.workspace_premium, size: 28),
+                  label: const Text(
+                    "Upgrade to Pro",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
                 ),
                 const SizedBox(height: 30),
 
                 // Why Upgrade to Pro Section
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.0),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Text(
                     "🏆 Why Upgrade to Pro?",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-                // Free and Pro Version Comparison using Cards
+                // Free Version Card
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Card(
-                    elevation: 5,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    color: Colors.white.withOpacity(0.95),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text("Free Version", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                          SizedBox(height: 10),
-                          Text("✅ Access to daily vocabulary quizzes"),
-                          Text("✅ Basic conversation practice"),
-                          Text("✅ Grammar & pronunciation guides"),
-                          Text("✅ Limited flashcards and exercises"),
-                          Text("🚫 No offline mode"),
-                          Text("🚫 No personalized learning path"),
-                          Text("🚫 Ads in app"),
-                          Text("🚫 No certificate"),
-                          Text("🚫 No progress tracking"),
-                          Text("🚫 No access to group speaking clubs"),
+                        children: [
+                          Text(
+                            "Free Version",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              color: Colors.teal.shade700,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildFeatureItem("✅ Access to daily vocabulary quizzes"),
+                          _buildFeatureItem("✅ Basic conversation practice"),
+                          _buildFeatureItem("✅ Grammar & pronunciation guides"),
+                          _buildFeatureItem("✅ Limited flashcards and exercises"),
+                          _buildFeatureItem("🚫 No offline mode", color: Colors.red),
+                          _buildFeatureItem("🚫 No personalized learning path", color: Colors.red),
+                          _buildFeatureItem("🚫 Ads in app", color: Colors.red),
+                          _buildFeatureItem("🚫 No certificate", color: Colors.red),
+                          _buildFeatureItem("🚫 No progress tracking", color: Colors.red),
+                          _buildFeatureItem("🚫 No access to group speaking clubs", color: Colors.red),
                         ],
                       ),
                     ),
@@ -167,31 +227,37 @@ class _ProPageState extends State<ProPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Pro Version Comparison using Cards
+                // Pro Version Card
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Card(
-                    elevation: 5,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    color: Colors.white.withOpacity(0.95),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text("Pro (Subscription)", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                          SizedBox(height: 10),
-                          Text("✅ Everything in Free, plus:"),
-                          Text("✅ 1-on-1 Video Calling Lessons with native speakers"),
-                          Text("✅ AI-powered speaking feedback"),
-                          Text("✅ Unlimited flashcards with spaced repetition"),
-                          Text("✅ Offline access to lessons"),
-                          Text("✅ Personalized curriculum based on your goals"),
-                          Text("✅ Ad-free experience"),
-                          Text("✅ Get certified upon course completion"),
-                          Text("✅ Full progress tracking and analytics"),
-                          Text("✅ Join live group practice sessions"),
+                        children: [
+                          Text(
+                            "Pro (Subscription)",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              color: Colors.blueAccent.shade700,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildFeatureItem("✅ Everything in Free, plus:"),
+                          _buildFeatureItem("✅ 1-on-1 Video Calling Lessons with native speakers"),
+                          _buildFeatureItem("✅ AI-powered speaking feedback"),
+                          _buildFeatureItem("✅ Unlimited flashcards with spaced repetition"),
+                          _buildFeatureItem("✅ Offline access to lessons"),
+                          _buildFeatureItem("✅ Personalized curriculum based on your goals"),
+                          _buildFeatureItem("✅ Ad-free experience"),
+                          _buildFeatureItem("✅ Get certified upon course completion"),
+                          _buildFeatureItem("✅ Full progress tracking and analytics"),
+                          _buildFeatureItem("✅ Join live group practice sessions"),
                         ],
                       ),
                     ),
@@ -206,39 +272,60 @@ class _ProPageState extends State<ProPage> {
     );
   }
 
-  // Payment Dialogs
+  Widget _buildFeatureItem(String text, {Color color = Colors.black87}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 16, color: color, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+
   void _showPaymentDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Choose Payment Method"),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white.withOpacity(0.95),
+          title: const Text(
+            "Choose Payment Method",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.teal),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.credit_card, color: Colors.blue),
-                title: const Text("Visa Card"),
+                leading: const Icon(Icons.credit_card, color: Colors.blueAccent, size: 32),
+                title: const Text("Visa Card", style: TextStyle(fontWeight: FontWeight.w600)),
                 subtitle: const Text("Pay with your Visa card"),
                 onTap: () {
                   Navigator.of(context).pop();
                   _showVisaPaymentDialog();
                 },
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                tileColor: Colors.blueAccent.withOpacity(0.1),
               ),
-              const Divider(),
+              const Divider(color: Colors.grey),
               ListTile(
-                leading: const Icon(Icons.phone_android, color: Colors.pink),
-                title: const Text("bKash"),
+                leading: const Icon(Icons.phone_android, color: Colors.pink, size: 32),
+                title: const Text("bKash", style: TextStyle(fontWeight: FontWeight.w600)),
                 subtitle: const Text("Pay with bKash mobile banking"),
                 onTap: () {
                   Navigator.of(context).pop();
                   _showBkashPaymentDialog();
                 },
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                tileColor: Colors.pink.withOpacity(0.1),
               ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text("Cancel")),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Cancel", style: TextStyle(color: Colors.teal)),
+            ),
           ],
         );
       },
@@ -250,62 +337,98 @@ class _ProPageState extends State<ProPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Visa Card Payment"),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white.withOpacity(0.95),
+          title: const Text(
+            "Visa Card Payment",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueAccent),
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: cardNumberController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: "Card Number",
-                    prefixIcon: Icon(Icons.credit_card),
+                    prefixIcon: const Icon(Icons.credit_card, color: Colors.blueAccent),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    filled: true,
+                    fillColor: Colors.blueAccent.withOpacity(0.05),
                   ),
                   keyboardType: TextInputType.number,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
                       child: TextField(
                         controller: expiryController,
-                        decoration: const InputDecoration(labelText: "MM/YY"),
+                        decoration: InputDecoration(
+                          labelText: "MM/YY",
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          filled: true,
+                          fillColor: Colors.blueAccent.withOpacity(0.05),
+                        ),
                         keyboardType: TextInputType.datetime,
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: TextField(
                         controller: cvvController,
-                        decoration: const InputDecoration(labelText: "CVV"),
+                        decoration: InputDecoration(
+                          labelText: "CVV",
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          filled: true,
+                          fillColor: Colors.blueAccent.withOpacity(0.05),
+                        ),
                         keyboardType: TextInputType.number,
                         obscureText: true,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
                 TextField(
                   controller: nameController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: "Cardholder Name",
-                    prefixIcon: Icon(Icons.person),
+                    prefixIcon: const Icon(Icons.person, color: Colors.blueAccent),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    filled: true,
+                    fillColor: Colors.blueAccent.withOpacity(0.05),
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text("Amount: \$29.99", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  "Amount: \$29.99",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.blueAccent.shade700,
+                  ),
+                ),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text("Cancel")),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Cancel", style: TextStyle(color: Colors.teal)),
+            ),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 _processPayment("Visa Card");
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-              child: const Text("Pay Now", style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text("Pay Now", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),
           ],
         );
@@ -318,34 +441,55 @@ class _ProPageState extends State<ProPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("bKash Payment"),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white.withOpacity(0.95),
+          title: const Text(
+            "bKash Payment",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.pink),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: phoneController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: "Mobile Number",
-                  prefixIcon: Icon(Icons.phone),
+                  prefixIcon: const Icon(Icons.phone, color: Colors.pink),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  filled: true,
+                  fillColor: Colors.pink.withOpacity(0.05),
                 ),
                 keyboardType: TextInputType.phone,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
               TextField(
                 controller: pinController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: "bKash PIN",
-                  prefixIcon: Icon(Icons.lock),
+                  prefixIcon: const Icon(Icons.lock, color: Colors.pink),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  filled: true,
+                  fillColor: Colors.pink.withOpacity(0.05),
                 ),
                 keyboardType: TextInputType.number,
                 obscureText: true,
               ),
               const SizedBox(height: 20),
-              const Text("Amount: ৳2,500", style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                "Amount: ৳2,500",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Colors.pink.shade700,
+                ),
+              ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text("Cancel")),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Cancel", style: TextStyle(color: Colors.teal)),
+            ),
             ElevatedButton(
               onPressed: () {
                 if (phoneController.text.isEmpty || pinController.text.isEmpty) {
@@ -357,8 +501,13 @@ class _ProPageState extends State<ProPage> {
                   _processPayment("bKash");
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.pink),
-              child: const Text("Pay Now", style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.pink,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text("Pay Now", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),
           ],
         );
@@ -370,12 +519,18 @@ class _ProPageState extends State<ProPage> {
     try {
       await Provider.of<UserProfileProvider>(context, listen: false).updatePremiumStatus(true);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Payment successful via $method! You are now a Pro user.")),
+        SnackBar(
+          content: Text("Payment successful via $method! You are now a Pro user."),
+          backgroundColor: Colors.teal,
+        ),
       );
-      Navigator.pushReplacementNamed(context, '/home'); // Navigate back to HomeScreen
+      Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Payment failed: $e")),
+        SnackBar(
+          content: Text("Payment failed: $e"),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }

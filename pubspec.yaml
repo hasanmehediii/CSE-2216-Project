@@ -42,7 +42,7 @@ dependencies:
   youtube_player_iframe: ^5.2.1
   url_launcher: ^6.1.0
   youtube_player_flutter: ^9.1.1
-  flutter_tts: ^3.0.0
+  flutter_tts: ^4.0.2
   cached_network_image: ^3.2.0
   webview_flutter: ^4.0.0
   flutter_inappwebview: ^6.1.5
@@ -82,9 +82,9 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/ad1.jpg
-    - assets/ad2.jpg
-    - assets/ad3.jpg
+#    - assets/ad1.png
+#    - assets/ad2.png
+#    - assets/ad3.png
     - assets/person1.png
     - assets/person2.png
     - assets/person3.png
@@ -99,6 +99,7 @@ flutter:
     - assets/reactions/happy.png
     - assets/reactions/sad.png
     - assets/reactions/mid.png
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

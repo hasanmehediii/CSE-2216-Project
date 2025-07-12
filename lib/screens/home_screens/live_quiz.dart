@@ -1,11 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_tts/flutter_tts.dart';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 class LiveQuizPage extends StatefulWidget {
   const LiveQuizPage({super.key});
 
@@ -15,28 +14,35 @@ class LiveQuizPage extends StatefulWidget {
 
 class _LiveQuizPageState extends State<LiveQuizPage> {
   int _currentIndex = 0;
-  String _selectedLanguage = 'spanish';  // Default language
+  String _selectedLanguage = 'spanish';
   List<Map<String, dynamic>> _words = [];
-  bool _showPopup = true; // Flag to control popup visibility
+  bool _showPopup = true;
+  final FlutterTts _flutterTts = FlutterTts();
 
-  // List of available languages
   List<String> _languages = ['spanish', 'german', 'arabic', 'chinese', 'french'];
 
-  // Fetch data from FastAPI
   Future<void> _fetchWords() async {
     final baseUrl = dotenv.env['BASE_URL'] ?? 'http://192.168.3.107:8000';
     final response = await http.get(Uri.parse('$baseUrl/words'));
 
     if (response.statusCode == 200) {
-      // If the server returns a 200 OK response, parse the JSON
       final List<dynamic> data = json.decode(response.body);
       setState(() {
         _words = data.map((word) {
+          String englishWord = _sanitizeString(word['english_word']);
+          String imageLink = _sanitizeString(word['image_link']);
+          Map<String, dynamic> translations = word['translations'] is Map
+              ? Map<String, dynamic>.from(word['translations'])
+              : {};
+          String englishMeaning = _sanitizeString(word['englishMeaning']);
+
+          print('Fetched word: english_word="$englishWord", translation for $_selectedLanguage="${translations[_selectedLanguage]}", meaning="$englishMeaning"');
+
           return {
-            'wordText': word['english_word'],
-            'imageUrl': word['image_link'],
-            'translations': word['translations'],
-            'englishMeaning': word['englishMeaning'],
+            'wordText': englishWord,
+            'imageUrl': imageLink,
+            'translations': translations,
+            'englishMeaning': englishMeaning,
           };
         }).toList();
       });
@@ -45,78 +51,135 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
     }
   }
 
-  // Function to move to the next word
+  String _sanitizeString(dynamic input) {
+    if (input == null) return '';
+    if (input is Map) {
+      return input['text']?.toString().trim() ?? '';
+    }
+    return input.toString().trim();
+  }
+
   void _nextWord() {
     setState(() {
       _currentIndex = (_currentIndex + 1) % _words.length;
     });
   }
 
-  // Function to move to the previous word
   void _previousWord() {
     setState(() {
       _currentIndex = (_currentIndex - 1 + _words.length) % _words.length;
     });
   }
 
-  // Function to pronounce a word using TTS
-  Future<void> _speak(String word) async {
-    if (kIsWeb) {
-      // Web-specific implementation using the Web Speech API
-      //final speech = html.window.speechSynthesis;
-      //final utterance = html.SpeechSynthesisUtterance(word);
+  Future<void> _speak(String word, {String? language}) async {
+    String cleanWord = _sanitizeString(word);
+    if (cleanWord.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No valid word to pronounce')),
+      );
+      return;
+    }
 
-      // // Optional: Configure the speech parameters (rate, pitch, etc.)
-      // utterance.rate = 0.8;  // Speed of speech (0.1 to 10)
-      // utterance.pitch = 1.0; // Pitch of the voice (0 to 2)
-      // utterance.volume = 1.0; // Volume (0 to 1)
-      //
-      // // Speak the word
-      // speech?.speak(utterance);
-    } else {
-      // Mobile platforms (Android/iOS) – No TTS functionality on mobile
-      print("TTS not supported on this platform.");
+    print('Speaking word: "$cleanWord" in language: $language');
+
+    String targetLanguage = language ?? 'english';
+    String ttsLanguageCode = _getTtsLanguageCode(targetLanguage);
+
+    bool isAvailable = await _flutterTts.isLanguageAvailable(ttsLanguageCode);
+    if (!isAvailable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('TTS language ${targetLanguage.toUpperCase()} is not available on this device.')),
+      );
+      return;
+    }
+
+    await _flutterTts.setVolume(1.0);
+    await _flutterTts.setSpeechRate(0.5);
+    await _flutterTts.setPitch(1.0);
+    await _flutterTts.setLanguage(ttsLanguageCode);
+
+    await _flutterTts.speak(cleanWord);
+  }
+
+  String _getTtsLanguageCode(String language) {
+    switch (language.toLowerCase()) {
+      case 'spanish':
+        return 'es-ES';
+      case 'german':
+        return 'de-DE';
+      case 'arabic':
+        return 'ar-SA';
+      case 'chinese':
+        return 'zh-CN';
+      case 'french':
+        return 'fr-FR';
+      default:
+        return 'en-US';
     }
   }
 
   @override
   void initState() {
     super.initState();
-    _fetchWords();  // Fetch words when the screen is initialized
+    _fetchWords();
+    _initTts();
 
-    // Show popup after a delay to give the screen time to load
     Future.delayed(Duration.zero, () {
       if (_showPopup) {
-        _showWelcomeDialog(); // Show the popup dialog
+        _showWelcomeDialog();
       }
     });
   }
 
-  // Function to show the popup dialog
+  Future<void> _initTts() async {
+    await _flutterTts.setSharedInstance(true);
+    try {
+      await _flutterTts.setEngine('com.google.android.tts');
+      print('TTS engine set to Google TTS');
+    } catch (e) {
+      print('Failed to set TTS engine: $e');
+    }
+  }
+
   void _showWelcomeDialog() {
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent closing the dialog by tapping outside
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Let's Start Learning Words!"),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white,
+          title: const Text(
+            "Let's Start Learning Words!",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.teal),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset('assets/good.png', height: 100, width: 100), // PNG Image
-              const SizedBox(height: 10),
-              const Text("Let's start learning words with images!"),
+              Image.asset('assets/good.png', height: 100, width: 100),
+              const SizedBox(height: 16),
+              const Text(
+                "Let's start learning words with images!",
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () {
                 setState(() {
-                  _showPopup = false; // Hide the popup after closing
+                  _showPopup = false;
                 });
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
-              child: const Text("Start Learning"),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.teal,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text("Start Learning", style: TextStyle(fontSize: 16)),
             ),
           ],
         );
@@ -128,189 +191,253 @@ class _LiveQuizPageState extends State<LiveQuizPage> {
   Widget build(BuildContext context) {
     if (_words.isEmpty) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Word Display'),
-          backgroundColor: Colors.teal,
-          leading: BackButton(), // Add back button
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal, Colors.blueAccent],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: const Center(child: CircularProgressIndicator(color: Colors.white)),
         ),
-        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     final currentWord = _words[_currentIndex];
-
-    // Get the translation for the selected language
-    final selectedWordTranslation = currentWord['translations'][_selectedLanguage] ?? "Translation not available";
+    final selectedWordTranslation = _sanitizeString(currentWord['translations'][_selectedLanguage]);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Word Display'),
-        backgroundColor: Colors.teal,
-        leading: BackButton(), // Add back button
+        title: const Text(
+          'Word Display',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: Colors.white),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal, Colors.blueAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        leading: const BackButton(color: Colors.white),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                // First row with the image
-                if (currentWord['imageUrl'] != null && currentWord['imageUrl'] is String)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 30.0),
-                    child: Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: CachedNetworkImage(
-                          imageUrl: currentWord['imageUrl'] ?? "",
-                          placeholder: (context, url) => CircularProgressIndicator(), // Show a loading spinner while the image is loading
-                          errorWidget: (context, url, error) => Icon(Icons.error), // Show an error icon if the image fails to load
-                          height: 200,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  )
-                else
-                  Container(),
-
-                // Language selection dropdown
-                DropdownButton<String>(
-                  value: _selectedLanguage,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedLanguage = newValue!;
-                    });
-                  },
-                  items: _languages.map<DropdownMenuItem<String>>((String language) {
-                    return DropdownMenuItem<String>(
-                      value: language,
-                      child: Text(language.toUpperCase()),
-                    );
-                  }).toList(),
-                ),
-
-                // Second row with two cards horizontally
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Card(
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(25.0),
-                            child: Column(
-                              children: [
-                                Text(
-                                  _selectedLanguage.toUpperCase(), // Display selected language
-                                  style: const TextStyle(fontSize: 16, color: Colors.grey),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  selectedWordTranslation, // Display translation of the selected language
-                                  style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.deepPurple),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),  // Spacing between cards
-                      Expanded(
-                        child: Card(
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(25.0),
-                            child: Column(
-                              children: [
-                                const Text(
-                                  'English Meaning',
-                                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  currentWord['englishMeaning'] ?? "Unknown",  // Fallback if null
-                                  style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.blueAccent),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Microphone Icons below each card (Only for Web)
-                if (kIsWeb)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.mic, color: Colors.teal),
-                        onPressed: () {
-                          _speak(selectedWordTranslation); // Speak translation
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.mic, color: Colors.teal),
-                        onPressed: () {
-                          _speak(currentWord['wordText']); // Speak English word
-                        },
-                      ),
-                    ],
-                  ),
-
-                // Navigation buttons (Previous and Next)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+      extendBodyBehindAppBar: true,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal, Colors.blueAccent],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: SingleChildScrollView(
+                child: Column(
                   children: [
-                    ElevatedButton.icon(
-                      onPressed: _previousWord,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    if (currentWord['imageUrl'] != null && currentWord['imageUrl'] is String)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 30.0),
+                        child: Container(
+                          height: 220,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 3,
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: CachedNetworkImage(
+                              imageUrl: currentWord['imageUrl'] ?? "",
+                              placeholder: (context, url) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+                              errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.white, size: 50),
+                              height: 220,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      Container(),
+
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Previous', style: TextStyle(fontSize: 18)),
+                      child: DropdownButton<String>(
+                        value: _selectedLanguage,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedLanguage = newValue!;
+                          });
+                        },
+                        items: _languages.map<DropdownMenuItem<String>>((String language) {
+                          return DropdownMenuItem<String>(
+                            value: language,
+                            child: Text(
+                              language.toUpperCase(),
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.teal),
+                            ),
+                          );
+                        }).toList(),
+                        underline: Container(),
+                        icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
+                      ),
                     ),
-                    ElevatedButton.icon(
-                      onPressed: _nextWord,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      icon: const Icon(Icons.arrow_forward),
-                      label: const Text('Next', style: TextStyle(fontSize: 18)),
+
+                    const SizedBox(height: 20),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Card(
+                            elevation: 8,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            color: Colors.white.withOpacity(0.95),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    _selectedLanguage.toUpperCase(),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    selectedWordTranslation,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.orange,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Card(
+                            elevation: 8,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            color: Colors.white.withOpacity(0.95),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    'English',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    currentWord['englishMeaning'] ?? "Unknown",
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blueAccent,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.volume_up, color: Colors.white, size: 32),
+                          onPressed: () {
+                            _speak(selectedWordTranslation, language: _selectedLanguage);
+                          },
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.teal.withOpacity(0.8),
+                            padding: const EdgeInsets.all(12),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.volume_up, color: Colors.white, size: 32),
+                          onPressed: () {
+                            _speak(currentWord['wordText'], language: 'english');
+                          },
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.blueAccent.withOpacity(0.8),
+                            padding: const EdgeInsets.all(12),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: _previousWord,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                            elevation: 5,
+                          ),
+                          icon: const Icon(Icons.arrow_back, size: 24),
+                          label: const Text('Previous', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: _nextWord,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                            elevation: 5,
+                          ),
+                          icon: const Icon(Icons.arrow_forward, size: 24),
+                          label: const Text('Next', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
