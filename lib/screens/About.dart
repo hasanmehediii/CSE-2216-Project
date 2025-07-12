@@ -1,5 +1,3 @@
-// lib/screens/about_us_screen.dart
-
 import 'package:flutter/material.dart';
 
 class AboutUsPage extends StatefulWidget {
@@ -15,14 +13,13 @@ class _AboutUsPageState extends State<AboutUsPage> with SingleTickerProviderStat
 
   // Data for team members
   final List<Map<String, String>> teamMembers = const [
-    {
-      'name': 'Abdullah Evne Masood', // Name from your screenshot
-      'email': 'abdullahbmasood@gmail.com', // Email from your screenshot
+    { 'name': 'Mehedi Hasan', // Placeholder name
+      'email': 'mehedi-2022415897@cs.du.ac.bd', // Placeholder email
       'image': 'assets/person1.png', // All images are now .png
     },
     {
-      'name': 'Mehedi Hasan', // Placeholder name
-      'email': 'mehedi-2022415897@cs.du.ac.bd', // Placeholder email
+      'name': 'Abdullah Evne Masood', // Name from your screenshot
+      'email': 'abdullahbmasood@gmail.com', // Email from your screenshot
       'image': 'assets/person2.png', // All images are now .png
     },
     {
@@ -208,20 +205,21 @@ class TeamMemberCard extends StatelessWidget {
             CircleAvatar(
               radius: 60,
               backgroundColor: Colors.grey[200], // Placeholder background
-              // Use Image.asset directly as a child to handle errorBuilder
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                width: 120, // Ensure fixed width and height for consistency
-                height: 120,
-                errorBuilder: (context, error, stackTrace) {
-                  debugPrint('Error loading image $imagePath: $error');
-                  return const Icon(
-                    Icons.person,
-                    size: 80,
-                    color: Colors.grey,
-                  ); // Fallback icon
-                },
+              child: ClipOval(
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                  width: 120, // Ensure fixed width and height for consistency
+                  height: 120,
+                  errorBuilder: (context, error, stackTrace) {
+                    debugPrint('Error loading image $imagePath: $error');
+                    return const Icon(
+                      Icons.person,
+                      size: 80,
+                      color: Colors.grey,
+                    ); // Fallback icon
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 15),

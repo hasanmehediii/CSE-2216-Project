@@ -13,7 +13,6 @@ import 'home_screens/picpair.dart';
 import 'home_screens/video_lessons.dart';
 import 'home_screens/sentence_builder.dart';
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -113,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Divider(),
               _buildDrawerItem(Icons.workspace_premium, "Get Pro", const ProPage()),
               if (isPremium) _buildDrawerItem(Icons.video_library, "Video Lessons", const VideoLessonsPage()),
-              _buildDrawerItem(Icons.bar_chart, "Progress", const RoutinePage()),
+              _buildDrawerItem(Icons.bar_chart, "Progress", const ToDoListPage()), // Updated to ToDoListPage
               _buildDrawerItem(Icons.menu_book, "Vocabulary", const LiveQuizPage()),
               _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const MCQTestPage()),
               _buildDrawerItem(Icons.image_search, "Flash Cards", const MatchPage()),

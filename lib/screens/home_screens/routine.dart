@@ -1,51 +1,76 @@
 import 'package:flutter/material.dart';
 
-/// A data model representing a work or learning task.
-class WorkTask {
+/// A data model for a to-do task.
+class ToDoTask {
   final String title;
-  final String time;
-  final String duration;
-  String status; // Added status to demonstrate state change
+  String status;
 
-  WorkTask({
-    required this.title,
-    required this.time,
-    required this.duration,
-    this.status = 'Pending', // Default status
-  });
+  ToDoTask({required this.title, this.status = 'Pending'});
 }
 
-class RoutinePage extends StatefulWidget {
-  const RoutinePage({super.key});
+/// A data model for a day's to-do list.
+class Day {
+  final String dayLabel;
+  final List<ToDoTask> tasks;
+
+  Day({required this.dayLabel, required this.tasks});
+}
+
+class ToDoListPage extends StatefulWidget {
+  const ToDoListPage({super.key});
 
   @override
-  State<RoutinePage> createState() => _RoutinePageState();
+  State<ToDoListPage> createState() => _ToDoListPageState();
 }
 
-class _RoutinePageState extends State<RoutinePage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final List<WorkTask> _tasks = [
-    WorkTask(title: 'Complete Spanish Lesson', time: '09:00 AM', duration: '1 hour'),
-    WorkTask(title: 'Vocabulary Review', time: '11:00 AM', duration: '30 mins'),
-    WorkTask(title: 'Group Practice Session', time: '02:00 PM', duration: '1.5 hours'),
-    WorkTask(title: 'Grammar Exercises', time: '04:30 PM', duration: '45 mins'),
-    WorkTask(title: 'Speaking Practice', time: '06:00 PM', duration: '1 hour'),
+class _ToDoListPageState extends State<ToDoListPage> {
+  // List of 10 days with tasks
+  final List<Day> _days = [
+    Day(dayLabel: 'Day 1', tasks: [
+      ToDoTask(title: 'Watch Video'),
+      ToDoTask(title: 'Learn Pronunciation'),
+    ]),
+    Day(dayLabel: 'Day 2', tasks: [
+      ToDoTask(title: 'Participate in MCQ Exam'),
+      ToDoTask(title: 'Play Flash Card'),
+    ]),
+    Day(dayLabel: 'Day 3', tasks: [
+      ToDoTask(title: 'Play Sentence Builder'),
+      ToDoTask(title: 'MCQ Test'),
+      ToDoTask(title: 'Memorise'),
+    ]),
+    Day(dayLabel: 'Day 4', tasks: [
+      ToDoTask(title: 'Grammar Exercises'),
+      ToDoTask(title: 'Speaking Practice'),
+    ]),
+    Day(dayLabel: 'Day 5', tasks: [
+      ToDoTask(title: 'Vocabulary Review'),
+      ToDoTask(title: 'Group Discussion'),
+    ]),
+    Day(dayLabel: 'Day 6', tasks: [
+      ToDoTask(title: 'Watch Tutorial Video'),
+      ToDoTask(title: 'Practice Writing'),
+    ]),
+    Day(dayLabel: 'Day 7', tasks: [
+      ToDoTask(title: 'MCQ Quiz'),
+      ToDoTask(title: 'Play Word Puzzle'),
+    ]),
+    Day(dayLabel: 'Day 8', tasks: [
+      ToDoTask(title: 'Listening Practice'),
+      ToDoTask(title: 'Review Notes'),
+    ]),
+    Day(dayLabel: 'Day 9', tasks: [
+      ToDoTask(title: 'Sentence Correction'),
+      ToDoTask(title: 'Speaking Drill'),
+    ]),
+    Day(dayLabel: 'Day 10', tasks: [
+      ToDoTask(title: 'Comprehensive Review'),
+      ToDoTask(title: 'Mock Test'),
+    ]),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  // Helper widget for status buttons within the task details dialog
-  Widget _buildStatusButton(String statusText, Color color, WorkTask task) {
+  // Helper method for status buttons
+  Widget _buildStatusButton(String statusText, Color color, ToDoTask task) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -54,15 +79,12 @@ class _RoutinePageState extends State<RoutinePage> with SingleTickerProviderStat
             backgroundColor: color,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           onPressed: () {
             setState(() {
               task.status = statusText;
             });
-            Navigator.of(context).pop(); // Close the dialog
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Task "${task.title}" set to: $statusText')),
             );
@@ -77,124 +99,98 @@ class _RoutinePageState extends State<RoutinePage> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Routine & Schedule'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.school), text: 'Class Routine'),
-            Tab(icon: Icon(Icons.work), text: 'Work Schedule'),
-          ],
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-        ),
+        title: const Text('To-Do List'),
         backgroundColor: Colors.teal,
-        automaticallyImplyLeading: false,
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // Class Routine Tab
-          const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.schedule, size: 60, color: Colors.teal),
-                SizedBox(height: 20),
-                Text(
-                  'Class Routine',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Monday: 9:00 AM - Spanish\n'
-                      'Tuesday: 11:00 AM - Vocabulary\n'
-                      'Wednesday: 2:00 PM - Conversation\n'
-                      'Thursday: 4:00 PM - Grammar\n'
-                      'Friday: 10:00 AM - Review',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 18),
-                ),
-              ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Your 10-Day Learning Plan',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-          ),
-
-          // Work Schedule Tab
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Your Work Schedule',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  'Manage your learning tasks and deadlines',
-                  style: TextStyle(color: Colors.grey),
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _tasks.length,
-                    itemBuilder: (context, index) {
-                      final task = _tasks[index];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: ListTile(
-                          leading: Icon(Icons.assignment, color: Colors.teal),
-                          title: Text(task.title),
-                          subtitle: Text('${task.time} • ${task.duration} • Status: ${task.status}'), // Display status
-                          trailing: IconButton(
-                            icon: const Icon(Icons.notifications),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Reminder set for ${task.title}')),
-                              );
-                            },
-                          ),
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text(task.title),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Time: ${task.time}'),
-                                    Text('Duration: ${task.duration}'),
-                                    const SizedBox(height: 20),
-                                    const Text('Set status:'),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        _buildStatusButton('Pending', Colors.orange, task),
-                                        _buildStatusButton('In Progress', Colors.blue, task),
-                                        _buildStatusButton('Completed', Colors.green, task),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.of(context).pop(),
-                                    child: const Text('Close'),
-                                  ),
+            const SizedBox(height: 10),
+            const Text(
+              'Tap a day to view tasks',
+              style: TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _days.length,
+                itemBuilder: (context, index) {
+                  final day = _days[index];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: ListTile(
+                      leading: const Icon(Icons.calendar_today, color: Colors.teal),
+                      title: Text(day.dayLabel),
+                      subtitle: Text('Tasks: ${day.tasks.length}'),
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text(day.dayLabel),
+                            content: SingleChildScrollView(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Tasks:'),
+                                  const SizedBox(height: 10),
+                                  ...day.tasks.map((task) => ListTile(
+                                    title: Text(task.title),
+                                    subtitle: Text('Status: ${task.status}'),
+                                    onTap: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: Text(task.title),
+                                          content: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Text('Set status:'),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                children: [
+                                                  _buildStatusButton('Pending', Colors.orange, task),
+                                                  _buildStatusButton('In Progress', Colors.blue, task),
+                                                  _buildStatusButton('Completed', Colors.green, task),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(context).pop(),
+                                              child: const Text('Close'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  )),
                                 ],
                               ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('Close'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
