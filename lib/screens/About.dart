@@ -15,7 +15,7 @@ class _AboutUsPageState extends State<AboutUsPage> with SingleTickerProviderStat
   final List<Map<String, String>> teamMembers = const [
     { 'name': 'Mehedi Hasan', // Placeholder name
       'email': 'mehedi-2022415897@cs.du.ac.bd', // Placeholder email
-      'image': 'assets/person1.png', // All images are now .png
+      'image': 'assets/person1.jpg', // All images are now .png
     },
     {
       'name': 'Abdullah Evne Masood', // Name from your screenshot
