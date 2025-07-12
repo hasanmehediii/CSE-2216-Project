@@ -116,7 +116,10 @@ class _SentenceBuilderGameState extends State<SentenceBuilderGame> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sentence Builder')),
+      appBar: AppBar(
+        title: const Text('Sentence Builder'),
+        backgroundColor: Colors.blue,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: selectedLang.isEmpty

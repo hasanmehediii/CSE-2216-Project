@@ -4,7 +4,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../providers/user_profile_provider.dart';
-import '../models/user_profile.dart';
 import '../services/storage_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -133,7 +132,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Edit Profile"),
+        title: const Text(
+            "Edit Profile",
+            style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          )
+        ),
         backgroundColor: Colors.blueAccent,
       ),
       body: Padding(
