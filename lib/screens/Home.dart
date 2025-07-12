@@ -7,7 +7,6 @@ import 'home_screens/dashboard.dart';
 import 'home_screens/live_quiz.dart';
 import 'home_screens/mcq.dart';
 import 'home_screens/routine.dart';
-import 'home_screens/writing.dart';
 import 'home_screens/settings.dart';
 import 'home_screens/pro.dart';
 import 'home_screens/picpair.dart';
@@ -119,7 +118,6 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildDrawerItem(Icons.check_circle_outline, "MCQ Test", const MCQTestPage()),
               _buildDrawerItem(Icons.image_search, "Flash Cards", const MatchPage()),
               _buildDrawerItem(Icons.text_snippet, "Sentence Builder", const SentenceBuilderGame()),
-              _buildDrawerItem(Icons.edit_note, "Live Class", const WritingTestPage()),
               _buildDrawerItem(Icons.settings, "Settings", const SettingsPage()),
               const Spacer(),
               const Divider(),
