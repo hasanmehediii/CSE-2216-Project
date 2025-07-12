@@ -5,6 +5,7 @@ import '../common/custom_text_field.dart';
 import '../services/auth_service.dart';
 import '../services/storage_service.dart';
 import 'SignUp.dart';
+import 'forgot_password.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_profile_provider.dart';
 import '../models/user_profile.dart';
@@ -192,6 +193,27 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             validator: _validatePassword,
             focusNode: _passwordFocusNode,
           ),
+
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {
+                // Navigate to your ForgotPasswordPage (create this page)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
+                );
+              },
+              child: const Text(
+                "Forgot Password?",
+                style: TextStyle(
+                  color: Colors.blueAccent,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+
           const SizedBox(height: 24),
           _buildLoginButton(),
           const SizedBox(height: 12),
