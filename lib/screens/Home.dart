@@ -5,14 +5,13 @@ import '../../services/storage_service.dart';
 import '../../providers/user_profile_provider.dart';
 import 'home_screens/dashboard.dart';
 import 'home_screens/live_quiz.dart';
+import 'home_screens/mcq.dart';
 import 'home_screens/routine.dart';
 import 'home_screens/writing.dart';
 import 'home_screens/settings.dart';
 import 'home_screens/pro.dart';
 import 'home_screens/picpair.dart';
 import 'home_screens/video_lessons.dart';
-import '../screens/que_screen.dart';
-import '../screens/result_screen.dart';
 import 'home_screens/sentence_builder.dart';
 
 
@@ -43,9 +42,9 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   final List<Map<String, String>> courses = [
-    {"name": "Summer Course", "info": "500 learners", "rating": "4.5", "students": "500"},
-    {"name": "Spring Course", "info": "300 learners", "rating": "4.7", "students": "300"},
-    {"name": "One Shot Course", "info": "150 learners", "rating": "4.6", "students": "150"},
+    {"name": "Fall", "info": "500 learners", "rating": "4.5", "students": "500"},
+    {"name": "Spring", "info": "300 learners", "rating": "4.7", "students": "300"},
+    {"name": "One Shot", "info": "150 learners", "rating": "4.6", "students": "150"},
   ];
 
   @override

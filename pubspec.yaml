@@ -82,9 +82,9 @@ flutter:
   uses-material-design: true
 
   assets:
-#    - assets/ad1.png
-#    - assets/ad2.png
-#    - assets/ad3.png
+    - assets/ad1.png
+    - assets/ad2.png
+    - assets/ad3.png
     - assets/person1.png
     - assets/person2.png
     - assets/person3.png

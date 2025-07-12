@@ -22,16 +22,16 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   final _passwordController = TextEditingController();
   final _emailFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
-  final _formKey = GlobalKey<FormState>();
+  final _userFormKey = GlobalKey<FormState>();
+  final _adminFormKey = GlobalKey<FormState>();
 
   bool _obscureText = true;
   bool _isLoggingIn = false;
-  int _loginMode = 0; // 0 for User, 1 for Admin
+  int _loginMode = 0;
   final PageController _pageController = PageController(initialPage: 0);
 
   late AnimationController _bgController;
   late Animation<double> _bgAnimation;
-
   late AnimationController _exitAnimationController;
 
   @override
@@ -39,17 +39,17 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     super.initState();
 
     _bgController = AnimationController(
-      duration: const Duration(seconds: 6),
+      duration: const Duration(seconds: 8),
       vsync: this,
     )..repeat(reverse: true);
 
-    _bgAnimation = Tween<double>(begin: 0, end: 30).animate(
-      CurvedAnimation(parent: _bgController, curve: Curves.easeInOut),
+    _bgAnimation = Tween<double>(begin: 0, end: 20).animate(
+      CurvedAnimation(parent: _bgController, curve: Curves.easeInOutSine),
     );
 
     _exitAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 700),
+      duration: const Duration(milliseconds: 500),
     );
   }
 
@@ -68,13 +68,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
   String? _validateEmail(String? mail) {
     if (mail == null || mail.isEmpty) return 'Please enter your email';
-    final emailRegex = RegExp(
-        r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    );
+    final emailRegex = RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
     if (!emailRegex.hasMatch(mail)) return 'Please enter a valid email';
     return null;
   }
-
 
   String? _validatePassword(String? password) {
     if (password == null || password.isEmpty) return 'Please enter your password';
@@ -83,7 +80,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   }
 
   Future<void> _login() async {
-    if (_formKey.currentState?.validate() ?? false) {
+    final currentFormKey = _loginMode == 0 ? _userFormKey : _adminFormKey;
+    if (currentFormKey.currentState?.validate() ?? false) {
       setState(() => _isLoggingIn = true);
 
       try {
@@ -91,13 +89,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         final password = _passwordController.text.trim();
 
         if (_loginMode == 1) {
-          // Hardcoded Admin Login
           if (email == "admin@gmail.com" && password == "admin1234") {
-
-
             await StorageService.saveToken("admin-token");
             final adminProfile = UserProfile(
-              fullName: "LangBuddy Admin",
+              fullName: "LangMastero Admin",
               username: "admin",
               email: "admin@gmail.com",
               phoneNumber: "00000000000",
@@ -108,22 +103,17 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               isPremium: true,
             );
 
-            await StorageService.saveToken("admin-token");
-            await StorageService.saveUserProfile(adminProfile); // ✅ Save JSON in storage
-
-            Provider.of<UserProfileProvider>(context, listen: false)
-                .setUserProfile(adminProfile); // ✅ Pass original object to provider
-
+            await StorageService.saveUserProfile(adminProfile);
+            Provider.of<UserProfileProvider>(context, listen: false).setUserProfile(adminProfile);
 
             await _exitAnimationController.forward();
-            Navigator.pushReplacementNamed(context, '/admin'); // ✅ Navigate to Admin screen
+            Navigator.pushReplacementNamed(context, '/admin');
             return;
           } else {
             throw Exception("Invalid admin credentials");
           }
         }
 
-        // Normal user login via backend
         final authService = AuthService();
         final result = await authService.login(email, password);
 
@@ -136,7 +126,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       } catch (e) {
         setState(() => _isLoggingIn = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e")),
+          SnackBar(
+            content: Text("Error: $e", style: const TextStyle(color: Colors.white)),
+            backgroundColor: Colors.redAccent,
+          ),
         );
         print("Login failed: $e");
       }
@@ -149,49 +142,59 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.blueAccent,
-          padding: const EdgeInsets.symmetric(vertical: 18),
-          elevation: 8,
-          shadowColor: Colors.black.withOpacity(0.3),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          elevation: 4,
+          shadowColor: Colors.black26,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         onPressed: _isLoggingIn ? null : _login,
         child: _isLoggingIn
             ? const CircularProgressIndicator(color: Colors.white)
-            : const Text('Login', style: TextStyle(fontSize: 20, color: Colors.white)),
+            : const Text(
+          'Login',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildUserLoginForm() {
     return Form(
-      key: _formKey,
+      key: _userFormKey,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           CustomTextField(
             controller: _userEmailController,
             hintText: 'Email',
-            prefixIcon: const Icon(Icons.email),
+            prefixIcon: const Icon(Icons.email, color: Colors.blueAccent),
             keyboardType: TextInputType.emailAddress,
             validator: _validateEmail,
             focusNode: _emailFocusNode,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           CustomTextField(
             controller: _passwordController,
             hintText: 'Password',
             obscureText: _obscureText,
-            prefixIcon: const Icon(Icons.lock),
+            prefixIcon: const Icon(Icons.lock, color: Colors.blueAccent),
             suffixIcon: IconButton(
-              icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
+              icon: Icon(
+                _obscureText ? Icons.visibility : Icons.visibility_off,
+                color: Colors.blueAccent,
+              ),
               onPressed: () => setState(() => _obscureText = !_obscureText),
             ),
             validator: _validatePassword,
             focusNode: _passwordFocusNode,
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 24),
           _buildLoginButton(),
-          const SizedBox(height: 15),
+          const SizedBox(height: 12),
           TextButton(
             onPressed: () => Navigator.push(
               context,
@@ -199,7 +202,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             ),
             child: const Text(
               "Don't have an account? Sign Up",
-              style: TextStyle(fontSize: 16, color: Colors.blueAccent, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.blueAccent,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -209,32 +216,35 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
   Widget _buildAdminLoginForm() {
     return Form(
-      key: _formKey,
+      key: _adminFormKey,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           CustomTextField(
             controller: _adminEmailController,
             hintText: 'Admin Email',
-            prefixIcon: const Icon(Icons.admin_panel_settings),
+            prefixIcon: const Icon(Icons.admin_panel_settings, color: Colors.blueAccent),
             keyboardType: TextInputType.emailAddress,
             validator: _validateEmail,
             focusNode: _emailFocusNode,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           CustomTextField(
             controller: _passwordController,
             hintText: 'Admin Password',
             obscureText: _obscureText,
-            prefixIcon: const Icon(Icons.lock),
+            prefixIcon: const Icon(Icons.lock, color: Colors.blueAccent),
             suffixIcon: IconButton(
-              icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
+              icon: Icon(
+                _obscureText ? Icons.visibility : Icons.visibility_off,
+                color: Colors.blueAccent,
+              ),
               onPressed: () => setState(() => _obscureText = !_obscureText),
             ),
             validator: _validatePassword,
             focusNode: _passwordFocusNode,
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 24),
           _buildLoginButton(),
         ],
       ),
@@ -243,13 +253,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
   Widget _buildFadedLetter(String letter) {
     return Opacity(
-      opacity: 0.05,
+      opacity: 0.03,
       child: Text(
         letter,
         style: const TextStyle(
-          fontSize: 60,
+          fontSize: 80,
           fontWeight: FontWeight.bold,
-          color: Colors.black,
+          color: Colors.black87,
         ),
       ),
     );
@@ -260,8 +270,15 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     return Scaffold(
       backgroundColor: Colors.blue[50],
       appBar: AppBar(
-        title: const Text('LangMastero'),
-        backgroundColor: Colors.blueAccent.withOpacity(0.8),
+        title: const Text(
+          'LangMastero',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.blueAccent,
         elevation: 0,
         centerTitle: true,
       ),
@@ -273,84 +290,110 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               return Stack(
                 children: [
                   Positioned(top: _bgAnimation.value, left: _bgAnimation.value, child: _buildFadedLetter('A')),
-                  Positioned(top: 100 + _bgAnimation.value, right: 20 + _bgAnimation.value, child: _buildFadedLetter('あ')),
-                  Positioned(bottom: 100 - _bgAnimation.value, left: 20 + _bgAnimation.value, child: _buildFadedLetter('ب')),
-                  Positioned(bottom: 50 + _bgAnimation.value, right: 50 - _bgAnimation.value, child: _buildFadedLetter('文')),
-                  Positioned(top: 30 + _bgAnimation.value, right: 100 - _bgAnimation.value, child: _buildFadedLetter('अ')),
-                  Positioned(top: 200 - _bgAnimation.value, left: 80 + _bgAnimation.value, child: _buildFadedLetter('অ')),
-                  Positioned(bottom: 200 + _bgAnimation.value, right: 70 - _bgAnimation.value, child: _buildFadedLetter('ñ')),
-                  Positioned(top: 250 + _bgAnimation.value, left: 50 - _bgAnimation.value, child: _buildFadedLetter('é')),
+                  Positioned(top: 120 + _bgAnimation.value, right: 30 + _bgAnimation.value, child: _buildFadedLetter('あ')),
+                  Positioned(bottom: 120 - _bgAnimation.value, left: 30 + _bgAnimation.value, child: _buildFadedLetter('ب')),
+                  Positioned(bottom: 60 + _bgAnimation.value, right: 60 - _bgAnimation.value, child: _buildFadedLetter('文')),
+                  Positioned(top: 40 + _bgAnimation.value, right: 120 - _bgAnimation.value, child: _buildFadedLetter('अ')),
+                  Positioned(top: 220 - _bgAnimation.value, left: 100 + _bgAnimation.value, child: _buildFadedLetter('অ')),
+                  Positioned(bottom: 220 + _bgAnimation.value, right: 90 - _bgAnimation.value, child: _buildFadedLetter('ñ')),
+                  Positioned(top: 280 + _bgAnimation.value, left: 60 - _bgAnimation.value, child: _buildFadedLetter('é')),
                 ],
               );
             },
           ),
-
           Center(
             child: ScaleTransition(
-              scale: Tween<double>(begin: 1, end: 0).animate(CurvedAnimation(
-                parent: _exitAnimationController,
-                curve: Curves.easeInOut,
-              )),
+              scale: Tween<double>(begin: 1, end: 0).animate(
+                CurvedAnimation(parent: _exitAnimationController, curve: Curves.easeInOut),
+              ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
+                      gradient: LinearGradient(
+                        colors: [Colors.white, Colors.blue[50]!],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                    margin: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                    margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 42),
+                    constraints: BoxConstraints(
+                      maxWidth: 400,
+                      maxHeight: MediaQuery.of(context).size.height * 0.85,
+                    ),
                     child: SingleChildScrollView(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           SizedBox(
-                            width: 200,
-                            height: 200,
+                            width: 180,
+                            height: 180,
                             child: Lottie.asset(
                               _loginMode == 0
                                   ? 'assets/gifs/loginn.json'
                                   : 'assets/gifs/admin_office.json',
                               repeat: true,
                               fit: BoxFit.contain,
+                              frameRate: FrameRate(60),
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 16),
                           Column(
                             children: [
                               Text(
                                 'Login to Continue',
                                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.blue[800],
+                                  color: Colors.blue[900],
+                                  fontSize: 26,
                                 ),
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 12),
                               ToggleButtons(
                                 isSelected: [_loginMode == 0, _loginMode == 1],
                                 onPressed: (index) {
                                   setState(() {
                                     _loginMode = index;
-                                    _formKey.currentState?.reset();
+                                    _userEmailController.clear();
+                                    _adminEmailController.clear();
+                                    _passwordController.clear();
+                                    _userFormKey.currentState?.reset();
+                                    _adminFormKey.currentState?.reset();
                                   });
-                                  _pageController.animateToPage(index,
-                                      duration: const Duration(milliseconds: 400), curve: Curves.easeInOut);
+                                  _pageController.animateToPage(
+                                    index,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                  );
                                 },
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(12),
                                 selectedColor: Colors.white,
                                 fillColor: Colors.blueAccent,
                                 color: Colors.blueAccent,
-                                constraints: const BoxConstraints(minHeight: 40, minWidth: 100),
-                                children: const [Text("User"), Text("Admin")],
+                                selectedBorderColor: Colors.blueAccent,
+                                borderColor: Colors.blue[200],
+                                constraints: const BoxConstraints(minHeight: 40, minWidth: 120),
+                                children: const [
+                                  Text("User", style: TextStyle(fontWeight: FontWeight.w600)),
+                                  Text("Admin", style: TextStyle(fontWeight: FontWeight.w600)),
+                                ],
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 24),
                           SizedBox(
-                            height: 400,
+                            height: 380,
                             child: PageView(
                               controller: _pageController,
                               physics: const NeverScrollableScrollPhysics(),
