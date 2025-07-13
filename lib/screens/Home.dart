@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _logout(BuildContext context) async {
     await StorageService.clearStorage();
-    Provider.of<UserProfileProvider>(context, listen: false).clearProfile();
+    Provider.of<UserProfileProvider>(context, listen: false).clearUserProfile();
     if (mounted) {
       Navigator.pushReplacementNamed(context, '/login');
     }
