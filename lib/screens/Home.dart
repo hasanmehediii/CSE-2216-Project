@@ -194,6 +194,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSection(String title, List<Map<String, String>> items) {
+    final bool isCourseSection = (title == "Running Courses");
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: Column(
@@ -219,6 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 item["rating"]!,
                 item["students"]!,
                 index,
+                isCourseSection, // <-- Pass here if this section is courses or not
               );
             },
           ),
@@ -227,7 +230,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildLanguageCard(String title, String subtitle, String rating, String students, int index) {
+
+  Widget _buildLanguageCard(String title, String subtitle, String rating, String students, int index, [bool isCourse = false]) {
     final List<Color> cardColors = [
       Colors.blue.shade100,
       Colors.green.shade100,
@@ -237,7 +241,14 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     return GestureDetector(
-      onTap: () => _showCardDetailsDialog(title, subtitle, rating, students),
+      onTap: () {
+        // Choose detail text based on whether it's a course or language card
+        final detailText = isCourse
+            ? courseDetails[title] ?? "Course details not available."
+            : languageDetails[title] ?? "Language details not available.";
+
+        _showCardDetailsDialog(title, subtitle, rating, students, detailText);
+      },
       child: Container(
         decoration: BoxDecoration(
           color: cardColors[index % cardColors.length],
@@ -284,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
-  void _showCardDetailsDialog(String title, String subtitle, String rating, String students) {
+  void _showCardDetailsDialog(String title, String subtitle, String rating, String students, String detailText) {
     showDialog(
       context: context,
       builder: (context) {
@@ -313,10 +324,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 10),
               Text(
-                languageDetails[title] ?? "No additional details available.",
+                detailText,
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
-
             ],
           ),
           actions: [
@@ -329,6 +339,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
+
 
 
 
@@ -358,4 +369,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+
+
+
+
+
+
 }
+
+
