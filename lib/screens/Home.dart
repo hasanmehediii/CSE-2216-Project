@@ -25,6 +25,23 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController();
   late Timer _adTimer;
 
+  final Map<String, String> languageDetails = {
+    "English": "Learn international communication, business English, and test prep like IELTS/TOEFL.",
+    "Spanish": "Master conversational Spanish, grammar, and useful phrases for travel and work.",
+    "German": "Build a solid foundation in German speaking, reading, and writing.",
+    "Arabic": "Learn Arabic alphabets, speaking skills, and Quranic Arabic.",
+    "French": "Improve your French with cultural lessons, phrases, and listening practice.",
+  };
+
+
+  final Map<String, String> courseDetails = {
+    "Fall": "Fall courses are long-term, with in-depth grammar and speaking practice, designed for gradual mastery.",
+    "Spring": "Spring sessions are ideal for revising or improving your basics with fresh activities and updated content.",
+    "One Shot": "One Shot course is a fast-paced, intensive training module covering essential speaking and listening skills in a short time.",
+  };
+
+
+
   final List<String> adImages = [
     'assets/ad1.png',
     'assets/ad2.png',
@@ -219,49 +236,101 @@ class _HomeScreenState extends State<HomeScreen> {
       Colors.purple.shade100
     ];
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColors[index % cardColors.length],
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(10.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.language, size: 40, color: Colors.indigo),
-          const SizedBox(height: 10),
-          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.black54)),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.star, color: Colors.amber, size: 18),
-              const SizedBox(width: 4),
-              Text(rating, style: const TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.people, color: Colors.black, size: 18),
-              const SizedBox(width: 4),
-              Text(students, style: const TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ],
+    return GestureDetector(
+      onTap: () => _showCardDetailsDialog(title, subtitle, rating, students),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardColors[index % cardColors.length],
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.language, size: 40, color: Colors.indigo),
+            const SizedBox(height: 10),
+            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.star, color: Colors.amber, size: 18),
+                const SizedBox(width: 4),
+                Text(rating, style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.people, color: Colors.black, size: 18),
+                const SizedBox(width: 4),
+                Text(students, style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
+
+
+  void _showCardDetailsDialog(String title, String subtitle, String rating, String students) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(subtitle),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(Icons.star, color: Colors.amber),
+                  const SizedBox(width: 5),
+                  Text("Rating: $rating"),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(Icons.people),
+                  const SizedBox(width: 5),
+                  Text("Students: $students"),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                languageDetails[title] ?? "No additional details available.",
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text("Close"),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
 
   Widget _buildFooter() {
     return Padding(
