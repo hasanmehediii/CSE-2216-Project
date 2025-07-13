@@ -32,12 +32,12 @@ class _SentenceBuilderGameState extends State<SentenceBuilderGame> {
           title: const Text("Choose a Language"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: ['english', 'spanish', 'german', 'arabic', 'french', 'chinese'].map((lang) {
-              return ListTile(
-                title: Text(lang[0].toUpperCase() + lang.substring(1)),
-                onTap: () => Navigator.of(context).pop(lang),
-              );
-            }).toList(),
+            children: ['english', 'spanish', 'german', 'arabic', 'french', 'chinese']
+                .map((lang) => ListTile(
+              title: Text(lang[0].toUpperCase() + lang.substring(1)),
+              onTap: () => Navigator.of(context).pop(lang),
+            ))
+                .toList(),
           ),
         );
       },
@@ -73,12 +73,12 @@ class _SentenceBuilderGameState extends State<SentenceBuilderGame> {
           });
         } else {
           setState(() {
-            resultMessage = 'No sentence available in "$lang".';
+            resultMessage = '⚠️ No sentence available in "$lang".';
           });
         }
       } else {
         setState(() {
-          resultMessage = '❌ Error fetching sentence: ${response.statusCode}';
+          resultMessage = '❌ Error: ${response.statusCode}';
         });
       }
     } catch (e) {
@@ -102,7 +102,7 @@ class _SentenceBuilderGameState extends State<SentenceBuilderGame> {
     setState(() {
       resultMessage = (formed == correct)
           ? '✅ Correct!'
-          : '❌ Incorrect.\nExpected: "$correct"';
+          : '❌ Incorrect.\nExpected:\n"$correct"';
     });
   }
 
@@ -118,68 +118,133 @@ class _SentenceBuilderGameState extends State<SentenceBuilderGame> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sentence Builder'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.blue.shade700,
+        centerTitle: true,
+        elevation: 4,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: selectedLang.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
+      body: selectedLang.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 10),
             Text(
-              'Arrange the words to form a correct sentence in $selectedLang',
-              style: const TextStyle(fontSize: 18),
+              '🧩 Arrange the words to form a sentence in:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 6),
+            Text(
+              selectedLang.toUpperCase(),
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue.shade800,
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Shuffled words
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: 10,
+              runSpacing: 10,
+              alignment: WrapAlignment.center,
               children: shuffledWords.map((word) {
                 return ElevatedButton(
                   onPressed: () => onWordTap(word),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    backgroundColor: Colors.blue.shade100,
+                    foregroundColor: Colors.black,
+                    elevation: 2,
+                  ),
                   child: Text(word),
                 );
               }).toList(),
             ),
+
             const SizedBox(height: 30),
-            const Text('Your Sentence:', style: TextStyle(fontSize: 18)),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              children: userSentence.map((word) {
-                return Chip(label: Text(word));
-              }).toList(),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Your Sentence:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              ),
             ),
+            const SizedBox(height: 10),
+
+            Container(
+              padding: const EdgeInsets.all(12),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: userSentence
+                    .map((word) => Chip(
+                  label: Text(word),
+                  backgroundColor: Colors.blue.shade50,
+                ))
+                    .toList(),
+              ),
+            ),
+
             const SizedBox(height: 20),
+
+            // Action Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton.icon(
                   onPressed: clearSentence,
-                  icon: const Icon(Icons.clear),
+                  icon: const Icon(Icons.refresh),
                   label: const Text('Clear'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade300,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
                 ),
                 const SizedBox(width: 20),
                 ElevatedButton.icon(
                   onPressed: checkSentence,
-                  icon: const Icon(Icons.check),
+                  icon: const Icon(Icons.check_circle),
                   label: const Text('Submit'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade600,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
                 ),
               ],
             ),
+
             const SizedBox(height: 30),
-            Text(
-              resultMessage,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                color: resultMessage.startsWith('✅')
-                    ? Colors.green
-                    : Colors.red,
+
+            if (resultMessage.isNotEmpty)
+              Text(
+                resultMessage,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  color: resultMessage.startsWith('✅')
+                      ? Colors.green
+                      : Colors.red.shade700,
+                ),
               ),
-            ),
           ],
         ),
       ),
