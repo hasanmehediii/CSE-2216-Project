@@ -125,7 +125,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         ? const CircularProgressIndicator(color: Colors.white)
                         : const Text(
                       'Send Reset Code',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600,color: Colors.white),
                     ),
                   ),
                 ),
