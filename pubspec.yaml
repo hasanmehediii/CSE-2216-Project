@@ -99,6 +99,9 @@ flutter:
     - assets/reactions/happy.png
     - assets/reactions/sad.png
     - assets/reactions/mid.png
+    - assets/gifs/arrow_down.json
+    - assets/gifs/bg_loop.json
+    - assets/gifs/user_profile_loop.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:

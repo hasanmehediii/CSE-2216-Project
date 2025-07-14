@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 
 class UserManage extends StatefulWidget {
   const UserManage({super.key});
@@ -83,22 +84,32 @@ class _UserManageState extends State<UserManage> {
 
   Widget buildUserCard(Map<String, dynamic> user) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.blue.shade100),
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            colors: [Colors.white, Colors.blue.shade50],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Full Name: ${user['fullName']}", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text("Username: ${user['username']}"),
-            Text("Email: ${user['email']}"),
-            Text("Phone: ${user['countryCode']} ${user['phoneNumber']}"),
-            Text("Gender: ${user['gender']}"),
-            Text("DOB: ${user['dob']}"),
-            Text("NID: ${user['nid']}"),
-            Text("Premium User: ${user['is_premium'] ? 'Yes' : 'No'}"),
+            Text("👤 Full Name: ${user['fullName']}", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            Text("🆔 Username: ${user['username']}"),
+            Text("📧 Email: ${user['email']}"),
+            Text("📞 Phone: ${user['countryCode']} ${user['phoneNumber']}"),
+            Text("🚻 Gender: ${user['gender']}"),
+            Text("🎂 DOB: ${user['dob']}"),
+            Text("🆔 NID: ${user['nid']}"),
+            Text("💎 Premium User: ${user['is_premium'] ? 'Yes' : 'No'}"),
           ],
         ),
       ),
@@ -108,26 +119,41 @@ class _UserManageState extends State<UserManage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFE3F2FD),
       appBar: AppBar(
         title: const Text('Manage Users'),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.blue,
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 🔍 Search Field
-              TextField(
-                controller: searchController,
-                decoration: InputDecoration(
-                  labelText: 'Search by username',
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () => searchUser(searchController.text.trim()),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blue.shade100,
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    )
+                  ],
+                ),
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    labelText: 'Search by username',
+                    labelStyle: const TextStyle(color: Colors.indigo),
+                    border: InputBorder.none,
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.search, color: Colors.blue),
+                      onPressed: () => searchUser(searchController.text.trim()),
+                    ),
                   ),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
 
@@ -145,22 +171,53 @@ class _UserManageState extends State<UserManage> {
 
               const SizedBox(height: 20),
 
-              // ⏭️ Next Button
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() => skip += 1);
-                    fetchUser();
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-                  child: const Text(
-                    "Next",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
+              // ⏮️ Prev & ⏭️ Next Buttons
+              if (!isLoading && !isError)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (skip > 0)
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            skip -= 1;
+                            fetchUser();
+                          });
+                        },
+                        icon: const Icon(Icons.navigate_before),
+                        label: const Text("Prev", style: TextStyle(fontSize: 16)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade200,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+                    const SizedBox(width: 16),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          skip += 1;
+                          fetchUser();
+                        });
+                      },
+                      icon: const Icon(Icons.navigate_next),
+                      label: const Text("Next", style: TextStyle(fontSize: 16)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
+
+
+              // 👇 Bottom Lottie Animation
+              SizedBox(
+                height: 180,
+                child: Lottie.asset('assets/gifs/user_profile_loop.json'),
               ),
             ],
           ),

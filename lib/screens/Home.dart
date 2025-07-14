@@ -12,6 +12,7 @@ import 'home_screens/pro.dart';
 import 'home_screens/picpair.dart';
 import 'home_screens/video_lessons.dart';
 import 'home_screens/sentence_builder.dart';
+import 'home_screens/mcq.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
