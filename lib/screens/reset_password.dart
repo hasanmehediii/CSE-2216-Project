@@ -172,7 +172,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           ? const CircularProgressIndicator(color: Colors.white)
                           : const Text(
                         'Reset Password',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600,color: Colors.white),
                       ),
                     ),
                   ),

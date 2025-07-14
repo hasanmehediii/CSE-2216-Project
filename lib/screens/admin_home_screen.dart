@@ -1,6 +1,8 @@
 import 'package:cseduapp/screens/admin/mcq_insert.dart';
 import 'package:cseduapp/screens/admin/sentence_insert.dart';
 import 'package:cseduapp/screens/admin/user.dart';
+import 'package:cseduapp/screens/home_screens/admin_qna.dart';
+
 import 'package:flutter/material.dart';
 import '../services/storage_service.dart';
 import 'admin/word_insert.dart';
@@ -73,6 +75,18 @@ class AdminHomeScreen extends StatelessWidget {
                   Navigator.push(
                       context,
                     MaterialPageRoute(builder: (_) => const WordInsert()),
+                  );
+                },
+              ),
+              _drawerItem(
+                context,
+                icon: Icons.question_answer,
+                title: "Manage QnA",
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AdminQnAPage()),
                   );
                 },
               ),

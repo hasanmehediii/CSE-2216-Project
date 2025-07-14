@@ -84,16 +84,27 @@ class _MatchPageState extends State<MatchPage> {
 
     Future.delayed(Duration.zero, () async {
       final selectedLang = await _showLanguagePopup(context);
-      if (selectedLang == null) return;
+      if (selectedLang == null) {
+        Navigator.pop(context); // Go back if no language selected
+        return;
+      }
 
-      fetchPictureMatchWords(selectedLang).then((fetchedItems) {
+      try {
+        final fetchedItems = await fetchPictureMatchWords(selectedLang);
         setState(() {
           items = fetchedItems;
           words = fetchedItems.map((e) => e.word).toList();
           words.shuffle();
           isLoading = false;
         });
-      });
+      } catch (error) {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load words: $error')),
+        );
+      }
 
       timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
         setState(() {
@@ -102,6 +113,7 @@ class _MatchPageState extends State<MatchPage> {
           } else {
             timer?.cancel();
             int score = matched.values.where((v) => v == true).length;
+            print('Final Score: $score / ${items.length}'); // Debug print
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -176,52 +188,62 @@ class _MatchPageState extends State<MatchPage> {
       );
     }
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Match the Words to Pictures',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-            color: Colors.white,
-          ),
-        ),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.teal, Colors.blueAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70), // Increased height for better spacing
+        child: AppBar(
+          title: const Text(
+            'Match the Words to Pictures',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 22,
+              color: Colors.white,
             ),
           ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'Time: $secondsLeft s',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.teal, Colors.blueAccent],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Center(
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * 0.3, // Constrain width
+                    minWidth: 80, // Minimum width for readability
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Time: $secondsLeft s',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center, // Center text
+                    overflow: TextOverflow.ellipsis, // Handle overflow
+                    maxLines: 1, // Single line
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -246,6 +268,7 @@ class _MatchPageState extends State<MatchPage> {
                         onAccept: (receivedWord) {
                           setState(() {
                             matched[item.word] = (item.word == receivedWord);
+                            print('Matched: $matched'); // Debug print
                           });
                         },
                         builder: (context, candidateData, rejectedData) {
@@ -402,6 +425,7 @@ class ScorePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('ScorePage: Score = $score, Total = $total'); // Debug print
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -435,6 +459,10 @@ class ScorePage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+                  minWidth: 200, // Minimum width for readability
+                ),
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.9),
@@ -456,6 +484,9 @@ class ScorePage extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: Colors.teal,
                       ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -465,6 +496,9 @@ class ScorePage extends StatelessWidget {
                         color: score == total ? Colors.green : Colors.blueAccent,
                         fontWeight: FontWeight.w600,
                       ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ],
                 ),

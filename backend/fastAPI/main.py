@@ -11,6 +11,8 @@ from sentence_routes import router as sentence_router
 from password_reset import router as password_reset_router
 from edit_profile_route import router as edit_profile_router
 from admin import router as admin_router
+from qna_routes import qna_router
+from admin_qna_routes import admin_qna_router
 
 
 app = FastAPI()
@@ -33,6 +35,8 @@ app.include_router(sentence_router)
 app.include_router(password_reset_router)
 app.include_router(edit_profile_router)
 app.include_router(admin_router)
+app.include_router(qna_router)
+app.include_router(admin_qna_router)
 
 class Word(BaseModel):
     english_word: str
