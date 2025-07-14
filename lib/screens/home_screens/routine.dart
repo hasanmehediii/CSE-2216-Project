@@ -24,6 +24,20 @@ class ToDoListPage extends StatefulWidget {
 }
 
 class _ToDoListPageState extends State<ToDoListPage> {
+  // List of colors for each day
+  final List<List<Color>> _dayColors = [
+    [Colors.teal.shade400, Colors.teal.shade700], // Day 1
+    [Colors.blue.shade400, Colors.blue.shade700], // Day 2
+    [Colors.purple.shade400, Colors.purple.shade700], // Day 3
+    [Colors.indigo.shade400, Colors.indigo.shade700], // Day 4
+    [Colors.green.shade400, Colors.green.shade700], // Day 5
+    [Colors.cyan.shade400, Colors.cyan.shade700], // Day 6
+    [Colors.deepPurple.shade400, Colors.deepPurple.shade700], // Day 7
+    [Colors.blueGrey.shade400, Colors.blueGrey.shade700], // Day 8
+    [Colors.lime.shade400, Colors.lime.shade700], // Day 9
+    [Colors.amber.shade400, Colors.amber.shade700], // Day 10
+  ];
+
   // List of 10 days with tasks
   final List<Day> _days = [
     Day(dayLabel: 'Day 1', tasks: [
@@ -70,26 +84,42 @@ class _ToDoListPageState extends State<ToDoListPage> {
   ];
 
   // Helper method for status buttons
-  Widget _buildStatusButton(String statusText, Color color, ToDoTask task) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: color,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-          onPressed: () {
-            setState(() {
-              task.status = statusText;
-            });
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Task "${task.title}" set to: $statusText')),
-            );
-          },
-          child: Text(statusText),
+  Widget _buildStatusButton(String statusText, Color color, IconData icon, ToDoTask task) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 2,
+          textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          minimumSize: const Size(90, 40), // Constrain button size
+        ),
+        onPressed: () {
+          setState(() {
+            task.status = statusText;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Task "${task.title}" set to: $statusText'),
+              backgroundColor: color,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        },
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16),
+            const SizedBox(width: 4),
+            Text(
+              statusText,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ],
         ),
       ),
     );
@@ -99,97 +129,229 @@ class _ToDoListPageState extends State<ToDoListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('To-Do List'),
-        backgroundColor: Colors.teal,
+        title: const Text(
+          '10-Day Learning Plan',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal, Colors.blueAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        elevation: 2,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Your 10-Day Learning Plan',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Tap a day to view tasks',
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _days.length,
-                itemBuilder: (context, index) {
-                  final day = _days[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      leading: const Icon(Icons.calendar_today, color: Colors.teal),
-                      title: Text(day.dayLabel),
-                      subtitle: Text('Tasks: ${day.tasks.length}'),
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(day.dayLabel),
-                            content: SingleChildScrollView(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Tasks:'),
-                                  const SizedBox(height: 10),
-                                  ...day.tasks.map((task) => ListTile(
-                                    title: Text(task.title),
-                                    subtitle: Text('Status: ${task.status}'),
-                                    onTap: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: Text(task.title),
-                                          content: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Text('Set status:'),
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                children: [
-                                                  _buildStatusButton('Pending', Colors.orange, task),
-                                                  _buildStatusButton('In Progress', Colors.blue, task),
-                                                  _buildStatusButton('Completed', Colors.green, task),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal.shade50, Colors.blue.shade50],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Your Learning Journey',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Tap a day to view and manage tasks',
+                style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _days.length,
+                  itemBuilder: (context, index) {
+                    final day = _days[index];
+                    final colors = _dayColors[index % _dayColors.length];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: colors,
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.white.withOpacity(0.9),
+                            child: Icon(Icons.calendar_today, color: colors[0], size: 24),
+                          ),
+                          title: Text(
+                            day.dayLabel,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Tasks: ${day.tasks.length} | Completed: ${day.tasks.where((t) => t.status == 'Completed').length}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                          ),
+                          trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                backgroundColor: Colors.white.withOpacity(0.95),
+                                title: Text(
+                                  day.dayLabel,
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: colors[0],
+                                  ),
+                                ),
+                                content: SingleChildScrollView(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Tasks (${day.tasks.length}):',
+                                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      ...day.tasks.map((task) => Card(
+                                        margin: const EdgeInsets.symmetric(vertical: 6),
+                                        elevation: 2,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                        child: ListTile(
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          title: Text(
+                                            task.title,
+                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                          ),
+                                          subtitle: Text(
+                                            'Status: ${task.status}',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: task.status == 'Completed'
+                                                  ? Colors.green
+                                                  : task.status == 'In Progress'
+                                                  ? Colors.blue
+                                                  : Colors.orange,
+                                            ),
+                                          ),
+                                          trailing: Icon(
+                                            task.status == 'Completed'
+                                                ? Icons.check_circle
+                                                : task.status == 'In Progress'
+                                                ? Icons.hourglass_top
+                                                : Icons.pending,
+                                            color: task.status == 'Completed'
+                                                ? Colors.green
+                                                : task.status == 'In Progress'
+                                                ? Colors.blue
+                                                : Colors.orange,
+                                          ),
+                                          onTap: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                                backgroundColor: Colors.white.withOpacity(0.95),
+                                                title: Text(
+                                                  task.title,
+                                                  style: TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: colors[0],
+                                                  ),
+                                                ),
+                                                content: ConstrainedBox(
+                                                  constraints: BoxConstraints(
+                                                    maxWidth: MediaQuery.of(context).size.width * 0.8,
+                                                  ),
+                                                  child: SingleChildScrollView(
+                                                    child: Column(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        const Text(
+                                                          'Set Task Status:',
+                                                          style: TextStyle(fontSize: 16),
+                                                        ),
+                                                        const SizedBox(height: 12),
+                                                        Wrap(
+                                                          spacing: 8.0,
+                                                          runSpacing: 8.0,
+                                                          alignment: WrapAlignment.center,
+                                                          children: [
+                                                            _buildStatusButton('Pending', Colors.orange, Icons.pending, task),
+                                                            _buildStatusButton('In Progress', Colors.blue, Icons.hourglass_top, task),
+                                                            _buildStatusButton('Completed', Colors.green, Icons.check_circle, task),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Navigator.of(context).pop(),
+                                                    child: const Text(
+                                                      'Close',
+                                                      style: TextStyle(color: Colors.teal, fontSize: 16),
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
-                                            ],
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.of(context).pop(),
-                                              child: const Text('Close'),
-                                            ),
-                                          ],
+                                            );
+                                          },
                                         ),
-                                      );
-                                    },
-                                  )),
+                                      )),
+                                    ],
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(),
+                                    child: const Text(
+                                      'Close',
+                                      style: TextStyle(color: Colors.teal, fontSize: 16),
+                                    ),
+                                  ),
                                 ],
                               ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                child: const Text('Close'),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
