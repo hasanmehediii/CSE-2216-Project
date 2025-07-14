@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 
 class McqInsert extends StatefulWidget {
   const McqInsert({super.key});
@@ -10,13 +11,45 @@ class McqInsert extends StatefulWidget {
   State<McqInsert> createState() => _McqInsertState();
 }
 
-class _McqInsertState extends State<McqInsert> {
+class _McqInsertState extends State<McqInsert> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController jsonController = TextEditingController();
   bool isLoading = false;
   String message = '';
 
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
   final String baseUrl = '${dotenv.env['BASE_URL']!}/admin';
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    jsonController.dispose();
+    super.dispose();
+  }
 
   Future<void> insertMcq() async {
     setState(() {
@@ -35,16 +68,16 @@ class _McqInsertState extends State<McqInsert> {
 
       if (response.statusCode == 200) {
         setState(() {
-          message = 'MCQ inserted successfully!';
+          message = '🎉 MCQ inserted successfully!';
         });
       } else {
         setState(() {
-          message = 'Error: Failed to insert MCQ';
+          message = '⚠️ Failed to insert MCQ. Try again.';
         });
       }
     } catch (e) {
       setState(() {
-        message = 'Invalid JSON format. Please check the data.';
+        message = '❌ Invalid JSON format.';
       });
     }
 
@@ -56,100 +89,118 @@ class _McqInsertState extends State<McqInsert> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFE3F2FD), // Light blue background
       appBar: AppBar(
         title: const Text('Insert MCQ'),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.blue,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: jsonController,
-                maxLines: 25,
-                decoration: const InputDecoration(
-                  labelText: 'Paste MCQ JSON here',
-                  hintText: '''{
-  "_id": "687276333353a36f3ed789e7",
-  "question": "The meaning of 'tree' in {selected_language} is:",
-  "languages": {
-    "spanish": {
-      "options": [
-        "casa",
-        "árbol",
-        "coche",
-        "sol"
-      ],
-      "answer_index": { "numberInt": "1" }
-    },
-    "german": {
-      "options": [
-        "Haus",
-        "Baum",
-        "Auto",
-        "Sonne"
-      ],
-      "answer_index": { "numberInt": "1" }
-    },
-    "chinese": {
-      "options": ["房子", "树", "车", "太阳"],
-      "answer_index": { "numberInt": "1" }
-    },
-    "arabic": {
-      "options": ["بيت", "شجرة", "سيارة", "شمس"],
-      "answer_index": { "numberInt": "1" }
-    },
-    "french": {
-      "options": [
-        "maison",
-        "arbre",
-        "voiture",
-        "soleil"
-      ],
-      "answer_index": { "numberInt": "1" }
-    }
-  }
-}''',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the JSON data';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              if (isLoading)
-                const CircularProgressIndicator()
-              else if (message.isNotEmpty)
-                Text(
-                  message,
-                  style: TextStyle(
-                    color: message.contains('Error') ? Colors.red : Colors.green,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.08,
+              child: Lottie.asset('assets/gifs/bg_loop.json', fit: BoxFit.cover),
+            ),
+          ),
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Lottie.asset('assets/gifs/arrow_down.json', height: 100),
+                const SizedBox(height: 10),
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          )
+                        ],
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: jsonController,
+                              maxLines: 20,
+                              style: const TextStyle(color: Colors.indigo),
+                              decoration: const InputDecoration(
+                                labelText: 'Paste MCQ JSON here',
+                                labelStyle: TextStyle(color: Colors.indigo),
+                                border: OutlineInputBorder(),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter the JSON data';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  insertMcq();
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text(
+                                'Insert MCQ',
+                                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            if (isLoading)
+                              const CircularProgressIndicator()
+                            else if (message.isNotEmpty)
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFB3E5FC), // sky blue background
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.info_outline, color: Colors.indigo),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        message,
+                                        style: const TextStyle(
+                                          color: Colors.indigo,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    insertMcq();
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                ),
-                child: const Text(
-                  'Insert MCQ',
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              )
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -14,7 +14,6 @@ import 'home_screens/video_lessons.dart';
 import 'home_screens/sentence_builder.dart';
 import 'home_screens/qna.dart';
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
