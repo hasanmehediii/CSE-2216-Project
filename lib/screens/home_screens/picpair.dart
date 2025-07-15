@@ -253,11 +253,11 @@ class _MatchPageState extends State<MatchPage> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: SizedBox.expand(
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Column(
@@ -275,7 +275,7 @@ class _MatchPageState extends State<MatchPage> {
                           bool isMatched = matched[item.word] == true;
                           return AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
-                            margin: const EdgeInsets.symmetric(vertical: 12),
+                            margin: const EdgeInsets.symmetric(vertical: 6),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               border: Border.all(
@@ -298,7 +298,7 @@ class _MatchPageState extends State<MatchPage> {
                                   borderRadius: BorderRadius.circular(10),
                                   child: Image.network(
                                     item.imageLink,
-                                    height: 100,
+                                    height: 80,
                                     fit: BoxFit.cover,
                                     errorBuilder: (context, error, stackTrace) => const Icon(
                                       Icons.error,
@@ -307,18 +307,18 @@ class _MatchPageState extends State<MatchPage> {
                                     ),
                                   ),
                                 ),
-                                if (isMatched)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8),
-                                    child: Text(
-                                      item.word,
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        color: Colors.green,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
+                                // if (isMatched)
+                                //   Padding(
+                                //     padding: const EdgeInsets.only(top: 8),
+                                //     child: Text(
+                                //       item.word,
+                                //       style: const TextStyle(
+                                //         fontSize: 18,
+                                //         color: Colors.green,
+                                //         fontWeight: FontWeight.bold,
+                                //       ),
+                                //     ),
+                                //   ),
                               ],
                             ),
                           );
