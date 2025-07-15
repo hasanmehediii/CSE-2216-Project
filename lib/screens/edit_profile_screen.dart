@@ -168,7 +168,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Save Changes", style: TextStyle(fontSize: 18)),
+                    : const Text("Save Changes", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white)),
               )
             ],
           ),
