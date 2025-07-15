@@ -5,10 +5,13 @@ LangMastero is a cross-platform language learning application. This was built by
 ## 📱 Features
 
 - 🔐 User Authentication (Signup/Login)
-- 📚 Vocabulary Quizzes & Flashcards
-- 📈 Learning Progress Tracker
-- 🎯 Personalized Learning Path
+- 📚 Vocabulary, Flashcards, MCQ Quiz and Sentence Making.
+- 📈 Learning Guideline with Todo List
 - 🌍 Support for Multiple Languages
+- ☁️ Live QNA with admin (Pro User)
+- 📈 Pre recorded premium video classes
+- 📊 Admin Dashboard (For insert JSON and manage user)
+- 🌐 Web version using Flutter Web
 - ☁️ Data stored in MongoDB (Cloud/Local)
 - 📦 RESTful API powered by FastAPI
 
@@ -21,23 +24,32 @@ LangMastero is a cross-platform language learning application. This was built by
 | Database                       | MongoDB            |
 
 
-## **Screenshots 📸**
+## **Screens 📸**
 
 | ![Start](readme/welcome.jpg) | ![Login](readme/login.jpg) |
-|:-------------------:|:------------------:|
-| _Welcome Screen._ | _Login Screen._ |
+|:----------------------------:|:--------------------------:|
+|      _Welcome Screen._       |      _Login Screen._       |
 
 | ![Home](readme/home.jpg) | ![Pro](readme/getpro.jpg) |
-|:-------------------:|:------------------:|
-| _Home Screen._ | _Pro purchase Screen._ |
+|:------------------------:|:-------------------------:|
+|      _Home Screen._      |  _Pro purchase Screen._   |
 
 | ![Video](readme/video.jpg) | ![Location](readme/location.jpg) |
-|:-------------------:|:------------------:|
-| _Recorded Lecture Screen._ | _Offline branch Screen._ |
+|:--------------------------:|:--------------------------------:|
+| _Recorded Lecture Screen._ |     _Offline branch Screen._     |
 
 | ![MCQ](readme/mcq.jpg) | ![Vocabulary](readme/vocabulary.jpg) |
-|:-------------------:|:------------------:|
-| _MCQ exam Screen._ | _Vocabulary Screen._ |
+|:----------------------:|:------------------------------------:|
+|   _MCQ exam Screen._   |         _Vocabulary Screen._         |
+
+| ![MCQ](readme/flashcard.jpg) | ![Vocabulary](readme/sentence.jpg) |
+|:----------------------------:|:----------------------------------:|
+|     _Flash Card Screen._     |     _Sentence making Screen._      |
+
+| ![MCQ](readme/qna.jpg) | ![Vocabulary](readme/user.jpg) |
+|:----------------------:|:------------------------------:|
+| _Interaction Screen._  |     _Manage User Screen._      |
+
 
 --- 
 ## 🛠️ Getting Started
@@ -50,31 +62,36 @@ LangMastero is a cross-platform language learning application. This was built by
 
 ### 🔧 Backend Setup
 
-1. Navigate to the backend directory:
+1. Create a .env file with your ip address and port number
+   ```bash
+   #BASE_URL=http://<your_machine's_ipv4>:8000
+   ```
+
+2. Navigate to the backend directory:
    ```bash
    cd backend
    ```
 
-2. Create a virtual environment:
+3. Create a virtual environment:
     ```bash
     python -m venv venv
     source venv/bin/activate  # For Windows: venv\Scripts\activate
     pip install -r requirements.txt
    ```
 
-3. Run backend server:
+4. Run backend server:
     ```bash
+   cd backend/fastAPI
    uvicorn main:app --reload
    ```
    
-4. Run frontend:
+5. Run frontend:
     ```bash
    flutter pub get
    flutter run
     ```
 
 ## 🚀 Future Improvements
-    - 🌐 Web version using Flutter Web
     - 🧠 AI tutor with OpenAI API
     - 📥 Downloadable lessons and offline mode
     - 🧑‍🏫 Tutor marketplace and booking system
