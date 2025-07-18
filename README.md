@@ -9,6 +9,13 @@
 
 LangMastero is a cross-platform language learning application. This was built by **Team Quattro** for the 2nd year 2nd semester application development final project. This has been made by using **Flutter** for the frontend, **FastAPI** for the backend, and **MongoDB** for the database. The app offers an engaging and intuitive way to learn new languages and also good for test yourself by attend in exams.
 
+## Attachments
+
+  - [Video](https://youtu.be/-zH8NUaVHFw)
+  - [Video (with voice)](https://youtu.be/-zH8NUaVHFw)
+  - [Report](App%Development%Report.pdf)
+  - [Apk File](https://drive.google.com/file/d/1VICObE5gMyPvmKnrwiV2NgcdLoCO8O8O/view?usp=drive_link)
+
 ## 📱 Features
 
 - 🔐 User Authentication (Signup/Login)
