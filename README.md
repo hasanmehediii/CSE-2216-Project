@@ -113,35 +113,35 @@ LangMastero is a cross-platform language learning application. This was built by
 
 
 ## 🙌 Contributors:
-<table>
+<table align="center">
   <tr>
     <td align="center">
       <img src="assets/person2.png" width="100px;" height="100px;" alt="Masood" style="border-radius: 50%; object-fit: cover;"/>
       <br />
       <sub><b>Abdullah Ibne Masood</b></sub>
       <br />
-      <a href="https://github.com/AbdullahIbneMasoodRegan">💻</a>
+      <a href="https://github.com/AbdullahIbneMasoodRegan">GitHub</a>
     </td>
     <td align="center">
       <img src="assets/person3.png" width="100px;" height="100px;" alt="Roza" style="border-radius: 50%; object-fit: cover;"/>
       <br />
       <sub><b>Ibna Afra Roza</b></sub>
       <br />
-      <a href="https://www.github.com/Roza-fail">🎨</a>
+      <a href="https://www.github.com/Roza-fail">GitHub</a>
     </td>
     <td align="center">
       <img src="assets/person4.png" width="100px;" height="100px;" alt="Nafisha" style="border-radius: 50%; object-fit: cover;"/>
       <br />
       <sub><b>Nafisha Akhter Tuli</b></sub>
       <br />
-      <a href="https://github.com/nafisha3588">🗃️</a>
+      <a href="https://github.com/nafisha3588">GitHub</a>
     </td>
     <td align="center">
       <img src="assets/person1.jpg" width="100px;" height="100px;" alt="Mehedi" style="border-radius: 50%; object-fit: cover;"/>
       <br />
       <sub><b>Mehedi Hasan</b></sub>
       <br />
-      <a href="https://www.github.com/hasan-mehedii">📊</a>
+      <a href="https://www.github.com/hasan-mehedii">GitHub</a>
     </td>
   </tr>
 </table>
