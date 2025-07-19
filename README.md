@@ -113,18 +113,35 @@ LangMastero is a cross-platform language learning application. This was built by
 
 
 ## 🙌 Contributors:
-### 👤 Abdullah Ibne Masood
-- **Email**: [abdullahibnemasoodr@gmail.com](mailto:abdullahibnemasoodr@gmail.com)
-- **GitHub**: [AbdullahIbneMasoodRegan](https://github.com/AbdullahIbneMasoodRegan)
-
-### 👤 Ibna Afra Roza
-- **Email**: [ibnaafra-2022015891@cs.du.ac.bd](mailto:ibnaafra-2022015891@cs.du.ac.bd)
-- **GitHub**: [Roza-fail](https://www.github.com/Roza-fail)
-
-### 👤 Nafisha Akhter
-- **Email**: [nafisha3558@gmail.com](mailto:nafisha3558@gmail.com)
-- **GitHub**: [nafisha3588](https://github.com/nafisha3588)
-
-### 👤 Mehedi Hasan
-- **Email**: [mehedi-2022415897@cs.du.ac.bd](mailto:mehedi-2022415897@cs.du.ac.bd)
-- **GitHub**: [hasan-mehedii](https://www.github.com/hasan-mehedii)
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/person2.png" width="100px;" height="100px;" alt="Masood" style="border-radius: 50%; object-fit: cover;"/>
+      <br />
+      <sub><b>Abdullah Ibne Masood</b></sub>
+      <br />
+      <a href="https://github.com/AbdullahIbneMasoodRegan">💻</a>
+    </td>
+    <td align="center">
+      <img src="assets/person3.png" width="100px;" height="100px;" alt="Roza" style="border-radius: 50%; object-fit: cover;"/>
+      <br />
+      <sub><b>Ibna Afra Roza</b></sub>
+      <br />
+      <a href="https://www.github.com/Roza-fail">🎨</a>
+    </td>
+    <td align="center">
+      <img src="assets/person4.png" width="100px;" height="100px;" alt="Nafisha" style="border-radius: 50%; object-fit: cover;"/>
+      <br />
+      <sub><b>Nafisha Akhter Tuli</b></sub>
+      <br />
+      <a href="https://github.com/nafisha3588">🗃️</a>
+    </td>
+    <td align="center">
+      <img src="assets/person1.jpg" width="100px;" height="100px;" alt="Mehedi" style="border-radius: 50%; object-fit: cover;"/>
+      <br />
+      <sub><b>Mehedi Hasan</b></sub>
+      <br />
+      <a href="https://www.github.com/hasan-mehedii">📊</a>
+    </td>
+  </tr>
+</table>
