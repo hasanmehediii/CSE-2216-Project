@@ -48,36 +48,36 @@ Discover the core features of our application through these carefully designed s
 
 | **Welcome Screen** | **Login Screen** |
 |:------------------:|:----------------:|
-| ![Welcome](readme/welcome.jpg) | ![Login](readme/login.jpg) |
-| A vibrant entry point to begin your journey. | Secure and streamlined access to your account. |
+| <img src="readme/welcome.jpg" alt="Welcome" width="300"> | <img src="readme/login.jpg" alt="Login" width="300"> |
+| A vibrant entry point to start your journey. | Secure and streamlined access to your account. |
 
 | **Home Screen** | **Pro Purchase Screen** |
 |:---------------:|:-----------------------:|
-| ![Home](readme/home.jpg) | ![Pro](readme/getpro.jpg) |
+| <img src="readme/home.jpg" alt="Home" width="300"> | <img src="readme/getpro.jpg" alt="Pro" width="300"> |
 | Your central hub for navigating app features. | Unlock premium features with ease. |
 
 | **Recorded Lecture Screen** | **Offline Branch Screen** |
 |:--------------------------:|:------------------------:|
-| ![Video](readme/video.jpg) | ![Location](readme/location.jpg) |
+| <img src="readme/video.jpg" alt="Video" width="300"> | <img src="readme/location.jpg" alt="Location" width="300"> |
 | Access high-quality lectures anytime, anywhere. | Connect with nearby offline branches effortlessly. |
 
 | **MCQ Exam Screen** | **Vocabulary Screen** |
 |:-------------------:|:---------------------:|
-| ![MCQ](readme/mcq.jpg) | ![Vocabulary](readme/vocabulary.jpg) |
+| <img src="readme/mcq.jpg" alt="MCQ" width="300"> | <img src="readme/vocabulary.jpg" alt="Vocabulary" width="300"> |
 | Test your knowledge with interactive quizzes. | Build your vocabulary with engaging exercises. |
 
 | **Flash Card Screen** | **Sentence Making Screen** |
 |:---------------------:|:--------------------------:|
-| ![Flash Card](readme/flashcard.jpg) | ![Sentence](readme/sentence.jpg) |
+| <img src="readme/flashcard.jpg" alt="Flash Card" width="300"> | <img src="readme/sentence.jpg" alt="Sentence" width="300"> |
 | Reinforce learning with dynamic flashcards. | Enhance language skills through sentence creation. |
 
 | **Interaction Screen** | **Manage User Screen** |
 |:----------------------:|:----------------------:|
-| ![QnA](readme/qna.jpg) | ![User](readme/user.jpg) |
+| <img src="readme/qna.jpg" alt="QnA" width="300"> | <img src="readme/user.jpg" alt="User" width="300"> |
 | Engage in real-time Q&A for collaborative learning. | Manage user profiles with a clean, intuitive interface. |
 
+---
 
---- 
 ## 🛠️ Getting Started
 
 ### Prerequisites
