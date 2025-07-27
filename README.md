@@ -38,31 +38,43 @@ LangMastero is a cross-platform language learning application. This was built by
 | Database                       | MongoDB            |
 
 
-## **Screens 📸**
+# App Screenshots
 
-| ![Start](readme/welcome.jpg) | ![Login](readme/login.jpg) |
-|:----------------------------:|:--------------------------:|
-|      _Welcome Screen._       |      _Login Screen._       |
+Discover the core features of our application through these carefully designed screenshots. Each screen is crafted to provide an intuitive and engaging user experience, ensuring seamless navigation and functionality.
 
+---
+
+## Key Screens
+
+| **Welcome Screen** | **Login Screen** |
+|:------------------:|:----------------:|
+| ![Welcome](readme/welcome.jpg) | ![Login](readme/login.jpg) |
+| A vibrant entry point to begin your journey. | Secure and streamlined access to your account. |
+
+| **Home Screen** | **Pro Purchase Screen** |
+|:---------------:|:-----------------------:|
 | ![Home](readme/home.jpg) | ![Pro](readme/getpro.jpg) |
-|:------------------------:|:-------------------------:|
-|      _Home Screen._      |  _Pro purchase Screen._   |
+| Your central hub for navigating app features. | Unlock premium features with ease. |
 
+| **Recorded Lecture Screen** | **Offline Branch Screen** |
+|:--------------------------:|:------------------------:|
 | ![Video](readme/video.jpg) | ![Location](readme/location.jpg) |
-|:--------------------------:|:--------------------------------:|
-| _Recorded Lecture Screen._ |     _Offline branch Screen._     |
+| Access high-quality lectures anytime, anywhere. | Connect with nearby offline branches effortlessly. |
 
+| **MCQ Exam Screen** | **Vocabulary Screen** |
+|:-------------------:|:---------------------:|
 | ![MCQ](readme/mcq.jpg) | ![Vocabulary](readme/vocabulary.jpg) |
-|:----------------------:|:------------------------------------:|
-|   _MCQ exam Screen._   |         _Vocabulary Screen._         |
+| Test your knowledge with interactive quizzes. | Build your vocabulary with engaging exercises. |
 
-| ![MCQ](readme/flashcard.jpg) | ![Vocabulary](readme/sentence.jpg) |
-|:----------------------------:|:----------------------------------:|
-|     _Flash Card Screen._     |     _Sentence making Screen._      |
+| **Flash Card Screen** | **Sentence Making Screen** |
+|:---------------------:|:--------------------------:|
+| ![Flash Card](readme/flashcard.jpg) | ![Sentence](readme/sentence.jpg) |
+| Reinforce learning with dynamic flashcards. | Enhance language skills through sentence creation. |
 
-| ![MCQ](readme/qna.jpg) | ![Vocabulary](readme/user.jpg) |
-|:----------------------:|:------------------------------:|
-| _Interaction Screen._  |     _Manage User Screen._      |
+| **Interaction Screen** | **Manage User Screen** |
+|:----------------------:|:----------------------:|
+| ![QnA](readme/qna.jpg) | ![User](readme/user.jpg) |
+| Engage in real-time Q&A for collaborative learning. | Manage user profiles with a clean, intuitive interface. |
 
 
 --- 
