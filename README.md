@@ -154,7 +154,7 @@ Discover the core features of our application through these carefully designed s
       <br />
       <sub><b>Mehedi Hasan</b></sub>
       <br />
-      <a href="https://www.github.com/hasan-mehedii">GitHub</a>
+      <a href="https://www.github.com/hasanmehediii">GitHub</a>
     </td>
   </tr>
 </table>
