@@ -18,7 +18,7 @@ LangMastero is a cross-platform language learning application. This was built by
 
 
 ## 🛠️ System Architecture
-  [Architecture](System.png)
+  ![Architecture](System.png)
 
 
 ## 📱 Features
